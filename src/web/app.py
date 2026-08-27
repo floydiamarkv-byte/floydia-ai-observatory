@@ -1094,10 +1094,14 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
         <select id="sortSelect" class="dropdown-select" style="border-color: var(--floydia-teal); color: #34D399;" onchange="onSortSelectChange()">
           <option value="free_score_desc">🆓 Gratuitos Primero + Mayor Score</option>
           <option value="score_desc">🧠 Mayor Inteligencia Global (Score)</option>
+          <option value="score_asc">📉 Menor Inteligencia Global</option>
           <option value="workhorse_desc">⚡ Mayor Eficiencia (Caballo Batalla)</option>
           <option value="coding_desc">💻 Mayor Rendimiento en Coding</option>
           <option value="price_asc">💰 Menor Precio ($/1M Tokens)</option>
+          <option value="price_desc">💎 Mayor Precio ($/1M Tokens)</option>
           <option value="local_first">🟢 Activos en mi PC Primero</option>
+          <option value="context_desc">📚 Mayor Ventana de Contexto</option>
+          <option value="name_asc">🔤 Nombre Alfabético (A-Z)</option>
         </select>
       </div>
 
@@ -1381,13 +1385,18 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
     }}
 
     function setSortMode(mode) {{
-      document.getElementById("sortSelect").value = mode;
+      const sel = document.getElementById("sortSelect");
+      if (sel) sel.value = mode;
+      sortState = {{ table: null, col: null, asc: false }};
       applySortByMode(mode);
-      filterAndRender();
+      renderGlobalTable();
+      renderLocalTable();
     }}
 
     function onSortSelectChange() {{
-      const mode = document.getElementById("sortSelect").value;
+      const sel = document.getElementById("sortSelect");
+      const mode = sel ? sel.value : "free_score_desc";
+      sortState = {{ table: null, col: null, asc: false }};
       applySortByMode(mode);
       renderGlobalTable();
       renderLocalTable();
@@ -1396,30 +1405,44 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
     function applySortByMode(mode) {{
       if (mode === "free_score_desc") {{
         currentFiltered.sort((a, b) => {{
-          if (a.is_free_tier !== b.is_free_tier) {{
-            return a.is_free_tier ? -1 : 1;
-          }}
-          return b.intelligence_score - a.intelligence_score;
+          const freeA = Boolean(a.is_free_tier) ? 1 : 0;
+          const freeB = Boolean(b.is_free_tier) ? 1 : 0;
+          if (freeA !== freeB) return freeB - freeA;
+          return (Number(b.intelligence_score) || 0) - (Number(a.intelligence_score) || 0);
         }});
       }} else if (mode === "score_desc") {{
-        currentFiltered.sort((a, b) => b.intelligence_score - a.intelligence_score);
+        currentFiltered.sort((a, b) => (Number(b.intelligence_score) || 0) - (Number(a.intelligence_score) || 0));
+      }} else if (mode === "score_asc") {{
+        currentFiltered.sort((a, b) => (Number(a.intelligence_score) || 0) - (Number(b.intelligence_score) || 0));
       }} else if (mode === "workhorse_desc") {{
-        currentFiltered.sort((a, b) => b.workhorse_score - a.workhorse_score);
+        currentFiltered.sort((a, b) => (Number(b.workhorse_score) || 0) - (Number(a.workhorse_score) || 0));
       }} else if (mode === "coding_desc") {{
-        currentFiltered.sort((a, b) => b.coding_score - a.coding_score);
+        currentFiltered.sort((a, b) => (Number(b.coding_score) || 0) - (Number(a.coding_score) || 0));
       }} else if (mode === "price_asc") {{
         currentFiltered.sort((a, b) => {{
-          const costA = a.is_free_tier ? 0 : (a.input_cost_per_m + a.output_cost_per_m);
-          const costB = b.is_free_tier ? 0 : (b.input_cost_per_m + b.output_cost_per_m);
-          return costA - costB;
+          const costA = Boolean(a.is_free_tier) ? 0 : ((Number(a.input_cost_per_m) || 0) + (Number(a.output_cost_per_m) || 0));
+          const costB = Boolean(b.is_free_tier) ? 0 : ((Number(b.input_cost_per_m) || 0) + (Number(b.output_cost_per_m) || 0));
+          if (costA !== costB) return costA - costB;
+          return (Number(b.intelligence_score) || 0) - (Number(a.intelligence_score) || 0);
+        }});
+      }} else if (mode === "price_desc") {{
+        currentFiltered.sort((a, b) => {{
+          const costA = Boolean(a.is_free_tier) ? 0 : ((Number(a.input_cost_per_m) || 0) + (Number(a.output_cost_per_m) || 0));
+          const costB = Boolean(b.is_free_tier) ? 0 : ((Number(b.input_cost_per_m) || 0) + (Number(b.output_cost_per_m) || 0));
+          if (costA !== costB) return costB - costA;
+          return (Number(b.intelligence_score) || 0) - (Number(a.intelligence_score) || 0);
         }});
       }} else if (mode === "local_first") {{
         currentFiltered.sort((a, b) => {{
-          if (a.is_local_active !== b.is_local_active) {{
-            return a.is_local_active ? -1 : 1;
-          }}
-          return b.intelligence_score - a.intelligence_score;
+          const locA = Boolean(a.is_local_active) ? 1 : 0;
+          const locB = Boolean(b.is_local_active) ? 1 : 0;
+          if (locA !== locB) return locB - locA;
+          return (Number(b.intelligence_score) || 0) - (Number(a.intelligence_score) || 0);
         }});
+      }} else if (mode === "context_desc") {{
+        currentFiltered.sort((a, b) => (Number(b.context_window) || 0) - (Number(a.context_window) || 0));
+      }} else if (mode === "name_asc") {{
+        currentFiltered.sort((a, b) => (a.canonical_name || "").localeCompare(b.canonical_name || ""));
       }}
     }}
 
@@ -1484,8 +1507,8 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
       const showEdge = document.getElementById("filterEdge") ? document.getElementById("filterEdge").checked : true;
 
       currentFiltered = allModels.filter(m => {{
-        if (onlyFree && !m.is_free_tier) return false;
-        if (onlyLocal && !m.is_local_active) return false;
+        if (onlyFree && !Boolean(m.is_free_tier)) return false;
+        if (onlyLocal && !Boolean(m.is_local_active)) return false;
 
         const t = m.tier;
         if (t === "frontier" && !showFrontier) return false;
@@ -1500,7 +1523,7 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
         if (t === "edge" && !showEdge) return false;
 
         if (selectedSource !== "all") {{
-          const sources = (m.sources || []).map(s => s.toLowerCase());
+          const sources = (m.sources || []).map(s => String(s).toLowerCase());
           const prov = (m.provider || "").toLowerCase();
           const target = selectedSource.toLowerCase();
 
@@ -1519,8 +1542,12 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
         return true;
       }});
 
-      const currentMode = document.getElementById("sortSelect").value;
-      applySortByMode(currentMode);
+      if (sortState.table !== null && sortState.col !== null) {{
+        applyTableSort(sortState.table, sortState.col, sortState.asc);
+      }} else {{
+        const currentMode = document.getElementById("sortSelect").value;
+        applySortByMode(currentMode);
+      }}
 
       renderLocalTable();
       renderGlobalTable();
@@ -1528,7 +1555,7 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
 
     function renderLocalTable() {{
       const tbody = document.getElementById("localTableBody");
-      const localModels = currentFiltered.filter(m => m.is_local_active);
+      const localModels = currentFiltered.filter(m => Boolean(m.is_local_active));
       document.getElementById("localCountBadge").innerText = localModels.length + " activos";
 
       if (localModels.length === 0) {{
@@ -1537,7 +1564,7 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
       }}
 
       tbody.innerHTML = localModels.map(m => {{
-        const freeTxt = m.is_free_tier ? "<span class='free-badge'>🆓 GRATIS</span>" : ('$' + m.input_cost_per_m.toFixed(3) + ' / $' + m.output_cost_per_m.toFixed(3));
+        const freeTxt = m.is_free_tier ? "<span class='free-badge'>🆓 GRATIS</span>" : ('$' + (Number(m.input_cost_per_m) || 0).toFixed(3) + ' / $' + (Number(m.output_cost_per_m) || 0).toFixed(3));
         const lat = m.local_latency_ms ? (m.local_latency_ms + " ms") : "-";
         const statusTxt = m.local_status_msg || '🟢 OK';
         return `
@@ -1545,7 +1572,7 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
             <td onclick="openModal('${{m.id}}')"><strong>${{m.canonical_name}}</strong> <span style="font-size: 11px; color: var(--floydia-teal);">ℹ️</span></td>
             <td onclick="openModal('${{m.id}}')">${{m.provider}}</td>
             <td onclick="openModal('${{m.id}}')"><span class="tier-badge tier-${{m.tier}}">${{m.tier}}</span></td>
-            <td onclick="openModal('${{m.id}}')" class="code-val">${{m.context_window.toLocaleString()}} tok</td>
+            <td onclick="openModal('${{m.id}}')" class="code-val">${{(Number(m.context_window) || 0).toLocaleString()}} tok</td>
             <td onclick="openModal('${{m.id}}')" class="code-val">${{lat}}</td>
             <td onclick="openModal('${{m.id}}')" class="code-val">${{freeTxt}}</td>
             <td onclick="openModal('${{m.id}}')" class="score-val">${{m.intelligence_score}} / 100</td>
@@ -1569,8 +1596,8 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
 
       tbody.innerHTML = currentFiltered.map(m => {{
         const badgeHtml = m.is_local_active ? "<span class='badge-local'>🟢 LOCAL</span>" : "<span class='badge-external'>⚪ EXTERNO</span>";
-        const costStr = m.is_free_tier ? "<span class='free-badge'>🆓 GRATIS</span>" : ('$' + m.input_cost_per_m.toFixed(3) + ' / $' + m.output_cost_per_m.toFixed(3));
-        const eloVal = Math.round(m.preference_score * 4 + 1000);
+        const costStr = m.is_free_tier ? "<span class='free-badge'>🆓 GRATIS</span>" : ('$' + (Number(m.input_cost_per_m) || 0).toFixed(3) + ' / $' + (Number(m.output_cost_per_m) || 0).toFixed(3));
+        const eloVal = Math.round((Number(m.preference_score) || 0) * 4 + 1000);
         const sourcesHtml = (m.sources || []).map(s => '<span class="source-tag">' + s + '</span>').join("");
 
         return `
@@ -1593,10 +1620,7 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
       }}).join("");
     }}
 
-    function sortTable(tableType, colIndex) {{
-      const isAsc = (sortState.table === tableType && sortState.col === colIndex) ? !sortState.asc : (colIndex === 0 || colIndex === 1);
-      sortState = {{ table: tableType, col: colIndex, asc: isAsc }};
-
+    function applyTableSort(tableType, colIndex, isAsc) {{
       currentFiltered.sort((a, b) => {{
         let valA, valB;
         if (tableType === "localTable") {{
@@ -1605,7 +1629,10 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
           else if (colIndex === 2) {{ valA = (a.tier || "").toLowerCase(); valB = (b.tier || "").toLowerCase(); }}
           else if (colIndex === 3) {{ valA = Number(a.context_window) || 0; valB = Number(b.context_window) || 0; }}
           else if (colIndex === 4) {{ valA = Number(a.local_latency_ms) || 999999; valB = Number(b.local_latency_ms) || 999999; }}
-          else if (colIndex === 5) {{ valA = a.is_free_tier ? 0 : (a.input_cost_per_m + a.output_cost_per_m); valB = b.is_free_tier ? 0 : (b.input_cost_per_m + b.output_cost_per_m); }}
+          else if (colIndex === 5) {{ 
+            valA = a.is_free_tier ? 0 : ((Number(a.input_cost_per_m) || 0) + (Number(a.output_cost_per_m) || 0)); 
+            valB = b.is_free_tier ? 0 : ((Number(b.input_cost_per_m) || 0) + (Number(b.output_cost_per_m) || 0)); 
+          }}
           else if (colIndex === 6) {{ valA = Number(a.intelligence_score) || 0; valB = Number(b.intelligence_score) || 0; }}
           else if (colIndex === 7) {{ valA = (a.local_status_msg || "").toLowerCase(); valB = (b.local_status_msg || "").toLowerCase(); }}
           else {{ valA = a.id; valB = b.id; }}
@@ -1619,8 +1646,8 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
           else if (colIndex === 6) {{ valA = Number(a.coding_score) || 0; valB = Number(b.coding_score) || 0; }}
           else if (colIndex === 7) {{ valA = Number(a.preference_score) || 0; valB = Number(b.preference_score) || 0; }}
           else if (colIndex === 8) {{ 
-            valA = a.is_free_tier ? 0 : (a.input_cost_per_m + a.output_cost_per_m); 
-            valB = b.is_free_tier ? 0 : (b.input_cost_per_m + b.output_cost_per_m); 
+            valA = a.is_free_tier ? 0 : ((Number(a.input_cost_per_m) || 0) + (Number(a.output_cost_per_m) || 0)); 
+            valB = b.is_free_tier ? 0 : ((Number(b.input_cost_per_m) || 0) + (Number(b.output_cost_per_m) || 0)); 
           }}
           else if (colIndex === 9) {{ valA = (a.sources || []).length; valB = (b.sources || []).length; }}
           else {{ valA = a.id; valB = b.id; }}
@@ -1631,7 +1658,13 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
         }}
         return isAsc ? (valA - valB) : (valB - valA);
       }});
+    }}
 
+    function sortTable(tableType, colIndex) {{
+      const isAsc = (sortState.table === tableType && sortState.col === colIndex) ? !sortState.asc : (colIndex === 0 || colIndex === 1);
+      sortState = {{ table: tableType, col: colIndex, asc: isAsc }};
+
+      applyTableSort(tableType, colIndex, isAsc);
       renderGlobalTable();
       renderLocalTable();
     }}
