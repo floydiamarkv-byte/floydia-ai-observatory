@@ -1,0 +1,39 @@
+{
+  "brand_name": "FloydIA",
+  "slogan": "WEB & IA AUTOMATION",
+  "tagline": "Construimos la inteligencia. Desde la infraestructura.",
+  "closing_phrase": "Desde la infraestructura, todo.",
+  "version": "6.0",
+  "colors": {
+    "teal": "#10D2AD",
+    "cyan": "#10D6BD",
+    "mint": "#70CBAC",
+    "navy": "#152638",
+    "ink": "#0B111C",
+    "paper": "#F5F8F7",
+    "card_bg": "#FFFFFF",
+    "card_bg_dark": "#111C2B",
+    "text_main": "#111827",
+    "text_muted": "#4B5563",
+    "text_main_dark": "#F9FAFB",
+    "text_muted_dark": "#9CA3AF",
+    "border": "#E5E7EB",
+    "border_dark": "#1F3347",
+    "badge_local_bg": "#064E3B",
+    "badge_local_text": "#10D2AD",
+    "badge_external_bg": "#1F2937",
+    "badge_external_text": "#9CA3AF",
+    "badge_frontier": "#8B5CF6",
+    "badge_workhorse": "#3B82F6",
+    "badge_coding": "#10B981"
+  },
+  "typography": {
+    "display": "Chakra Petch, sans-serif",
+    "body": "IBM Plex Sans, sans-serif",
+    "code": "JetBrains Mono, monospace"
+  },
+  "contact": {
+    "founder": "Eliú Hurtado",
+    "whatsapp": "https://wa.me/584122532932"
+  }
+}

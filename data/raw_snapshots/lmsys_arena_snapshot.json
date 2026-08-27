@@ -1,0 +1,702 @@
+[
+  {
+    "model": "Gemini-2.5-Pro",
+    "elo": 1474.0,
+    "rank": 1,
+    "org": "Google",
+    "votes": 19209
+  },
+  {
+    "model": "Gemini-2.5-Pro-Preview-05-06",
+    "elo": 1446.0,
+    "rank": 2,
+    "org": "Google",
+    "votes": 13692
+  },
+  {
+    "model": "Grok-4-0709",
+    "elo": 1443.0,
+    "rank": 2,
+    "org": "xAI",
+    "votes": 5725
+  },
+  {
+    "model": "ChatGPT-4o-latest (2025-03-26)",
+    "elo": 1429.0,
+    "rank": 4,
+    "org": "OpenAI",
+    "votes": 26230
+  },
+  {
+    "model": "o3-2025-04-16",
+    "elo": 1428.0,
+    "rank": 4,
+    "org": "OpenAI",
+    "votes": 25442
+  },
+  {
+    "model": "DeepSeek-R1-0528",
+    "elo": 1424.0,
+    "rank": 4,
+    "org": "DeepSeek",
+    "votes": 14514
+  },
+  {
+    "model": "Grok-3-Preview-02-24",
+    "elo": 1423.0,
+    "rank": 4,
+    "org": "xAI",
+    "votes": 27643
+  },
+  {
+    "model": "Gemini-2.5-Flash",
+    "elo": 1417.0,
+    "rank": 6,
+    "org": "Google",
+    "votes": 24656
+  },
+  {
+    "model": "GPT-4.5-Preview",
+    "elo": 1413.0,
+    "rank": 8,
+    "org": "OpenAI",
+    "votes": 15271
+  },
+  {
+    "model": "Gemini-2.5-Flash-Preview-04-17",
+    "elo": 1397.0,
+    "rank": 10,
+    "org": "Google",
+    "votes": 18607
+  },
+  {
+    "model": "Qwen3-235B-A22B-no-thinking",
+    "elo": 1392.0,
+    "rank": 10,
+    "org": "Alibaba",
+    "votes": 19352
+  },
+  {
+    "model": "GPT-4.1-2025-04-14",
+    "elo": 1384.0,
+    "rank": 11,
+    "org": "OpenAI",
+    "votes": 20325
+  },
+  {
+    "model": "DeepSeek-V3-0324",
+    "elo": 1382.0,
+    "rank": 12,
+    "org": "DeepSeek",
+    "votes": 23031
+  },
+  {
+    "model": "Hunyuan-Turbos-20250416",
+    "elo": 1378.0,
+    "rank": 12,
+    "org": "Tencent",
+    "votes": 8950
+  },
+  {
+    "model": "kimi-k2-0711-preview",
+    "elo": 1374.0,
+    "rank": 12,
+    "org": "Moonshot",
+    "votes": 3166
+  },
+  {
+    "model": "DeepSeek-R1",
+    "elo": 1373.0,
+    "rank": 14,
+    "org": "DeepSeek",
+    "votes": 19430
+  },
+  {
+    "model": "Mistral Medium 3",
+    "elo": 1372.0,
+    "rank": 14,
+    "org": "Mistral",
+    "votes": 23574
+  },
+  {
+    "model": "Claude Opus 4 (thinking-16k)",
+    "elo": 1371.0,
+    "rank": 14,
+    "org": "Anthropic",
+    "votes": 13582
+  },
+  {
+    "model": "Claude Opus 4 (20250514)",
+    "elo": 1368.0,
+    "rank": 15,
+    "org": "Anthropic",
+    "votes": 21663
+  },
+  {
+    "model": "Qwen3-235B-A22B",
+    "elo": 1367.0,
+    "rank": 15,
+    "org": "Alibaba",
+    "votes": 16482
+  },
+  {
+    "model": "Minimax-M1",
+    "elo": 1364.0,
+    "rank": 15,
+    "org": "MiniMax",
+    "votes": 11524
+  },
+  {
+    "model": "o1-2024-12-17",
+    "elo": 1365.0,
+    "rank": 17,
+    "org": "OpenAI",
+    "votes": 29038
+  },
+  {
+    "model": "o4-mini-2025-04-16",
+    "elo": 1363.0,
+    "rank": 17,
+    "org": "OpenAI",
+    "votes": 20096
+  },
+  {
+    "model": "Qwen2.5-Max",
+    "elo": 1363.0,
+    "rank": 17,
+    "org": "Alibaba",
+    "votes": 32937
+  },
+  {
+    "model": "Grok-3-mini-high",
+    "elo": 1361.0,
+    "rank": 17,
+    "org": "xAI",
+    "votes": 6020
+  },
+  {
+    "model": "Gemini-2.0-Flash-001",
+    "elo": 1361.0,
+    "rank": 18,
+    "org": "Google",
+    "votes": 37796
+  },
+  {
+    "model": "Grok-3-Mini-beta",
+    "elo": 1357.0,
+    "rank": 20,
+    "org": "xAI",
+    "votes": 12522
+  },
+  {
+    "model": "Gemma-3-27B-it",
+    "elo": 1359.0,
+    "rank": 21,
+    "org": "Google",
+    "votes": 28099
+  },
+  {
+    "model": "Claude Sonnet 4 (thinking-32k)",
+    "elo": 1351.0,
+    "rank": 26,
+    "org": "Anthropic",
+    "votes": 12534
+  },
+  {
+    "model": "o1-preview",
+    "elo": 1350.0,
+    "rank": 28,
+    "org": "OpenAI",
+    "votes": 33177
+  },
+  {
+    "model": "Qwen3-32B",
+    "elo": 1344.0,
+    "rank": 29,
+    "org": "Alibaba",
+    "votes": 4074
+  },
+  {
+    "model": "Claude Sonnet 4 (20250514)",
+    "elo": 1341.0,
+    "rank": 31,
+    "org": "Anthropic",
+    "votes": 17996
+  },
+  {
+    "model": "o3-mini-high",
+    "elo": 1340.0,
+    "rank": 31,
+    "org": "OpenAI",
+    "votes": 19404
+  },
+  {
+    "model": "GPT-4.1-mini-2025-04-14",
+    "elo": 1337.0,
+    "rank": 31,
+    "org": "OpenAI",
+    "votes": 19404
+  },
+  {
+    "model": "Gemma-3-12B-it",
+    "elo": 1337.0,
+    "rank": 31,
+    "org": "Google",
+    "votes": 3976
+  },
+  {
+    "model": "Mistral-Small-2506",
+    "elo": 1335.0,
+    "rank": 31,
+    "org": "Mistral",
+    "votes": 4940
+  },
+  {
+    "model": "DeepSeek-V3",
+    "elo": 1334.0,
+    "rank": 31,
+    "org": "DeepSeek",
+    "votes": 22841
+  },
+  {
+    "model": "QwQ-32B",
+    "elo": 1332.0,
+    "rank": 31,
+    "org": "Alibaba",
+    "votes": 19232
+  },
+  {
+    "model": "Qwen-Plus-0125",
+    "elo": 1325.0,
+    "rank": 34,
+    "org": "Alibaba",
+    "votes": 6055
+  },
+  {
+    "model": "Gemini-2.0-Flash-Lite",
+    "elo": 1328.0,
+    "rank": 35,
+    "org": "Google",
+    "votes": 26104
+  },
+  {
+    "model": "Command A (03-2025)",
+    "elo": 1327.0,
+    "rank": 35,
+    "org": "Cohere",
+    "votes": 26540
+  },
+  {
+    "model": "GLM-4-Plus-0111",
+    "elo": 1326.0,
+    "rank": 35,
+    "org": "Zhipu",
+    "votes": 6028
+  },
+  {
+    "model": "Amazon-Nova-Experimental-Chat-05-14",
+    "elo": 1325.0,
+    "rank": 35,
+    "org": "Amazon",
+    "votes": 9753
+  },
+  {
+    "model": "Llama-3.1-Nemotron-Ultra-253B-v1",
+    "elo": 1321.0,
+    "rank": 35,
+    "org": "Nvidia",
+    "votes": 2656
+  },
+  {
+    "model": "Qwen3-30B-A3B",
+    "elo": 1321.0,
+    "rank": 39,
+    "org": "Alibaba",
+    "votes": 16285
+  },
+  {
+    "model": "Step-2-16K-Exp",
+    "elo": 1320.0,
+    "rank": 39,
+    "org": "StepFun",
+    "votes": 5126
+  },
+  {
+    "model": "Hunyuan-TurboS-20250226",
+    "elo": 1318.0,
+    "rank": 39,
+    "org": "Tencent",
+    "votes": 2452
+  },
+  {
+    "model": "Llama-3.3-Nemotron-Super-49B-v1",
+    "elo": 1312.0,
+    "rank": 40,
+    "org": "Nvidia",
+    "votes": 2371
+  },
+  {
+    "model": "o1-mini",
+    "elo": 1319.0,
+    "rank": 41,
+    "org": "OpenAI",
+    "votes": 54951
+  },
+  {
+    "model": "o3-mini",
+    "elo": 1318.0,
+    "rank": 41,
+    "org": "OpenAI",
+    "votes": 38885
+  },
+  {
+    "model": "Gemini-1.5-Pro-002",
+    "elo": 1317.0,
+    "rank": 42,
+    "org": "Google",
+    "votes": 58645
+  },
+  {
+    "model": "Hunyuan-Turbo-0110",
+    "elo": 1311.0,
+    "rank": 42,
+    "org": "Tencent",
+    "votes": 2510
+  },
+  {
+    "model": "Claude 3.7 Sonnet (thinking-32k)",
+    "elo": 1312.0,
+    "rank": 46,
+    "org": "Anthropic",
+    "votes": 28145
+  },
+  {
+    "model": "Gemma-3n-e4b-it",
+    "elo": 1305.0,
+    "rank": 49,
+    "org": "Google",
+    "votes": 9350
+  },
+  {
+    "model": "Claude 3.7 Sonnet",
+    "elo": 1305.0,
+    "rank": 50,
+    "org": "Anthropic",
+    "votes": 32904
+  },
+  {
+    "model": "Grok-2-08-13",
+    "elo": 1303.0,
+    "rank": 52,
+    "org": "xAI",
+    "votes": 67084
+  },
+  {
+    "model": "Yi-Lightning",
+    "elo": 1302.0,
+    "rank": 52,
+    "org": "01 AI",
+    "votes": 28968
+  },
+  {
+    "model": "GPT-4o-2024-05-13",
+    "elo": 1300.0,
+    "rank": 53,
+    "org": "OpenAI",
+    "votes": 117747
+  },
+  {
+    "model": "Qwen2.5-plus-1127",
+    "elo": 1297.0,
+    "rank": 53,
+    "org": "Alibaba",
+    "votes": 10715
+  },
+  {
+    "model": "Gemma-3-4B-it",
+    "elo": 1291.0,
+    "rank": 54,
+    "org": "Google",
+    "votes": 4321
+  },
+  {
+    "model": "Claude 3.5 Sonnet (20241022)",
+    "elo": 1298.0,
+    "rank": 55,
+    "org": "Anthropic",
+    "votes": 79949
+  },
+  {
+    "model": "Deepseek-v2.5-1210",
+    "elo": 1294.0,
+    "rank": 55,
+    "org": "DeepSeek",
+    "votes": 7243
+  },
+  {
+    "model": "Llama-4-Maverick-17B-128E-Instruct",
+    "elo": 1292.0,
+    "rank": 59,
+    "org": "Meta",
+    "votes": 20106
+  },
+  {
+    "model": "Hunyuan-Large-2025-02-10",
+    "elo": 1287.0,
+    "rank": 59,
+    "org": "Tencent",
+    "votes": 3856
+  },
+  {
+    "model": "Athene-v2-Chat-72B",
+    "elo": 1290.0,
+    "rank": 60,
+    "org": "NexusFlow",
+    "votes": 26074
+  },
+  {
+    "model": "GPT-4.1-nano-2025-04-14",
+    "elo": 1287.0,
+    "rank": 60,
+    "org": "OpenAI",
+    "votes": 6302
+  },
+  {
+    "model": "GLM-4-Plus",
+    "elo": 1289.0,
+    "rank": 61,
+    "org": "Zhipu AI",
+    "votes": 27788
+  },
+  {
+    "model": "GPT-4o-mini-2024-07-18",
+    "elo": 1287.0,
+    "rank": 61,
+    "org": "OpenAI",
+    "votes": 72423
+  },
+  {
+    "model": "Gemini-1.5-Flash-002",
+    "elo": 1287.0,
+    "rank": 61,
+    "org": "Google",
+    "votes": 37021
+  },
+  {
+    "model": "Llama-3.1-Nemotron-70B-Instruct",
+    "elo": 1284.0,
+    "rank": 61,
+    "org": "Nvidia",
+    "votes": 7577
+  },
+  {
+    "model": "Meta-Llama-3.1-405B-Instruct-bf16",
+    "elo": 1284.0,
+    "rank": 64,
+    "org": "Meta",
+    "votes": 43788
+  },
+  {
+    "model": "Meta-Llama-3.1-405B-Instruct-fp8",
+    "elo": 1283.0,
+    "rank": 65,
+    "org": "Meta",
+    "votes": 63038
+  },
+  {
+    "model": "Claude 3.5 Sonnet (20240620)",
+    "elo": 1283.0,
+    "rank": 66,
+    "org": "Anthropic",
+    "votes": 86159
+  },
+  {
+    "model": "Gemini Advanced App (2024-05-14)",
+    "elo": 1282.0,
+    "rank": 66,
+    "org": "Google",
+    "votes": 52144
+  },
+  {
+    "model": "Llama-4-Scout-17B-16E-Instruct",
+    "elo": 1279.0,
+    "rank": 66,
+    "org": "Meta",
+    "votes": 9771
+  },
+  {
+    "model": "Grok-2-Mini-08-13",
+    "elo": 1281.0,
+    "rank": 67,
+    "org": "xAI",
+    "votes": 55442
+  },
+  {
+    "model": "Hunyuan-Standard-2025-02-10",
+    "elo": 1276.0,
+    "rank": 67,
+    "org": "Tencent",
+    "votes": 4014
+  },
+  {
+    "model": "GPT-4o-2024-08-06",
+    "elo": 1280.0,
+    "rank": 68,
+    "org": "OpenAI",
+    "votes": 47973
+  },
+  {
+    "model": "Qwen-Max-0919",
+    "elo": 1278.0,
+    "rank": 68,
+    "org": "Alibaba",
+    "votes": 17432
+  },
+  {
+    "model": "Gemini-1.5-Pro-001",
+    "elo": 1275.0,
+    "rank": 75,
+    "org": "Google",
+    "votes": 82435
+  },
+  {
+    "model": "Deepseek-v2.5",
+    "elo": 1273.0,
+    "rank": 76,
+    "org": "DeepSeek",
+    "votes": 26344
+  },
+  {
+    "model": "Llama-3.3-70B-Instruct",
+    "elo": 1273.0,
+    "rank": 78,
+    "org": "Meta",
+    "votes": 48583
+  },
+  {
+    "model": "Qwen2.5-72B-Instruct",
+    "elo": 1272.0,
+    "rank": 78,
+    "org": "Alibaba",
+    "votes": 41519
+  },
+  {
+    "model": "GPT-4-Turbo-2024-04-09",
+    "elo": 1271.0,
+    "rank": 78,
+    "org": "OpenAI",
+    "votes": 102133
+  },
+  {
+    "model": "Mistral-Small-3.1-24B-Instruct-2503",
+    "elo": 1268.0,
+    "rank": 78,
+    "org": "Mistral",
+    "votes": 9738
+  },
+  {
+    "model": "Mistral-Large-2407",
+    "elo": 1267.0,
+    "rank": 84,
+    "org": "Mistral",
+    "votes": 48217
+  },
+  {
+    "model": "Athene-70B",
+    "elo": 1265.0,
+    "rank": 84,
+    "org": "NexusFlow",
+    "votes": 20580
+  },
+  {
+    "model": "Llama-3.1-Tulu-3-70B",
+    "elo": 1259.0,
+    "rank": 84,
+    "org": "Ai2",
+    "votes": 3010
+  },
+  {
+    "model": "GPT-4-1106-preview",
+    "elo": 1265.0,
+    "rank": 85,
+    "org": "OpenAI",
+    "votes": 103748
+  },
+  {
+    "model": "Mistral-Large-2411",
+    "elo": 1264.0,
+    "rank": 85,
+    "org": "Mistral",
+    "votes": 29633
+  },
+  {
+    "model": "Meta-Llama-3.1-70B-Instruct",
+    "elo": 1263.0,
+    "rank": 85,
+    "org": "Meta",
+    "votes": 58637
+  },
+  {
+    "model": "Claude 3 Opus",
+    "elo": 1262.0,
+    "rank": 85,
+    "org": "Anthropic",
+    "votes": 202641
+  },
+  {
+    "model": "Amazon Nova Pro 1.0",
+    "elo": 1260.0,
+    "rank": 86,
+    "org": "Amazon",
+    "votes": 26371
+  },
+  {
+    "model": "GPT-4-0125-preview",
+    "elo": 1260.0,
+    "rank": 88,
+    "org": "OpenAI",
+    "votes": 97079
+  },
+  {
+    "model": "Hunyuan-Large-Vision",
+    "elo": 1255.0,
+    "rank": 88,
+    "org": "Tencent",
+    "votes": 4995
+  },
+  {
+    "model": "magistral-medium-2506",
+    "elo": 1253.0,
+    "rank": 88,
+    "org": "Mistral",
+    "votes": 5732
+  },
+  {
+    "model": "Claude 3.5 Haiku (20241022)",
+    "elo": 1254.0,
+    "rank": 94,
+    "org": "Anthropic",
+    "votes": 51504
+  },
+  {
+    "model": "Reka-Core-20240904",
+    "elo": 1250.0,
+    "rank": 94,
+    "org": "Reka AI",
+    "votes": 7948
+  },
+  {
+    "model": "Gemini-1.5-Flash-001",
+    "elo": 1242.0,
+    "rank": 98,
+    "org": "Google",
+    "votes": 65661
+  },
+  {
+    "model": "Jamba-1.5-Large",
+    "elo": 1237.0,
+    "rank": 99,
+    "org": "AI21 Labs",
+    "votes": 9125
+  }
+]

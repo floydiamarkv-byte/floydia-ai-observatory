@@ -1,0 +1,634 @@
+{
+  "tiers": {
+    "frontier": {
+      "label": "Frontier / SOTA",
+      "description": "Modelos con máxima capacidad de razonamiento profundo, benchmarks de punta y resolución de problemas complejos.",
+      "color": "#6366F1"
+    },
+    "agentic": {
+      "label": "Agentes & Tool Calling",
+      "description": "Especialistas en flujos multi-paso, orquestación autónoma, planificación y ejecución estricta de Function Calling.",
+      "color": "#EC4899"
+    },
+    "reasoning": {
+      "label": "Razonamiento Puro (STEM)",
+      "description": "Modelos con cadenas de pensamiento nativo (RL/CoT) para matemáticas avanzadas, algoritmos y lógica formal.",
+      "color": "#8B5CF6"
+    },
+    "multimodal": {
+      "label": "Multimodal & Visión",
+      "description": "Capacidad nativa de análisis de imágenes de alta resolución, video, audio y comprensión espacial/OCR.",
+      "color": "#06B6D4"
+    },
+    "long_context": {
+      "label": "Contexto Masivo (1M+)",
+      "description": "Diseñado para procesar libros enteros, repositorios de código y horas de audio sin pérdida de recuperación.",
+      "color": "#F59E0B"
+    },
+    "workhorse": {
+      "label": "Caballo de Batalla (Workhorse)",
+      "description": "Modelos de alta velocidad, bajo coste y excelente balance para flujos de producción diarios.",
+      "color": "#3B82F6"
+    },
+    "coding": {
+      "label": "Especialista en Código",
+      "description": "Optimizado para generación de software, depuración, refactorización y copilotos de desarrollo.",
+      "color": "#10B981"
+    },
+    "uncensored": {
+      "label": "Soberanos & Sin Filtro",
+      "description": "Modelos sin censura corporativa ni sesgo de alineación, ideales para pentesting, roleplay y autonomía.",
+      "color": "#EF4444"
+    },
+    "realtime": {
+      "label": "Tiempo Real & Ultra-Velocidad",
+      "description": "Latencia sub-100ms e inferencia de más de 200 tokens/segundo para streaming instantáneo y voz.",
+      "color": "#FACC15"
+    },
+    "edge": {
+      "label": "Pesos Abiertos / Edge",
+      "description": "Modelos ligeros, eficientes y autohospedables en hardware local o portátiles.",
+      "color": "#64748B"
+    }
+  },
+  "canonical_models": [
+    {
+      "id": "gemini-2.5-flash",
+      "canonical_name": "Google Gemini 2.5 Flash",
+      "tier": "long_context",
+      "provider": "Google",
+      "context_window": 1048576,
+      "max_output": 8192,
+      "is_free_tier": true,
+      "input_cost_per_m": 0.075,
+      "output_cost_per_m": 0.30,
+      "supports_tools": true,
+      "supports_vision": true,
+      "supports_reasoning": true,
+      "aliases": [
+        "gemini-2.5-flash",
+        "gemini-2.5-flash-preview-05-20",
+        "gemini-2.5-flash-001",
+        "models/gemini-2.5-flash",
+        "google/gemini-2.5-flash"
+      ]
+    },
+    {
+      "id": "gemini-2.0-flash",
+      "canonical_name": "Google Gemini 2.0 Flash",
+      "tier": "realtime",
+      "provider": "Google",
+      "context_window": 1048576,
+      "max_output": 8192,
+      "is_free_tier": true,
+      "input_cost_per_m": 0.10,
+      "output_cost_per_m": 0.40,
+      "supports_tools": true,
+      "supports_vision": true,
+      "supports_reasoning": true,
+      "aliases": [
+        "gemini-2.0-flash",
+        "gemini-2.0-flash-exp",
+        "gemini-2.0-flash-001",
+        "models/gemini-2.0-flash",
+        "google/gemini-2.0-flash-001"
+      ]
+    },
+    {
+      "id": "gemini-2.5-pro",
+      "canonical_name": "Google Gemini 2.5 Pro",
+      "tier": "long_context",
+      "provider": "Google",
+      "context_window": 2097152,
+      "max_output": 8192,
+      "is_free_tier": false,
+      "input_cost_per_m": 1.25,
+      "output_cost_per_m": 5.00,
+      "supports_tools": true,
+      "supports_vision": true,
+      "supports_reasoning": true,
+      "aliases": [
+        "gemini-2.5-pro",
+        "gemini-2.5-pro-preview-05-20",
+        "models/gemini-2.5-pro",
+        "google/gemini-2.5-pro"
+      ]
+    },
+    {
+      "id": "deepseek-chat",
+      "canonical_name": "DeepSeek V3 (Chat)",
+      "tier": "workhorse",
+      "provider": "DeepSeek",
+      "context_window": 65536,
+      "max_output": 8192,
+      "is_free_tier": false,
+      "input_cost_per_m": 0.14,
+      "output_cost_per_m": 0.28,
+      "supports_tools": true,
+      "supports_vision": false,
+      "supports_reasoning": false,
+      "aliases": [
+        "deepseek-chat",
+        "deepseek-v3",
+        "deepseek/deepseek-chat",
+        "deepseek-ai/DeepSeek-V3"
+      ]
+    },
+    {
+      "id": "deepseek-reasoner",
+      "canonical_name": "DeepSeek R1 (Reasoner)",
+      "tier": "reasoning",
+      "provider": "DeepSeek",
+      "context_window": 65536,
+      "max_output": 8192,
+      "is_free_tier": false,
+      "input_cost_per_m": 0.55,
+      "output_cost_per_m": 2.19,
+      "supports_tools": false,
+      "supports_vision": false,
+      "supports_reasoning": true,
+      "aliases": [
+        "deepseek-reasoner",
+        "deepseek-r1",
+        "deepseek/deepseek-r1",
+        "deepseek-ai/DeepSeek-R1",
+        "deepseek/deepseek-r1:free"
+      ]
+    },
+    {
+      "id": "claude-3-7-sonnet",
+      "canonical_name": "Anthropic Claude 3.7 Sonnet",
+      "tier": "agentic",
+      "provider": "Anthropic",
+      "context_window": 200000,
+      "max_output": 8192,
+      "is_free_tier": false,
+      "input_cost_per_m": 3.00,
+      "output_cost_per_m": 15.00,
+      "supports_tools": true,
+      "supports_vision": true,
+      "supports_reasoning": true,
+      "aliases": [
+        "claude-3-7-sonnet-20250219",
+        "claude-3.7-sonnet",
+        "anthropic/claude-3.7-sonnet",
+        "claude-3-7-sonnet"
+      ]
+    },
+    {
+      "id": "claude-3-5-sonnet",
+      "canonical_name": "Anthropic Claude 3.5 Sonnet",
+      "tier": "coding",
+      "provider": "Anthropic",
+      "context_window": 200000,
+      "max_output": 8192,
+      "is_free_tier": false,
+      "input_cost_per_m": 3.00,
+      "output_cost_per_m": 15.00,
+      "supports_tools": true,
+      "supports_vision": true,
+      "supports_reasoning": false,
+      "aliases": [
+        "claude-3-5-sonnet-20241022",
+        "claude-3.5-sonnet",
+        "anthropic/claude-3.5-sonnet",
+        "claude-3-5-sonnet"
+      ]
+    },
+    {
+      "id": "claude-3-5-haiku",
+      "canonical_name": "Anthropic Claude 3.5 Haiku",
+      "tier": "workhorse",
+      "provider": "Anthropic",
+      "context_window": 200000,
+      "max_output": 8192,
+      "is_free_tier": false,
+      "input_cost_per_m": 0.80,
+      "output_cost_per_m": 4.00,
+      "supports_tools": true,
+      "supports_vision": true,
+      "supports_reasoning": false,
+      "aliases": [
+        "claude-3-5-haiku-20241022",
+        "claude-3.5-haiku",
+        "anthropic/claude-3.5-haiku"
+      ]
+    },
+    {
+      "id": "gpt-4o",
+      "canonical_name": "OpenAI GPT-4o",
+      "tier": "multimodal",
+      "provider": "OpenAI",
+      "context_window": 128000,
+      "max_output": 16384,
+      "is_free_tier": false,
+      "input_cost_per_m": 2.50,
+      "output_cost_per_m": 10.00,
+      "supports_tools": true,
+      "supports_vision": true,
+      "supports_reasoning": false,
+      "aliases": [
+        "gpt-4o",
+        "gpt-4o-2024-08-06",
+        "gpt-4o-2024-11-20",
+        "openai/gpt-4o"
+      ]
+    },
+    {
+      "id": "gpt-4o-mini",
+      "canonical_name": "OpenAI GPT-4o-mini",
+      "tier": "workhorse",
+      "provider": "OpenAI",
+      "context_window": 128000,
+      "max_output": 16384,
+      "is_free_tier": false,
+      "input_cost_per_m": 0.15,
+      "output_cost_per_m": 0.60,
+      "supports_tools": true,
+      "supports_vision": true,
+      "supports_reasoning": false,
+      "aliases": [
+        "gpt-4o-mini",
+        "gpt-4o-mini-2024-07-18",
+        "openai/gpt-4o-mini"
+      ]
+    },
+    {
+      "id": "o3-mini",
+      "canonical_name": "OpenAI o3-mini",
+      "tier": "reasoning",
+      "provider": "OpenAI",
+      "context_window": 200000,
+      "max_output": 100000,
+      "is_free_tier": false,
+      "input_cost_per_m": 1.10,
+      "output_cost_per_m": 4.40,
+      "supports_tools": true,
+      "supports_vision": false,
+      "supports_reasoning": true,
+      "aliases": [
+        "o3-mini",
+        "o3-mini-2025-01-31",
+        "openai/o3-mini"
+      ]
+    },
+    {
+      "id": "qwen-2.5-coder-32b",
+      "canonical_name": "Qwen 2.5 Coder 32B Instruct",
+      "tier": "coding",
+      "provider": "Alibaba",
+      "context_window": 131072,
+      "max_output": 8192,
+      "is_free_tier": true,
+      "input_cost_per_m": 0.08,
+      "output_cost_per_m": 0.16,
+      "supports_tools": true,
+      "supports_vision": false,
+      "supports_reasoning": false,
+      "aliases": [
+        "qwen/qwen-2.5-coder-32b-instruct",
+        "qwen/qwen-2.5-coder-32b-instruct:free",
+        "Qwen/Qwen2.5-Coder-32B-Instruct"
+      ]
+    },
+    {
+      "id": "qwen-2.5-max",
+      "canonical_name": "Qwen 2.5 Max",
+      "tier": "frontier",
+      "provider": "Alibaba",
+      "context_window": 32768,
+      "max_output": 8192,
+      "is_free_tier": false,
+      "input_cost_per_m": 1.60,
+      "output_cost_per_m": 6.40,
+      "supports_tools": true,
+      "supports_vision": false,
+      "supports_reasoning": true,
+      "aliases": [
+        "qwen/qwen-max",
+        "qwen-2.5-max",
+        "qwen/qwen-2.5-max"
+      ]
+    },
+    {
+      "id": "llama-3.3-70b",
+      "canonical_name": "Meta Llama 3.3 70B Instruct",
+      "tier": "agentic",
+      "provider": "Meta",
+      "context_window": 131072,
+      "max_output": 8192,
+      "is_free_tier": true,
+      "input_cost_per_m": 0.12,
+      "output_cost_per_m": 0.30,
+      "supports_tools": true,
+      "supports_vision": false,
+      "supports_reasoning": false,
+      "aliases": [
+        "meta-llama/llama-3.3-70b-instruct",
+        "meta-llama/llama-3.3-70b-instruct:free",
+        "meta-llama/Llama-3.3-70B-Instruct"
+      ]
+    },
+    {
+      "id": "nous-hermes-3-70b",
+      "canonical_name": "Nous Hermes 3 70B",
+      "tier": "uncensored",
+      "provider": "Nous Research",
+      "context_window": 131072,
+      "max_output": 8192,
+      "is_free_tier": false,
+      "input_cost_per_m": 0.40,
+      "output_cost_per_m": 0.80,
+      "supports_tools": true,
+      "supports_vision": false,
+      "supports_reasoning": false,
+      "aliases": [
+        "nousresearch/hermes-3-llama-3.1-70b",
+        "Hermes-3-Llama-3.1-70B",
+        "hermes-3-70b"
+      ]
+    },
+    {
+      "id": "gemini-3.7-flash",
+      "canonical_name": "Google Gemini 3.7 Flash (Reasoning)",
+      "tier": "frontier",
+      "provider": "Google",
+      "context_window": 1048576,
+      "max_output": 8192,
+      "is_free_tier": false,
+      "input_cost_per_m": 0.075,
+      "output_cost_per_m": 0.30,
+      "supports_tools": true,
+      "supports_vision": true,
+      "supports_reasoning": true,
+      "aliases": [
+        "gemini-3.7-flash",
+        "models/gemini-3.7-flash",
+        "google/gemini-3.7-flash"
+      ]
+    },
+    {
+      "id": "gemini-3.6-flash",
+      "canonical_name": "Google Gemini 3.6 Flash (Fast)",
+      "tier": "workhorse",
+      "provider": "Google",
+      "context_window": 1048576,
+      "max_output": 8192,
+      "is_free_tier": true,
+      "input_cost_per_m": 0.0,
+      "output_cost_per_m": 0.0,
+      "supports_tools": true,
+      "supports_vision": true,
+      "supports_reasoning": true,
+      "aliases": [
+        "gemini-3.6-flash",
+        "models/gemini-3.6-flash",
+        "google/gemini-3.6-flash"
+      ]
+    },
+    {
+      "id": "gemini-3.5-flash",
+      "canonical_name": "Google Gemini 3.5 Flash (Multi)",
+      "tier": "multimodal",
+      "provider": "Google",
+      "context_window": 1048576,
+      "max_output": 8192,
+      "is_free_tier": true,
+      "input_cost_per_m": 0.0,
+      "output_cost_per_m": 0.0,
+      "supports_tools": true,
+      "supports_vision": true,
+      "supports_reasoning": true,
+      "aliases": [
+        "gemini-3.5-flash",
+        "models/gemini-3.5-flash",
+        "google/gemini-3.5-flash"
+      ]
+    },
+    {
+      "id": "gemma-4-31b-it",
+      "canonical_name": "Gemma 4 31B IT (Agent)",
+      "tier": "agentic",
+      "provider": "Google",
+      "context_window": 262144,
+      "max_output": 8192,
+      "is_free_tier": true,
+      "input_cost_per_m": 0.0,
+      "output_cost_per_m": 0.0,
+      "supports_tools": true,
+      "supports_vision": true,
+      "supports_reasoning": false,
+      "aliases": [
+        "gemma-4-31b-it",
+        "models/gemma-4-31b-it",
+        "google/gemma-4-31b-it"
+      ]
+    },
+    {
+      "id": "nemotron-3-super",
+      "canonical_name": "NVIDIA Nemotron 3 Super 120B",
+      "tier": "reasoning",
+      "provider": "NVIDIA",
+      "context_window": 262144,
+      "max_output": 8192,
+      "is_free_tier": true,
+      "input_cost_per_m": 0.0,
+      "output_cost_per_m": 0.0,
+      "supports_tools": true,
+      "supports_vision": false,
+      "supports_reasoning": true,
+      "aliases": [
+        "nvidia/nemotron-3-super-120b-a12b:free",
+        "nvidia/nemotron-3-super-120b-a12b",
+        "nemotron-3-super"
+      ]
+    },
+    {
+      "id": "nemotron-3-nano",
+      "canonical_name": "NVIDIA Nemotron 3 Nano Omni 30B",
+      "tier": "realtime",
+      "provider": "NVIDIA",
+      "context_window": 256000,
+      "max_output": 8192,
+      "is_free_tier": true,
+      "input_cost_per_m": 0.0,
+      "output_cost_per_m": 0.0,
+      "supports_tools": true,
+      "supports_vision": true,
+      "supports_reasoning": true,
+      "aliases": [
+        "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+        "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
+        "nemotron-3-nano"
+      ]
+    },
+    {
+      "id": "glm-5.2",
+      "canonical_name": "Zhipu GLM 5.2 Frontier",
+      "tier": "frontier",
+      "provider": "Zhipu AI",
+      "context_window": 256000,
+      "max_output": 8192,
+      "is_free_tier": true,
+      "input_cost_per_m": 0.0,
+      "output_cost_per_m": 0.0,
+      "supports_tools": true,
+      "supports_vision": false,
+      "supports_reasoning": true,
+      "aliases": [
+        "z-ai/glm-5.2:free",
+        "z-ai/glm-5.2",
+        "glm-5.2"
+      ]
+    },
+    {
+      "id": "laguna-s-2.1",
+      "canonical_name": "Poolside Laguna S 2.1 (Code)",
+      "tier": "coding",
+      "provider": "Poolside",
+      "context_window": 262144,
+      "max_output": 8192,
+      "is_free_tier": true,
+      "input_cost_per_m": 0.0,
+      "output_cost_per_m": 0.0,
+      "supports_tools": true,
+      "supports_vision": false,
+      "supports_reasoning": true,
+      "aliases": [
+        "poolside/laguna-s-2.1:free",
+        "poolside/laguna-s-2.1",
+        "laguna-s-2.1"
+      ]
+    },
+    {
+      "id": "deepseek-v4",
+      "canonical_name": "DeepSeek V4 Flash",
+      "tier": "frontier",
+      "provider": "DeepSeek",
+      "context_window": 262144,
+      "max_output": 8192,
+      "is_free_tier": false,
+      "input_cost_per_m": 0.10,
+      "output_cost_per_m": 0.20,
+      "supports_tools": true,
+      "supports_vision": false,
+      "supports_reasoning": true,
+      "aliases": [
+        "deepseek-ai/deepseek-v4-flash-0731",
+        "deepseek-v4-flash",
+        "deepseek-v4"
+      ]
+    },
+    {
+      "id": "kimi-k3",
+      "canonical_name": "Moonshot Kimi K3",
+      "tier": "long_context",
+      "provider": "Moonshot AI",
+      "context_window": 262144,
+      "max_output": 8192,
+      "is_free_tier": false,
+      "input_cost_per_m": 0.15,
+      "output_cost_per_m": 0.30,
+      "supports_tools": true,
+      "supports_vision": false,
+      "supports_reasoning": true,
+      "aliases": [
+        "moonshotai/kimi-k3",
+        "kimi-k3"
+      ]
+    },
+    {
+      "id": "codestral-latest",
+      "canonical_name": "Mistral Codestral Latest",
+      "tier": "coding",
+      "provider": "Mistral",
+      "context_window": 256000,
+      "max_output": 8192,
+      "is_free_tier": false,
+      "input_cost_per_m": 0.20,
+      "output_cost_per_m": 0.60,
+      "supports_tools": true,
+      "supports_vision": false,
+      "supports_reasoning": false,
+      "aliases": [
+        "codestral-latest",
+        "mistral/codestral-latest",
+        "codestral"
+      ]
+    },
+    {
+      "id": "llama-3.3-70b-groq",
+      "canonical_name": "Llama 3.3 70B Versatile (Groq LPU)",
+      "tier": "realtime",
+      "provider": "Groq",
+      "context_window": 131072,
+      "max_output": 8192,
+      "is_free_tier": true,
+      "input_cost_per_m": 0.05,
+      "output_cost_per_m": 0.08,
+      "supports_tools": true,
+      "supports_vision": false,
+      "supports_reasoning": false,
+      "aliases": [
+        "llama-3.3-70b-versatile",
+        "groq/llama-3.3-70b-versatile"
+      ]
+    },
+    {
+      "id": "deepseek-r1-distill-llama-70b",
+      "canonical_name": "DeepSeek R1 Distill Llama 70B (Groq LPU)",
+      "tier": "reasoning",
+      "provider": "Groq",
+      "context_window": 131072,
+      "max_output": 8192,
+      "is_free_tier": true,
+      "input_cost_per_m": 0.07,
+      "output_cost_per_m": 0.10,
+      "supports_tools": true,
+      "supports_vision": false,
+      "supports_reasoning": true,
+      "aliases": [
+        "deepseek-r1-distill-llama-70b",
+        "groq/deepseek-r1-distill-llama-70b"
+      ]
+    },
+    {
+      "id": "phi-4",
+      "canonical_name": "Microsoft Phi-4 (GitHub Models)",
+      "tier": "reasoning",
+      "provider": "Microsoft",
+      "context_window": 16384,
+      "max_output": 4096,
+      "is_free_tier": true,
+      "input_cost_per_m": 0.0,
+      "output_cost_per_m": 0.0,
+      "supports_tools": true,
+      "supports_vision": false,
+      "supports_reasoning": true,
+      "aliases": [
+        "Phi-4",
+        "microsoft/Phi-4",
+        "phi-4"
+      ]
+    },
+    {
+      "id": "gpt-4o-github",
+      "canonical_name": "OpenAI GPT-4o (GitHub Models Free Tier)",
+      "tier": "frontier",
+      "provider": "OpenAI",
+      "context_window": 128000,
+      "max_output": 4096,
+      "is_free_tier": true,
+      "input_cost_per_m": 0.0,
+      "output_cost_per_m": 0.0,
+      "supports_tools": true,
+      "supports_vision": true,
+      "supports_reasoning": false,
+      "aliases": [
+        "gpt-4o",
+        "openai/gpt-4o",
+        "models/gpt-4o"
+      ]
+    }
+  ]
+}
