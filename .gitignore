@@ -31,9 +31,10 @@ wheels/
 .secrets/
 
 # Bases de datos y caches locales
-data/*.db
-data/*.sqlite
-data/*.sqlite3
+data/*.db*
+data/*.sqlite*
+data/*.sqlite3*
+data/raw_snapshots/
 *.log
 reports/cron.log
 reports/daily/*.pdf

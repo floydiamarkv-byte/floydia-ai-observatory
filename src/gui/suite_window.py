@@ -123,7 +123,7 @@ class SuiteWorker(QThread):
                 # Agrupación por proveedor para detalle
                 by_prov = {}
                 for c in probe_res:
-                    prov = c.get("provider", "Otros")
+                    prov = c.get("provider_name") or c.get("provider", "Otros")
                     by_prov.setdefault(prov, []).append(c)
                 
                 for prov, checks in by_prov.items():
@@ -561,6 +561,12 @@ class FloydIASuiteWindow(QMainWindow):
     def _pipeline_finished(self, res: dict):
         self.run_btn.setEnabled(True)
         self.run_btn.setText("🚀 EJECUTAR PIPELINE SELECCIONADO")
+
+    def closeEvent(self, event):
+        if getattr(self, "worker", None) and self.worker.isRunning():
+            self.worker.requestInterruption()
+            self.worker.wait(3000)
+        event.accept()
 
 
 def run_gui_suite():

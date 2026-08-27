@@ -1,6 +1,7 @@
 """
 Manejador de Base de Datos SQLite para FloydIA AI Rankings & Local API Observatory.
-Garantiza inmutabilidad con snapshots criptográficos SHA256 y esquemas normalizados.
+Garantiza inmutabilidad con snapshots criptográficos SHA256, pragmas WAL concurrentes
+y saneamiento estricto de secretos antes de persistir (Fix V-07, V-16).
 """
 
 import sqlite3
@@ -10,14 +11,18 @@ from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Generator
-from config.settings import DB_PATH
+from config.settings import DB_PATH, scrub_secrets
 
 
 @contextmanager
 def get_db_connection() -> Generator[sqlite3.Connection, None, None]:
-    """Crea o retorna conexión a la base de datos SQLite con soporte para Row dicts y cierre automático."""
-    conn = sqlite3.connect(DB_PATH)
+    """Crea o retorna conexión a la base de datos SQLite con soporte WAL y timeout seguro."""
+    conn = sqlite3.connect(str(DB_PATH), timeout=30.0)
     conn.row_factory = sqlite3.Row
+    # FIX V-07: PRAGMAs de concurrencia y seguridad
+    conn.execute("PRAGMA journal_mode=WAL;")
+    conn.execute("PRAGMA busy_timeout=30000;")
+    conn.execute("PRAGMA foreign_keys=ON;")
     try:
         yield conn
         conn.commit()
@@ -96,6 +101,7 @@ def init_db():
                 detected_context_window INTEGER,
                 supports_tools BOOLEAN DEFAULT 0,
                 supports_vision BOOLEAN DEFAULT 0,
+                supports_reasoning BOOLEAN DEFAULT 0,
                 is_free_tier BOOLEAN DEFAULT 0,
                 cost_input_m REAL DEFAULT 0.0,
                 cost_output_m REAL DEFAULT 0.0,
@@ -107,14 +113,15 @@ def init_db():
 
 
 def save_raw_snapshot(source: str, endpoint_url: str, payload_str: str, status_code: int = 200) -> str:
-    """Guarda un snapshot crudo en SQLite asegurando deduplicación por SHA256."""
-    sha256 = hashlib.sha256(payload_str.encode("utf-8")).hexdigest()
+    """Guarda un snapshot crudo en SQLite asegurando deduplicación por SHA256 y scrub de secretos."""
+    sanitized_payload = scrub_secrets(payload_str)
+    sha256 = hashlib.sha256(sanitized_payload.encode("utf-8")).hexdigest()
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("""
             INSERT OR IGNORE INTO snapshots_raw (source, endpoint_url, payload, sha256_hash, fetch_status)
             VALUES (?, ?, ?, ?, ?)
-        """, (source, endpoint_url, payload_str, sha256, status_code))
+        """, (source, endpoint_url, sanitized_payload, sha256, status_code))
         conn.commit()
     return sha256
 
@@ -174,26 +181,27 @@ def save_evaluation(model_id: str, source: str, benchmark_name: str, score: floa
 
 
 def record_local_api_check(check_result: Dict[str, Any]):
-    """Registra la comprobación de salud y capacidades de una API local."""
+    """Registra la comprobación de salud y capacidades de una API local sanitizando mensajes de error."""
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("""
             INSERT INTO local_api_checks (
                 provider_name, model_identifier, canonical_id, is_functional,
                 status_code, status_message, latency_ms, detected_context_window,
-                supports_tools, supports_vision, is_free_tier, cost_input_m, cost_output_m
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                supports_tools, supports_vision, supports_reasoning, is_free_tier, cost_input_m, cost_output_m
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             check_result["provider_name"],
             check_result["model_identifier"],
             check_result.get("canonical_id"),
             1 if check_result.get("is_functional") else 0,
             check_result.get("status_code", 200),
-            check_result.get("status_message", "OK"),
+            scrub_secrets(check_result.get("status_message", "OK")),
             check_result.get("latency_ms", 0.0),
             check_result.get("detected_context_window", 128000),
             1 if check_result.get("supports_tools") else 0,
             1 if check_result.get("supports_vision") else 0,
+            1 if check_result.get("supports_reasoning") else 0,
             1 if check_result.get("is_free_tier") else 0,
             check_result.get("cost_input_m", 0.0),
             check_result.get("cost_output_m", 0.0)
@@ -225,7 +233,3 @@ def get_all_models_count() -> int:
         cursor.execute("SELECT COUNT(*) FROM models")
         row = cursor.fetchone()
         return row[0] if row else 0
-
-
-# Inicializar tablas al importar
-init_db()

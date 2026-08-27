@@ -18,6 +18,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, List
 
+import os
+import secrets
+import time
 from config.settings import BASE_DIR, DAILY_REPORTS_DIR, FRONTIER_EXPORT_DIR
 from src.core.scoring import calculate_multidimensional_rankings
 from src.core.db import get_latest_local_verified_models
@@ -29,15 +32,41 @@ from src.analyst.frontier_exporter import export_daily_snapshot_for_frontier_ai
 from src.analyst.ai_advisor import ask_observatory
 from src.core.engine_injector import apply_engine_configurations, sync_to_hp45
 
+# FIX V-02: Token de sesión para acciones mutadoras
+AUTH_TOKEN = os.getenv("FLOYDIA_DASH_TOKEN") or secrets.token_urlsafe(32)
+
+# FIX V-17: Caché TTL en memoria para rankings
+_RANKINGS_CACHE = {"data": None, "ts": 0.0}
+CACHE_TTL_SECONDS = 300
+
+
+def cached_rankings():
+    """Retorna rankings desde caché o los recalcula si expiró el TTL."""
+    now = time.time()
+    if _RANKINGS_CACHE["data"] is None or (now - _RANKINGS_CACHE["ts"]) > CACHE_TTL_SECONDS:
+        _RANKINGS_CACHE["data"] = calculate_multidimensional_rankings()
+        _RANKINGS_CACHE["ts"] = now
+    return _RANKINGS_CACHE["data"]
+
+
+def invalidate_rankings_cache():
+    """Invalida la caché de rankings tras una recolección."""
+    _RANKINGS_CACHE["data"] = None
+    _RANKINGS_CACHE["ts"] = 0.0
+
 
 class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
+    def _authorized(self) -> bool:
+        """Verifica si la petición POST incluye el token de autorización válido."""
+        token = self.headers.get("X-Floydia-Token")
+        return token == AUTH_TOKEN
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
 
         try:
             if path == "/api/rankings":
-                rankings = calculate_multidimensional_rankings()
+                rankings = cached_rankings()
                 self._send_json(rankings)
                 return
 
@@ -50,7 +79,7 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
                 today_str = datetime.now().strftime("%Y-%m-%d")
                 report_file = DAILY_REPORTS_DIR / f"{today_str}_informe_ia_floydia.md"
                 if not report_file.exists():
-                    rankings = calculate_multidimensional_rankings()
+                    rankings = cached_rankings()
                     local_apis = get_latest_local_verified_models()
                     report_file = generate_daily_markdown_report(rankings, local_apis)
                 self._send_file_download(report_file, f"{today_str}_informe_ia_floydia.md")
@@ -60,7 +89,7 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
                 today_str = datetime.now().strftime("%Y-%m-%d")
                 frontier_file = FRONTIER_EXPORT_DIR / f"{today_str}_SNAPSHOT_FOR_FRONTIER_AI.md"
                 if not frontier_file.exists():
-                    rankings = calculate_multidimensional_rankings()
+                    rankings = cached_rankings()
                     local_apis = get_latest_local_verified_models()
                     frontier_file = export_daily_snapshot_for_frontier_ai(rankings, local_apis)
                 self._send_file_download(frontier_file, f"{today_str}_SNAPSHOT_FOR_FRONTIER_AI.md")
@@ -70,14 +99,28 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
                 self._render_dashboard()
                 return
 
-            super().do_GET()
-        except Exception as e:
+            else:
+                # FIX V-03: No servir el árbol del proyecto
+                self.send_response(404)
+                self.end_headers()
+                return
+        except Exception:
             traceback.print_exc()
+            # FIX V-23: Error 500 sanitizado sin trazas crudas
             self.send_response(500)
+            self.send_header("Content-Type", "application/json")
             self.end_headers()
-            self.wfile.write(f"Error 500: {e}".encode("utf-8"))
+            self.wfile.write(b'{"error": "internal_error"}')
 
     def do_POST(self):
+        # FIX V-02: Gate de autenticación obligatoria para acciones mutadoras
+        if not self._authorized():
+            self.send_response(403)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(b'{"error": "forbidden", "message": "Missing or invalid X-Floydia-Token"}')
+            return
+
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
 
@@ -88,6 +131,7 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
 
         elif path == "/api/action/collect":
             results = run_all_collectors()
+            invalidate_rankings_cache()
             self._send_json({"success": True, "collectors": results})
             return
 
@@ -104,7 +148,7 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
             return
 
         elif path == "/api/action/generate-reports":
-            rankings = calculate_multidimensional_rankings()
+            rankings = cached_rankings()
             local_apis = get_latest_local_verified_models()
             md_path = generate_daily_markdown_report(rankings, local_apis)
             frontier_path = export_daily_snapshot_for_frontier_ai(rankings, local_apis)
@@ -133,7 +177,6 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(payload)))
-        self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
         self.wfile.write(payload)
 
@@ -152,7 +195,7 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
         self.wfile.write(data)
 
     def _render_dashboard(self):
-        rankings = calculate_multidimensional_rankings()
+        rankings = cached_rankings()
         today_str = datetime.now().strftime("%Y-%m-%d")
         rankings_json = json.dumps(rankings).replace("</", "<\\/")
 
@@ -1091,6 +1134,19 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
         </select>
       </div>
 
+      <!-- DESPLEGABLE DE VENTANA DE CONTEXTO -->
+      <div class="dropdown-group">
+        <span>📚 Contexto:</span>
+        <select id="contextSelect" class="dropdown-select" style="border-color: #F59E0B; color: #FBBF24;" onchange="filterAndRender()">
+          <option value="all">📚 Todo Contexto</option>
+          <option value="32k">≥ 32k tokens</option>
+          <option value="128k">≥ 128k tokens</option>
+          <option value="256k">≥ 256k tokens</option>
+          <option value="1m">≥ 1M tokens</option>
+          <option value="2m">≥ 2M tokens</option>
+        </select>
+      </div>
+
       <!-- DESPLEGABLE DE ORDENAMIENTO -->
       <div class="dropdown-group">
         <span>📶 Ordenar:</span>
@@ -1475,24 +1531,31 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
 
       if (preset === "coding_free") {{
         setCats({{ free: true, coding: true }});
+        if (document.getElementById("contextSelect")) document.getElementById("contextSelect").value = "all";
         setSortMode("coding_desc");
       }} else if (preset === "agentic") {{
         setCats({{ agentic: true, frontier: true }});
+        if (document.getElementById("contextSelect")) document.getElementById("contextSelect").value = "all";
         setSortMode("score_desc");
       }} else if (preset === "long_doc") {{
         setCats({{ long_context: true }});
+        if (document.getElementById("contextSelect")) document.getElementById("contextSelect").value = "1m";
         setSortMode("score_desc");
       }} else if (preset === "stem_reasoning") {{
         setCats({{ reasoning: true }});
+        if (document.getElementById("contextSelect")) document.getElementById("contextSelect").value = "all";
         setSortMode("score_desc");
       }} else if (preset === "realtime") {{
         setCats({{ realtime: true, workhorse: true }});
+        if (document.getElementById("contextSelect")) document.getElementById("contextSelect").value = "all";
         setSortMode("workhorse_desc");
       }} else if (preset === "uncensored") {{
         setCats({{ uncensored: true }});
+        if (document.getElementById("contextSelect")) document.getElementById("contextSelect").value = "all";
         setSortMode("score_desc");
       }} else {{
         setCats({{ frontier: true, agentic: true, reasoning: true, multimodal: true, long_context: true, workhorse: true, coding: true, uncensored: true, realtime: true, edge: true }});
+        if (document.getElementById("contextSelect")) document.getElementById("contextSelect").value = "all";
         setSortMode("free_score_desc");
       }}
     }}
@@ -1500,6 +1563,7 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
     function filterAndRender() {{
       const q = document.getElementById("searchInput").value.toLowerCase().trim();
       const selectedSource = document.getElementById("sourceSelect").value;
+      const selectedContext = document.getElementById("contextSelect") ? document.getElementById("contextSelect").value : "all";
       const onlyFree = document.getElementById("filterFreeOnly").checked;
       const onlyLocal = document.getElementById("filterLocalOnly").checked;
 
@@ -1539,6 +1603,15 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
           const hasProv = prov.includes(target) || target.includes(prov);
 
           if (!hasSource && !hasProv) return false;
+        }}
+
+        if (selectedContext !== "all") {{
+          const ctx = Number(m.context_window) || 0;
+          if (selectedContext === "32k" && ctx < 32000) return false;
+          if (selectedContext === "128k" && ctx < 128000) return false;
+          if (selectedContext === "256k" && ctx < 256000) return false;
+          if (selectedContext === "1m" && ctx < 1000000) return false;
+          if (selectedContext === "2m" && ctx < 2000000) return false;
         }}
 
         if (q) {{
@@ -2037,11 +2110,16 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
       }});
     }}
 
+    const DASH_AUTH_TOKEN = "{AUTH_TOKEN}";
+
     async function runProbe() {{
       const btn = event.target;
       btn.innerText = "⏳ Probando...";
       try {{
-        const res = await fetch("/api/action/probe", {{ method: "POST" }});
+        const res = await fetch("/api/action/probe", {{
+          method: "POST",
+          headers: {{ "X-Floydia-Token": DASH_AUTH_TOKEN, "Content-Type": "application/json" }}
+        }});
         const data = await res.json();
         alert("✅ Sonda completada: " + data.tested_count + " endpoints evaluados.");
         window.location.reload();
@@ -2056,7 +2134,10 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
       const btn = event.target;
       btn.innerText = "⏳ Recolectando...";
       try {{
-        const res = await fetch("/api/action/collect", {{ method: "POST" }});
+        const res = await fetch("/api/action/collect", {{
+          method: "POST",
+          headers: {{ "X-Floydia-Token": DASH_AUTH_TOKEN, "Content-Type": "application/json" }}
+        }});
         alert("✅ Benchmarks actualizados desde fuentes públicas.");
         window.location.reload();
       }} catch (e) {{
@@ -2070,7 +2151,10 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
       const btn = event.target;
       btn.innerText = "⏳ Inyectando...";
       try {{
-        const res = await fetch("/api/action/apply-configs", {{ method: "POST" }});
+        const res = await fetch("/api/action/apply-configs", {{
+          method: "POST",
+          headers: {{ "X-Floydia-Token": DASH_AUTH_TOKEN, "Content-Type": "application/json" }}
+        }});
         const data = await res.json();
         if (data.success) {{
           let msg = "✅ Configuraciones aplicadas con éxito:\\\\n";
@@ -2092,7 +2176,10 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
       const btn = event.target;
       btn.innerText = "⏳ Sincronizando...";
       try {{
-        const res = await fetch("/api/action/sync-hp45", {{ method: "POST" }});
+        const res = await fetch("/api/action/sync-hp45", {{
+          method: "POST",
+          headers: {{ "X-Floydia-Token": DASH_AUTH_TOKEN, "Content-Type": "application/json" }}
+        }});
         const data = await res.json();
         alert(data.message);
       }} catch (e) {{
@@ -2116,10 +2203,14 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
 
 
 def start_server(port: int = 8333):
-    socketserver.TCPServer.allow_reuse_address = True
+    socketserver.ThreadingTCPServer.allow_reuse_address = True
+    socketserver.ThreadingTCPServer.daemon_threads = True
     handler = FloydIAWebServer
-    with socketserver.TCPServer(("", port), handler) as httpd:
-        print(f"🟢 [FloydIA Observatory Web] Dashboard activo en: http://localhost:{port}")
+    # FIX V-02: Bind exclusivo a 127.0.0.1 (loopback)
+    with socketserver.ThreadingTCPServer(("127.0.0.1", port), handler) as httpd:
+        print(f"🟢 [FloydIA Observatory Web] http://127.0.0.1:{port} (solo localhost)")
+        if not os.getenv("FLOYDIA_DASH_TOKEN"):
+            print(f"🔑 [FloydIA Web Token]: {AUTH_TOKEN}")
         httpd.serve_forever()
 
 

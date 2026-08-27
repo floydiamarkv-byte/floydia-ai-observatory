@@ -1,7 +1,7 @@
 """
 Escáner y Descubridor de Credenciales Locales de IA.
 Inspecciona variables de entorno y archivos seguros (.secrets/antigravity.env / OpenCode)
-sin exponer valores en logs o interfaces públicas.
+sin exponer valores en texto plano (Fix V-10).
 """
 
 import os
@@ -12,7 +12,7 @@ from config.settings import GEMINI_API_KEY, OPENROUTER_API_KEY, DEEPSEEK_API_KEY
 def scan_configured_providers() -> Dict[str, Dict[str, Any]]:
     """
     Identifica qué proveedores de IA están configurados y disponibles en el entorno.
-    Retorna un diccionario de proveedores con su estado y clave enmascarada.
+    Retorna un diccionario de proveedores con su estado y clave enmascarada (nunca en claro).
     """
     providers = {}
 
@@ -21,7 +21,6 @@ def scan_configured_providers() -> Dict[str, Dict[str, Any]]:
     providers["Google_AI_Studio"] = {
         "configured": has_google,
         "key_preview": f"...{GEMINI_API_KEY[-4:]}" if has_google else None,
-        "api_key": GEMINI_API_KEY,
         "default_models": ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-pro"]
     }
 
@@ -30,7 +29,6 @@ def scan_configured_providers() -> Dict[str, Dict[str, Any]]:
     providers["OpenRouter"] = {
         "configured": has_openrouter,
         "key_preview": f"...{OPENROUTER_API_KEY[-4:]}" if has_openrouter else None,
-        "api_key": OPENROUTER_API_KEY,
         "default_models": ["qwen/qwen-2.5-coder-32b-instruct:free", "meta-llama/llama-3.3-70b-instruct:free", "deepseek/deepseek-r1:free"]
     }
 
@@ -39,7 +37,6 @@ def scan_configured_providers() -> Dict[str, Dict[str, Any]]:
     providers["DeepSeek"] = {
         "configured": has_deepseek,
         "key_preview": f"...{DEEPSEEK_API_KEY[-4:]}" if has_deepseek else None,
-        "api_key": DEEPSEEK_API_KEY,
         "default_models": ["deepseek-chat", "deepseek-reasoner"]
     }
 

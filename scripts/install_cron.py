@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Instalador y Gestor de Tarea Cron para FloydIA AI Observatory.
-Configura la ejecución desatendida diaria a las 00:00 (medianoche).
+Configura la ejecución desatendida diaria a las 00:00 (medianoche) con backup previo (Fix V-14).
 """
 
 import sys
@@ -16,11 +16,22 @@ CRON_ENTRY = f"0 0 * * * {SCRIPT_PATH} > /dev/null 2>&1"
 
 
 def get_current_crontab() -> str:
+    """Obtiene el crontab actual distinguiendo 'sin crontab' de un error real."""
     res = subprocess.run(["crontab", "-l"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    return res.stdout if res.returncode == 0 else ""
+    if res.returncode != 0:
+        if "no crontab for" in res.stderr.lower():
+            return ""
+        raise RuntimeError(f"crontab -l falló inesperadamente: {res.stderr.strip()}")
+    return res.stdout
 
 
 def set_crontab(content: str):
+    """Escribe el crontab generando un backup de seguridad previo en /tmp."""
+    try:
+        current = get_current_crontab()
+        Path("/tmp/crontab.floydia.bak").write_text(current, encoding="utf-8")
+    except Exception as e:
+        print(f"⚠️ No se pudo guardar backup de crontab: {e}")
     subprocess.run(["crontab", "-"], input=content, text=True, check=True)
 
 
@@ -57,11 +68,8 @@ def uninstall():
 
     lines = current.splitlines()
     filtered = []
-    skip_next = False
     for line in lines:
-        if CRON_COMMENT in line:
-            continue
-        if str(SCRIPT_PATH) in line:
+        if CRON_COMMENT in line or str(SCRIPT_PATH) in line:
             continue
         filtered.append(line)
 
@@ -96,7 +104,6 @@ def main():
     elif args.status:
         status()
     else:
-        # Por defecto, si no hay argumentos, instalar
         install()
 
 

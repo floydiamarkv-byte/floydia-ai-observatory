@@ -2,15 +2,20 @@
 Configuración centralizada de FloydIA AI Rankings & Local API Observatory.
 Carga segura de variables de entorno y rutas canónicas sin exponer secretos.
 """
+from __future__ import annotations
 
 import os
+import re
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
-# Directorio raíz de la herramienta
+# Directorio raíz de la herramienta (código)
 BASE_DIR = Path(__file__).resolve().parent.parent
 CONFIG_DIR = BASE_DIR / "config"
-DATA_DIR = BASE_DIR / "data"
+
+# Directorios de datos y reportes
+STATE_DIR = Path(os.getenv("XDG_DATA_HOME", Path.home() / ".local" / "share")) / "floydia"
+DATA_DIR = Path(os.getenv("FLOYDIA_DATA_DIR", BASE_DIR / "data"))
 REPORTS_DIR = BASE_DIR / "reports"
 DAILY_REPORTS_DIR = REPORTS_DIR / "daily"
 FRONTIER_EXPORT_DIR = REPORTS_DIR / "frontier_export"
@@ -23,13 +28,35 @@ for d in [DATA_DIR, REPORTS_DIR, DAILY_REPORTS_DIR, FRONTIER_EXPORT_DIR, RAW_SNA
 # Base de datos SQLite
 DB_PATH = DATA_DIR / "rankings_engine.db"
 
+# ---------------------------------------------------------------------------
+# Registro PRIVADO de secretos y accessor auditado (Fix V-15).
+# ---------------------------------------------------------------------------
+_PRIVATE_SECRETS: Dict[str, str] = {}
+
+
+def get_secret(name: str) -> Optional[str]:
+    """Accessor único y auditado de credenciales."""
+    return _PRIVATE_SECRETS.get(name) or os.getenv(name)
+
 
 def load_env_file(filepath: Path) -> Dict[str, str]:
-    """Lee un archivo .env sin dependencias externas y pobla os.environ si no está definido."""
-    env_vars = {}
+    """Lee un archivo .env endurecido: rechaza symlinks y exige chmod 600 (Fix V-04)."""
+    env_vars: Dict[str, str] = {}
     if not filepath.exists():
         return env_vars
-    
+
+    if filepath.is_symlink():
+        print(f"⚠️ [Settings] {filepath} es un symlink; ignorado por seguridad.")
+        return env_vars
+
+    try:
+        mode = filepath.stat().st_mode & 0o777
+        if mode != 0o600:
+            os.chmod(filepath, 0o600)
+            print(f"🔐 [Settings] Permisos corregidos a 600 en {filepath}")
+    except Exception as e:
+        print(f"⚠️ [Settings] No se pudo verificar chmod en {filepath}: {e}")
+
     try:
         with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
             for line in f:
@@ -40,28 +67,38 @@ def load_env_file(filepath: Path) -> Dict[str, str]:
                 k = k.strip()
                 v = v.strip().strip("'\"")
                 env_vars[k] = v
-                if k not in os.environ:
-                    os.environ[k] = v
+                _PRIVATE_SECRETS[k] = v
+                os.environ.setdefault(k, v)
     except Exception as e:
-        print(f"⚠️ Error cargando {filepath}: {e}")
+        print(f"⚠️ [Settings] Error cargando {filepath}: {e}")
     return env_vars
 
 
-# Rutas de búsqueda de secretos en orden de prioridad
+# ÚNICA fuente canónica de secretos (Fix V-04)
 SECRETS_PATHS = [
     Path("/home/tec/.secrets/antigravity.env"),
-    Path("/home/tec/Dropbox/ANTIGRAVITY_PROJECTS/.env"),
-    BASE_DIR / ".env"
 ]
 
 for p in SECRETS_PATHS:
     load_env_file(p)
 
+# ---------------------------------------------------------------------------
+# Helper de saneamiento criptográfico de secretos en logs/DB (Fix V-16).
+# ---------------------------------------------------------------------------
+_SECRET_RX = re.compile(
+    r"(AIza[\w\-]{10,}|sk-[\w\-]{10,}|ghp_[\w]{10,}|hf_[\w]{10,}|Bearer\s+[\w.\-]{10,}|key=[\w\-]{8,})"
+)
+
+
+def scrub_secrets(text: str) -> str:
+    """Elimina tokens y claves privadas de cualquier texto antes de persistir o imprimir."""
+    return _SECRET_RX.sub("[REDACTED]", text) if text else text
+
 
 def get_first_available_key(candidate_keys: list[str]) -> Optional[str]:
-    """Busca la primera clave disponible en el entorno."""
+    """Busca la primera clave disponible en el entorno o registro privado."""
     for k in candidate_keys:
-        val = os.getenv(k)
+        val = get_secret(k)
         if val and len(val.strip()) > 5:
             return val.strip()
     return None
@@ -71,7 +108,7 @@ def get_all_available_keys(candidate_keys: list[str]) -> List[Dict[str, str]]:
     """Busca y retorna todas las claves configuradas para un proveedor con su nombre de variable."""
     found = []
     for k in candidate_keys:
-        val = os.getenv(k)
+        val = get_secret(k)
         if val and len(val.strip()) > 5:
             found.append({"name": k, "key": val.strip()})
     return found
@@ -137,5 +174,3 @@ MISTRAL_API_BASE = "https://api.mistral.ai/v1"
 GROQ_API_BASE = "https://api.groq.com/openai/v1"
 FIREWORKS_API_BASE = "https://api.fireworks.ai/inference/v1"
 GITHUB_MODELS_BASE = "https://models.inference.ai.azure.com"
-
-

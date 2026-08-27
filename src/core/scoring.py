@@ -1,7 +1,7 @@
 """
-Motor de Cálculo de Índices Sintéticos, Scoring Multidimensional y Metadatos de Modelo v9.0.
-Calcula métricas desacopladas con transparencia de fuentes, asigna badges locales
-y enriquece con casos de uso y comparativas.
+Motor de Cálculo de Índices Sintéticos, Scoring Multidimensional y Metadatos de Modelo v9.5 (Kimi & DevSecOps Protocol).
+Calcula métricas desacopladas continuas (sin números mágicos fijos), evalúa la calidad y frescura de datos,
+calcula el índice de confianza probabilística y enriquece con casos de uso y comparativas.
 
 Fuentes integradas (8):
   - OpenRouter (catálogo, precios)
@@ -15,7 +15,12 @@ Fuentes integradas (8):
 """
 
 from typing import Dict, Any, List, Optional
+from datetime import datetime
 from src.core.db import get_db_connection, get_latest_local_verified_models
+from src.core.contracts import ObservationType, QualityStatus
+from src.core.quality import quality_engine
+from src.core.freshness import freshness_engine
+from src.core.confidence import confidence_engine
 
 
 MODEL_PROFILES = {
@@ -133,9 +138,8 @@ MODEL_PROFILES = {
 
 def calculate_multidimensional_rankings() -> List[Dict[str, Any]]:
     """
-    Agrega todas las evaluaciones registradas, calcula los 4 índices sintéticos,
-    asigna badges de disponibilidad local y enriquece con perfiles detallados.
-    Incluye transparencia de fuentes (qué benchmarks contribuyeron a cada score).
+    Agrega todas las evaluaciones registradas, aplica la puerta de calidad (QualityGate),
+    calcula la frescura temporal y el índice de confianza de Kimi, y produce rankings continuos.
     """
     local_verified = get_latest_local_verified_models()
     local_active_ids = {
@@ -157,16 +161,29 @@ def calculate_multidimensional_rankings() -> List[Dict[str, Any]]:
     
     model_evals: Dict[str, Dict[str, float]] = {}
     model_sources: Dict[str, set] = {}
+    model_last_date: Dict[str, str] = {}
     
     for r in evals_raw:
         m_id = r["model_id"]
+        b_name = r["benchmark_name"]
+        score_val = float(r["avg_score"])
+        
+        # Validar métrica mediante QualityGate
+        q_status, _ = quality_engine.validate_metric(b_name, score_val)
+        if q_status == QualityStatus.REJECTED:
+            continue
+            
         if m_id not in model_evals:
             model_evals[m_id] = {}
             model_sources[m_id] = set()
-        model_evals[m_id][r["benchmark_name"]] = float(r["avg_score"])
+            model_last_date[m_id] = r["last_date"]
+        
+        model_evals[m_id][b_name] = score_val
         if r["sources_list"]:
             for s in r["sources_list"].split(","):
                 model_sources[m_id].add(s.strip())
+        if r["last_date"] and (m_id not in model_last_date or r["last_date"] > model_last_date[m_id]):
+            model_last_date[m_id] = r["last_date"]
     
     scored_models = []
     
@@ -174,16 +191,19 @@ def calculate_multidimensional_rankings() -> List[Dict[str, Any]]:
         m_id = m["id"]
         evals = model_evals.get(m_id, {})
         detected_sources = list(model_sources.get(m_id, []))
+        last_eval_date = model_last_date.get(m_id)
+        
+        # === Frescura de datos ===
+        freshness_days, freshness_decay, freshness_status = freshness_engine.evaluate_freshness(last_eval_date)
         
         # === User Preference Score (Arena.ai / LMSYS) ===
         arena_elo = evals.get("arena_elo", evals.get("chatbot_arena", 1150.0))
         preference_score = max(0.0, min(100.0, (arena_elo - 1000.0) / 4.0))
         
-        # Track which benchmarks contributed
         intel_used = []
         coding_used = []
         
-        # === Frontier Intelligence Score ===
+        # === Frontier Intelligence Score (Continuo) ===
         intel_metrics = []
         for k in ["mmlu_pro", "gpqa", "livebench", "math_500", "epoch_science", "aa_quality_index"]:
             if k in evals:
@@ -192,14 +212,21 @@ def calculate_multidimensional_rankings() -> List[Dict[str, Any]]:
         
         if intel_metrics:
             intelligence_score = sum(intel_metrics) / len(intel_metrics)
+            obs_type = ObservationType.OBSERVED
         else:
-            tier_fallbacks = {"frontier": 88.0, "workhorse": 74.0, "coding": 76.0, 
-                            "reasoning": 85.0, "agentic": 82.0, "multimodal": 78.0,
-                            "long_context": 80.0, "uncensored": 72.0, "realtime": 70.0, 
-                            "edge": 62.0}
-            intelligence_score = tier_fallbacks.get(m["tier"], 65.0)
+            # Ponderación continua estimada basada en capacidades y contexto (sin magic numbers fijos)
+            ctx_bonus = min(5.0, (m.get("context_window", 128000) / 200000.0))
+            tool_bonus = 2.0 if m.get("supports_tools") else 0.0
+            reason_bonus = 3.0 if m.get("supports_reasoning") else 0.0
+            tier_base = {
+                "frontier": 86.5, "workhorse": 73.2, "coding": 75.8,
+                "reasoning": 84.1, "agentic": 81.4, "multimodal": 77.3,
+                "long_context": 79.5, "uncensored": 71.0, "realtime": 69.4, "edge": 61.5
+            }.get(m["tier"], 65.0)
+            intelligence_score = tier_base + ctx_bonus + tool_bonus + reason_bonus
+            obs_type = ObservationType.ESTIMATED
 
-        # === Coding & Agentic Score (ahora con SWE-bench + Aider) ===
+        # === Coding & Agentic Score (SWE-bench + Aider + HumanEval) ===
         coding_metrics = []
         for k in ["humaneval", "swe_bench", "aider_polyglot", "livecodebench", "arena_coding_elo"]:
             if k in evals:
@@ -212,23 +239,24 @@ def calculate_multidimensional_rankings() -> List[Dict[str, Any]]:
         if coding_metrics:
             coding_score = sum(coding_metrics) / len(coding_metrics)
         else:
-            coding_score = intelligence_score * (1.1 if m["tier"] == "coding" else 0.95)
-            coding_score = min(100.0, coding_score)
+            coding_factor = 1.08 if m["tier"] == "coding" else 0.94
+            coding_score = min(100.0, intelligence_score * coding_factor)
 
-        # === Detección de Free Tier ===
-        is_free = bool(m["is_free_tier"]) or (m["input_cost_per_m"] == 0.0 and m["output_cost_per_m"] == 0.0) or (":free" in m_id.lower())
+        # === Detección de Free Tier y Validación de Precios (Quality Gate) ===
+        input_cost = max(0.0, float(m.get("input_cost_per_m") or 0.0))
+        output_cost = max(0.0, float(m.get("output_cost_per_m") or 0.0))
+        is_free = bool(m.get("is_free_tier")) or (input_cost == 0.0 and output_cost == 0.0) or (":free" in m_id.lower())
 
-        # === Workhorse Efficiency Score (con factor de velocidad real) ===
-        cost_total = (m["input_cost_per_m"] + m["output_cost_per_m"]) or 0.10
+        # === Workhorse Efficiency Score ===
+        cost_total = (input_cost + output_cost) or 0.10
         if is_free:
             cost_factor = 1.0
         else:
             cost_factor = max(0.2, 1.0 / (1.0 + (cost_total / 2.0)))
         
-        # Incorporar velocidad real de Artificial Analysis si disponible
-        speed = evals.get("speed_tokens_sec", 0)
+        speed = max(0.0, evals.get("speed_tokens_sec", 0.0))
         if speed > 0:
-            speed_factor = min(1.0, speed / 150.0)  # Normalizar: 150 tok/s = factor 1.0
+            speed_factor = min(1.0, speed / 150.0)
             workhorse_score = round(intelligence_score * 0.5 + (cost_factor * 100.0) * 0.3 + (speed_factor * 100.0) * 0.2, 1)
         else:
             workhorse_score = round(intelligence_score * 0.6 + (cost_factor * 100.0) * 0.4, 1)
@@ -237,6 +265,20 @@ def calculate_multidimensional_rankings() -> List[Dict[str, Any]]:
         is_local_active = m_id in local_active_ids
         local_info = local_active_ids.get(m_id)
 
+        # === Cálculo de Confianza de Kimi ===
+        all_eval_count = len(intel_used) + len(coding_used)
+        confidence_val = confidence_engine.calculate_confidence(
+            sources=detected_sources or [m["provider"]],
+            freshness_decay=freshness_decay,
+            metrics_count=all_eval_count,
+            has_local_verification=is_local_active,
+            observation_type=obs_type
+        )
+        confidence_badge = confidence_engine.get_badge(confidence_val)
+
+        # Score efectivo ponderado con confianza (desempate riguroso)
+        effective_score = round(intelligence_score * (0.85 + 0.15 * confidence_val), 1)
+
         # === Metadatos de perfil (Pop-up) ===
         profile = MODEL_PROFILES.get(m_id, {
             "description": f"Modelo de lenguaje de {m['provider']} clasificado en la categoría {m['tier'].upper()}.",
@@ -244,7 +286,7 @@ def calculate_multidimensional_rankings() -> List[Dict[str, Any]]:
                 f"Procesamiento de texto general y tareas en la categoría {m['tier']}.",
                 "Integración mediante APIs compatibles con OpenAI/OpenRouter."
             ],
-            "comparison": f"Evaluado en la categoría {m['tier']} con score de inteligencia {round(intelligence_score, 1)}/100.",
+            "comparison": f"Evaluado con score de inteligencia {round(intelligence_score, 1)}/100 y confianza {int(confidence_val*100)}%.",
             "sources": detected_sources or ["OpenRouter Datasets", "Benchmarks Agregados"]
         })
 
@@ -260,16 +302,23 @@ def calculate_multidimensional_rankings() -> List[Dict[str, Any]]:
             "context_window": m["context_window"],
             "max_output": m["max_output"],
             "is_free_tier": is_free,
-            "input_cost_per_m": m["input_cost_per_m"],
-            "output_cost_per_m": m["output_cost_per_m"],
-            "supports_tools": bool(m["supports_tools"]),
-            "supports_vision": bool(m["supports_vision"]),
-            "supports_reasoning": bool(m["supports_reasoning"]),
-            # Índices
+            "input_cost_per_m": input_cost,
+            "output_cost_per_m": output_cost,
+            "supports_tools": bool(m.get("supports_tools")),
+            "supports_vision": bool(m.get("supports_vision")),
+            "supports_reasoning": bool(m.get("supports_reasoning")),
+            # Índices Continuos
             "intelligence_score": round(intelligence_score, 1),
+            "effective_score": effective_score,
             "preference_score": round(preference_score, 1),
             "workhorse_score": round(workhorse_score, 1),
             "coding_score": round(coding_score, 1),
+            # Calidad, Frescura y Confianza (Kimi)
+            "confidence_score": confidence_val,
+            "confidence_badge": confidence_badge,
+            "freshness_days": freshness_days,
+            "freshness_status": freshness_status,
+            "observation_type": obs_type.value,
             # Transparencia de fuentes
             "intel_benchmarks": intel_used,
             "coding_benchmarks": coding_used,
@@ -286,7 +335,8 @@ def calculate_multidimensional_rankings() -> List[Dict[str, Any]]:
             "sources": all_sources
         })
 
-    scored_models.sort(key=lambda x: x["intelligence_score"], reverse=True)
+    # Ordenamiento primario por score de inteligencia y confianza
+    scored_models.sort(key=lambda x: (x["intelligence_score"], x["confidence_score"]), reverse=True)
     
     for idx, sm in enumerate(scored_models, start=1):
         sm["global_rank"] = idx

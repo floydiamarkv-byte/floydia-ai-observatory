@@ -1,6 +1,7 @@
 """
 Módulo Unificado de Inyección y Saneamiento de Motores de FloydIA.
-Reescribe y sincroniza configuraciones para:
+Reescribe y sincroniza configuraciones con escrituras atómicas transaccionales,
+backups rotativos .bak y validación sintáctica (Fix V-05, V-18, V-19) para:
 - OpenCode Desktop & CLI (~/.config/opencode/opencode.jsonc)
 - Hermes Desktop & CLI (~/.hermes/config.yaml + purga de caché)
 - DeepSeek Harness DSH (~/.dsh/settings.yaml)
@@ -10,8 +11,10 @@ Reescribe y sincroniza configuraciones para:
 import os
 import json
 import time
+import shutil
+import tempfile
 import subprocess
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List, Tuple, Optional, Callable
 from pathlib import Path
 from config.settings import BASE_DIR
 
@@ -24,10 +27,79 @@ DSH_CONFIG_WORKSPACE = WORKSPACE / "SCRIPTS" / "dsh-settings.yaml"
 SYNC_HP45_SCRIPT = WORKSPACE / "SCRIPTS" / "sync_models_hp45.sh"
 
 
+class SecurityError(Exception):
+    """Destino de escritura inseguro (p.ej. symlink)."""
+    pass
+
+
+def _validate_json(text: str) -> None:
+    """Valida que el contenido sea JSON sintácticamente correcto antes de escribir."""
+    json.loads(text)
+
+
+def _validate_yaml(text: str) -> None:
+    """Valida que el contenido sea YAML sintácticamente correcto antes de escribir."""
+    try:
+        import yaml
+        yaml.safe_load(text)
+    except ImportError:
+        # Fallback si PyYAML no está instalado en el entorno mínimo
+        pass
+
+
+def atomic_write(
+    path: Path,
+    content: str,
+    mode: int = 0o600,
+    validator: Optional[Callable[[str], None]] = None,
+    keep_backups: int = 3,
+) -> Path:
+    """
+    Escritura transaccional y atómica de configuraciones críticas:
+      1. Rechaza symlinks (anti-clobber / anti-escalada).
+      2. Crea backup rotativo .<timestamp>.bak antes de modificar.
+      3. Valida la sintaxis del contenido ANTES de tocar el destino.
+      4. Escribe a archivo temporal en el MISMO directorio + fsync.
+      5. os.replace() atómico (POSIX) + chmod 600.
+    """
+    path = Path(path)
+
+    if path.is_symlink():
+        raise SecurityError(f"Destino es un symlink; abortando por seguridad: {path}")
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    if path.exists():
+        bak = path.with_name(f"{path.name}.{time.strftime('%Y%m%d-%H%M%S')}.bak")
+        try:
+            shutil.copy2(path, bak)
+            backups = sorted(path.parent.glob(f"{path.name}.*.bak"))
+            for old in backups[:-keep_backups]:
+                old.unlink(missing_ok=True)
+        except Exception as e:
+            print(f"⚠️ [EngineInjector] No se pudo crear backup de {path}: {e}")
+
+    if validator:
+        validator(content)
+
+    fd, tmp = tempfile.mkstemp(dir=str(path.parent), prefix=".tmp_")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(content)
+            f.flush()
+            os.fsync(f.fileno())
+        os.chmod(tmp, mode)
+        os.replace(tmp, str(path))
+    except BaseException:
+        Path(tmp).unlink(missing_ok=True)
+        raise
+    return path
+
+
 def apply_engine_configurations() -> List[Tuple[str, str]]:
     """
     Reescribe las configuraciones de OpenCode, Hermes y DSH con los modelos más recientes
-    y comprobados de la flota de FloydIA. Retorna lista de mensajes (mensaje, nivel).
+    y comprobados de la flota de FloydIA de forma atómica. Retorna lista de mensajes (mensaje, nivel).
     """
     logs = []
 
@@ -102,10 +174,9 @@ def apply_engine_configurations() -> List[Tuple[str, str]]:
     }
 
     try:
-        OPENCODE_CONFIG.parent.mkdir(parents=True, exist_ok=True)
-        with open(OPENCODE_CONFIG, "w", encoding="utf-8") as f:
-            json.dump(opencode_cfg, f, indent=2)
-        logs.append((f"✅ OpenCode configurado: {OPENCODE_CONFIG}", "SUCCESS"))
+        content_json = json.dumps(opencode_cfg, indent=2, ensure_ascii=False)
+        atomic_write(OPENCODE_CONFIG, content_json, validator=_validate_json)
+        logs.append((f"✅ OpenCode configurado (atómico): {OPENCODE_CONFIG}", "SUCCESS"))
     except Exception as e:
         logs.append((f"❌ Error configurando OpenCode: {e}", "ERROR"))
 
@@ -205,10 +276,8 @@ mcp_servers:
     command: /home/tec/.local/bin/crawl4ai-mcp
 """
     try:
-        HERMES_CONFIG.parent.mkdir(parents=True, exist_ok=True)
-        with open(HERMES_CONFIG, "w", encoding="utf-8") as f:
-            f.write(hermes_yaml)
-        logs.append((f"✅ Hermes config.yaml actualizado: {HERMES_CONFIG}", "SUCCESS"))
+        atomic_write(HERMES_CONFIG, hermes_yaml, validator=_validate_yaml)
+        logs.append((f"✅ Hermes config.yaml actualizado (atómico): {HERMES_CONFIG}", "SUCCESS"))
     except Exception as e:
         logs.append((f"❌ Error configurando Hermes: {e}", "ERROR"))
 
@@ -221,9 +290,9 @@ mcp_servers:
         "deepseek": {"fp": "deepseek-curated-v4", "at": time.time(), "models": ["deepseek-chat", "deepseek-reasoner"]}
     }
     try:
-        with open(HERMES_CACHE, "w", encoding="utf-8") as f:
-            json.dump(hermes_clean_cache, f, indent=2)
-        logs.append(("✅ Caché de Hermes saneada (modelos obsoletos purgados)", "SUCCESS"))
+        cache_json = json.dumps(hermes_clean_cache, indent=2)
+        atomic_write(HERMES_CACHE, cache_json, validator=_validate_json)
+        logs.append(("✅ Caché de Hermes saneada (atómico)", "SUCCESS"))
     except Exception as e:
         logs.append((f"⚠️ No se pudo purgar caché de Hermes: {e}", "WARN"))
 
@@ -317,13 +386,9 @@ llm-pi-ai:
           contextWindow: 131072
 """
     try:
-        DSH_CONFIG_USER.parent.mkdir(parents=True, exist_ok=True)
-        with open(DSH_CONFIG_USER, "w", encoding="utf-8") as f:
-            f.write(dsh_yaml)
-        DSH_CONFIG_WORKSPACE.parent.mkdir(parents=True, exist_ok=True)
-        with open(DSH_CONFIG_WORKSPACE, "w", encoding="utf-8") as f:
-            f.write(dsh_yaml)
-        logs.append((f"✅ DeepSeek Harness sincronizado: {DSH_CONFIG_USER}", "SUCCESS"))
+        atomic_write(DSH_CONFIG_USER, dsh_yaml, validator=_validate_yaml)
+        atomic_write(DSH_CONFIG_WORKSPACE, dsh_yaml, validator=_validate_yaml)
+        logs.append((f"✅ DeepSeek Harness sincronizado (atómico): {DSH_CONFIG_USER}", "SUCCESS"))
     except Exception as e:
         logs.append((f"❌ Error configurando DSH: {e}", "ERROR"))
 
@@ -337,7 +402,13 @@ def sync_to_hp45() -> Tuple[str, str]:
 
     cmd = ["bash", str(SYNC_HP45_SCRIPT), "hp45", "tec"]
     try:
-        res = subprocess.run(cmd, capture_output=True, text=True, timeout=25)
+        res = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=25,
+            env={"PATH": os.environ.get("PATH", "/usr/bin:/bin"), "HOME": os.environ.get("HOME", "/home/tec")}
+        )
         if res.returncode == 0:
             return ("✅ Sincronización exitosa hacia HP45 (tec@192.168.1.200).", "SUCCESS")
         return (f"⚠️ Rsync finalizado: {res.stdout.strip()[:100]}", "WARN")
