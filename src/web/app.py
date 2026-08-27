@@ -1,8 +1,9 @@
 """
-Servidor y Dashboard Web Interactivo de FloydIA AI Rankings & Local API Observatory v7.0.
+Servidor y Dashboard Web Interactivo de FloydIA AI Rankings & Local API Observatory v9.0.
 Incluye:
 - 10 categorías especializadas (Frontier, Agentes, Razonamiento, Visión, Contexto 1M+, Caballos, Coding, Soberanos, Realtime, Edge).
-- Botones de Recomendación Rápida ("Smart Pills").
+- 8 fuentes de benchmark: Arena.ai, SWE-bench, Aider, Artificial Analysis, OpenRouter, HuggingFace, LiveBench, Epoch AI.
+- Transparencia de benchmarks: desglose de qué métricas contribuyeron a cada score.
 - Generador de Snippets de Código (Python SDK / cURL) en 1 clic dentro del Modal.
 - Selector de fuentes y ordenamiento bidireccional Free Tier + Score.
 - Comparador Visual Cara a Cara (Model VS Model Side-by-Side) con Veredicto FloydIA.
@@ -160,7 +161,7 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FloydIA — AI Rankings & Local API Observatory v7.0</title>
+  <title>FloydIA — AI Rankings & Local API Observatory v9.0</title>
   <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {{
@@ -1075,8 +1076,10 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
       <div class="dropdown-group">
         <span>📡 Fuente:</span>
         <select id="sourceSelect" class="dropdown-select" onchange="filterAndRender()">
-          <option value="all">🌐 Todas las Fuentes (6 Benchmarks + APIs)</option>
-          <option value="LMSYS Arena">🏆 LMSYS Chatbot Arena (Elo)</option>
+          <option value="all">🌐 Todas las Fuentes (8 Benchmarks + APIs)</option>
+          <option value="ArenaAI">🏆 Arena.ai (Elo Preferencia Humana)</option>
+          <option value="SWEBench">🐛 SWE-bench Verified (Issues Reales)</option>
+          <option value="Aider">🧑‍💻 Aider Polyglot (Coding Multi-Lenguaje)</option>
           <option value="Artificial Analysis">⚡ Artificial Analysis (Velocidad & Precios)</option>
           <option value="OpenRouter">🛒 OpenRouter (Catálogo & Adopción)</option>
           <option value="Hugging Face">🎓 Hugging Face Leaderboard (Académico)</option>
@@ -1280,6 +1283,11 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
         <div class="modal-section">
           <div class="modal-section-title">📡 Fuentes de Datos y Benchmarks</div>
           <div id="modalSources"></div>
+        </div>
+
+        <div class="modal-section">
+          <div class="modal-section-title">🔬 Transparencia de Benchmarks</div>
+          <div id="modalBenchmarks" class="modal-desc" style="border-left-color: #6366F1;"></div>
         </div>
 
         <div class="modal-section" id="modalLocalSection">
@@ -1699,6 +1707,32 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
 
       const sourcesDiv = document.getElementById("modalSources");
       sourcesDiv.innerHTML = (m.sources || []).map(s => '<span class="source-tag" style="font-size: 12px; padding: 4px 8px;">📊 ' + s + '</span>').join(" ");
+
+      // Transparencia de Benchmarks: qué métricas contribuyeron a cada score
+      const benchSection = document.getElementById("modalBenchmarks");
+      if (benchSection) {{
+        let benchHtml = '';
+        const intelBench = m.intel_benchmarks || [];
+        const codingBench = m.coding_benchmarks || [];
+        const benchLabels = {{
+          'mmlu_pro': 'MMLU-Pro', 'gpqa': 'GPQA', 'livebench': 'LiveBench',
+          'math_500': 'MATH-500', 'epoch_science': 'Epoch AI', 'aa_quality_index': 'AA Quality',
+          'humaneval': 'HumanEval', 'swe_bench': 'SWE-bench', 'aider_polyglot': 'Aider',
+          'livecodebench': 'LiveCodeBench', 'arena_coding_elo': 'Arena Coding'
+        }};
+        if (intelBench.length > 0) {{
+          benchHtml += '<div style="margin-bottom:6px;"><strong>🧠 Inteligencia:</strong> ';
+          benchHtml += intelBench.map(b => '<span class="source-tag" style="font-size:11px;padding:2px 6px;background:rgba(99,102,241,0.15);color:#818CF8;">' + (benchLabels[b]||b) + '</span>').join(' ');
+          benchHtml += '</div>';
+        }}
+        if (codingBench.length > 0) {{
+          benchHtml += '<div><strong>💻 Coding:</strong> ';
+          benchHtml += codingBench.map(b => '<span class="source-tag" style="font-size:11px;padding:2px 6px;background:rgba(52,211,153,0.15);color:#34D399;">' + (benchLabels[b]||b) + '</span>').join(' ');
+          benchHtml += '</div>';
+        }}
+        if (!benchHtml) benchHtml = '<em style="color:#6B7280;">Scores calculados con heurísticas de categoría (sin benchmarks directos).</em>';
+        benchSection.innerHTML = benchHtml;
+      }}
 
       updateSnippet();
 

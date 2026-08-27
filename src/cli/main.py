@@ -1,5 +1,5 @@
 """
-Punto de Entrada CLI & GUI Unificado de FloydIA AI Command & Observatory Suite (v8.0).
+Punto de Entrada CLI & GUI Unificado de FloydIA AI Command & Observatory Suite (v9.0).
 Permite selección de tareas por checkmarks, consultas en lenguaje natural con IA,
 reescritura de motores y ejecución modular / visual.
 """
@@ -40,7 +40,7 @@ def print_banner():
   ██╔══╝  ██║     ██║   ██║  ╚██╔╝  ██║  ██║██║██╔══██║
   ██║     ███████╗╚██████╔╝   ██║   ██████╔╝██║██║  ██║
   ╚═╝     ╚══════╝ ╚═════╝    ╚═╝   ╚═════╝ ╚═╝╚═╝  ╚═╝
-  AI COMMAND & OBSERVATORY SUITE v8.0
+  AI COMMAND & OBSERVATORY SUITE v9.0 (8 Benchmark Sources)
 ======================================================================{C_RESET}
 {C_MINT}«Construimos la inteligencia. Desde la infraestructura.»{C_RESET}
 {C_DIM}Firma: FloydIA · Suite Unificada: Rankings + Radar + Inyector de Motores{C_RESET}

@@ -30,9 +30,8 @@ Responde al usuario ofreciendo:
 
 | Modelo | Proveedor | Tier | Ventana Contexto | Latencia (ms) | Modo Precio | Coste In/Out ($/1M) | Score Global |
 |---|---|---|---|---|---|---|---|
-| **Google Gemini 2.5 Pro** | Google | `long_context` | 1,048,576 tok | 474.1 ms | $1.250 / $10.000 | $1.25 / $10.0 | **89.0 / 100** |
-| **OpenAI o3-mini** | OpenAI | `reasoning` | 200,000 tok | 432.1 ms | $0.550 / $2.200 | $0.55 / $2.2 | **88.8 / 100** |
-| **DeepSeek R1 (Reasoner)** | DeepSeek | `reasoning` | 64,000 tok | 763.8 ms | $0.700 / $2.500 | $0.7 / $2.5 | **88.0 / 100** |
+| **Google Gemini 2.5 Pro** | Google | `long_context` | 1,048,576 tok | 474.1 ms | $1.250 / $10.000 | $1.25 / $10.0 | **88.9 / 100** |
+| **OpenAI o3-mini** | OpenAI | `reasoning` | 200,000 tok | 432.1 ms | $0.550 / $2.200 | $0.55 / $2.2 | **88.4 / 100** |
 | **upstage/solar-pro4** | OpenRouter | `frontier` | 524,288 tok | 432.1 ms | $0.030 / $0.120 | $0.03 / $0.12 | **88.0 / 100** |
 | **qwen/qwen3.8-max** | OpenRouter | `frontier` | 1,000,000 tok | 432.1 ms | $2.000 / $6.000 | $2.0 / $6.0 | **88.0 / 100** |
 | **anthropic/claude-opus-5-fast** | OpenRouter | `frontier` | 1,000,000 tok | 432.1 ms | $5.000 / $25.000 | $5.0 / $25.0 | **88.0 / 100** |
@@ -44,7 +43,6 @@ Responde al usuario ofreciendo:
 | **openai/gpt-5.6-sol-pro** | OpenRouter | `frontier` | 1,050,000 tok | 432.1 ms | $2.000 / $10.000 | $2.0 / $10.0 | **88.0 / 100** |
 | **openai/gpt-5.6-sol:batch** | OpenRouter | `frontier` | 1,050,000 tok | 432.1 ms | $1.000 / $5.000 | $1.0 / $5.0 | **88.0 / 100** |
 | **nex-agi/nex-n2-pro** | OpenRouter | `frontier` | 262,144 tok | 432.1 ms | $0.250 / $1.000 | $0.25 / $1.0 | **88.0 / 100** |
-| **minimax/minimax-m3** | OpenRouter | `frontier` | 1,048,576 tok | 432.1 ms | 🆓 GRATIS | $0.0 / $0.0 | **88.0 / 100** |
 | **anthropic/claude-opus-4.8-fast** | OpenRouter | `frontier` | 200,000 tok | 432.1 ms | $15.000 / $75.000 | $15.0 / $75.0 | **88.0 / 100** |
 | **anthropic/claude-opus-4.8:batch** | OpenRouter | `frontier` | 1,000,000 tok | 432.1 ms | $2.500 / $12.500 | $2.5 / $12.5 | **88.0 / 100** |
 | **qwen/qwen3.7-max** | OpenRouter | `frontier` | 1,000,000 tok | 432.1 ms | $1.475 / $4.425 | $1.475 / $4.425 | **88.0 / 100** |
@@ -86,10 +84,50 @@ Responde al usuario ofreciendo:
 | **gryphe/mythomax-l2-13b** | OpenRouter | `frontier` | 8,192 tok | 432.1 ms | $0.060 / $0.060 | $0.06 / $0.06 | **88.0 / 100** |
 | **Google Gemini 3.7 Flash (Reasoning)** | Google | `frontier` | 1,048,576 tok | 432.1 ms | $0.188 / $0.938 | $0.1875 / $0.9375 | **88.0 / 100** |
 | **Zhipu GLM 5.2 Frontier** | Zhipu AI | `frontier` | 204,800 tok | 432.1 ms | $0.600 / $1.920 | $0.6 / $1.92 | **88.0 / 100** |
-| **DeepSeek V4 Flash** | DeepSeek | `frontier` | 1,048,576 tok | 432.1 ms | $0.078 / $0.156 | $0.078 / $0.156 | **88.0 / 100** |
+| **DeepSeek V4 Flash** | DeepSeek | `frontier` | 1,048,576 tok | 432.1 ms | $0.076 / $0.153 | $0.0764 / $0.1529 | **88.0 / 100** |
+| **DeepSeek R1 (Reasoner)** | DeepSeek | `reasoning` | 64,000 tok | 763.8 ms | $0.700 / $2.500 | $0.7 / $2.5 | **87.9 / 100** |
+| **thinkingmachines/inkling-small** | OpenRouter | `reasoning` | 1,048,576 tok | 432.1 ms | $0.950 / $4.050 | $0.95 / $4.05 | **85.0 / 100** |
+| **thinkingmachines/inkling:batch** | OpenRouter | `reasoning` | 524,288 tok | 432.1 ms | $1.000 / $4.050 | $1.0 / $4.05 | **85.0 / 100** |
+| **thinkingmachines/inkling:free** | OpenRouter | `reasoning` | 1,048,576 tok | 432.1 ms | 🆓 GRATIS | $0.0 / $0.0 | **85.0 / 100** |
+| **arcee-ai/trinity-large-thinking** | OpenRouter | `reasoning` | 262,144 tok | 432.1 ms | $0.220 / $0.850 | $0.22 / $0.85 | **85.0 / 100** |
+| **qwen/qwen3-max-thinking** | OpenRouter | `reasoning` | 262,144 tok | 432.1 ms | $0.780 / $3.900 | $0.78 / $3.9 | **85.0 / 100** |
+| **moonshotai/kimi-k2-thinking** | OpenRouter | `reasoning` | 262,144 tok | 432.1 ms | $0.600 / $2.500 | $0.6 / $2.5 | **85.0 / 100** |
+| **qwen/qwen3-vl-8b-thinking** | OpenRouter | `reasoning` | 131,072 tok | 432.1 ms | $0.180 / $2.100 | $0.18 / $2.1 | **85.0 / 100** |
+| **qwen/qwen3-vl-30b-a3b-thinking** | OpenRouter | `reasoning` | 262,144 tok | 432.1 ms | $0.200 / $2.400 | $0.2 / $2.4 | **85.0 / 100** |
+| **qwen/qwen3-vl-235b-a22b-thinking** | OpenRouter | `reasoning` | 131,072 tok | 432.1 ms | $0.400 / $4.000 | $0.4 / $4.0 | **85.0 / 100** |
+| **qwen/qwen3-next-80b-a3b-thinking** | OpenRouter | `reasoning` | 262,144 tok | 432.1 ms | $0.150 / $1.200 | $0.15 / $1.2 | **85.0 / 100** |
+| **qwen/qwen3-30b-a3b-thinking-2507** | OpenRouter | `reasoning` | 131,072 tok | 432.1 ms | $0.120 / $0.500 | $0.12 / $0.5 | **85.0 / 100** |
+| **qwen/qwen3-235b-a22b-thinking-2507** | OpenRouter | `reasoning` | 131,072 tok | 432.1 ms | $0.455 / $1.820 | $0.455 / $1.82 | **85.0 / 100** |
+| **openai/o3-pro** | OpenRouter | `reasoning` | 200,000 tok | 432.1 ms | $10.000 / $40.000 | $10.0 / $40.0 | **85.0 / 100** |
+| **openai/o3:batch** | OpenRouter | `reasoning` | 200,000 tok | 432.1 ms | $1.000 / $4.000 | $1.0 / $4.0 | **85.0 / 100** |
+| **openai/o1-pro** | OpenRouter | `reasoning` | 200,000 tok | 432.1 ms | $15.000 / $60.000 | $15.0 / $60.0 | **85.0 / 100** |
+| **sao10k/l3.3-euryale-70b** | OpenRouter | `reasoning` | 131,072 tok | 432.1 ms | $0.650 / $0.750 | $0.65 / $0.75 | **85.0 / 100** |
+| **openai/o1:batch** | OpenRouter | `reasoning` | 200,000 tok | 432.1 ms | $7.500 / $30.000 | $7.5 / $30.0 | **85.0 / 100** |
+| **sao10k/l3.1-euryale-70b** | OpenRouter | `reasoning` | 131,072 tok | 432.1 ms | $0.850 / $0.850 | $0.85 / $0.85 | **85.0 / 100** |
+| **sao10k/l3-lunaris-8b** | OpenRouter | `reasoning` | 8,192 tok | 432.1 ms | $0.040 / $0.050 | $0.04 / $0.05 | **85.0 / 100** |
+| **NVIDIA Nemotron 3 Super 120B** | NVIDIA | `reasoning` | 262,144 tok | 432.1 ms | 🆓 GRATIS | $0.0 / $0.0 | **85.0 / 100** |
+| **x-ai/grok-4.20-multi-agent** | OpenRouter | `agentic` | 2,000,000 tok | 432.1 ms | $1.250 / $2.500 | $1.25 / $2.5 | **82.0 / 100** |
+| **google/gemini-3.1-pro-preview-customtools** | OpenRouter | `agentic` | 1,048,576 tok | 432.1 ms | $2.000 / $12.000 | $2.0 / $12.0 | **82.0 / 100** |
+| **Gemma 4 31B IT (Agent)** | Google | `agentic` | 262,144 tok | 797.0 ms | 🆓 GRATIS | $0.0 / $0.0 | **82.0 / 100** |
 | **Google Gemini 2.5 Flash** | Google | `long_context` | 1,048,576 tok | 474.1 ms | $0.150 / $1.250 | $0.15 / $1.25 | **81.0 / 100** |
-| **DeepSeek V3 (Chat)** | DeepSeek | `workhorse` | 163,840 tok | 763.8 ms | $0.257 / $1.029 | $0.2574 / $1.0287 | **80.5 / 100** |
-| **OpenAI GPT-4o (GitHub Models Free Tier)** | OpenAI | `frontier` | 8,191 tok | 432.1 ms | $30.000 / $60.000 | $30.0 / $60.0 | **77.4 / 100** |
+| **DeepSeek V3 (Chat)** | DeepSeek | `workhorse` | 163,840 tok | 763.8 ms | $0.257 / $1.029 | $0.2574 / $1.0287 | **80.3 / 100** |
+| **meituan/longcat-2.0** | OpenRouter | `long_context` | 1,048,756 tok | 432.1 ms | $0.300 / $1.200 | $0.3 / $1.2 | **80.0 / 100** |
+| **Moonshot Kimi K3** | Moonshot AI | `long_context` | 1,048,576 tok | 576.9 ms | $3.000 / $15.000 | $3.0 / $15.0 | **80.0 / 100** |
+| **OpenAI GPT-4o (GitHub Models Free Tier)** | OpenAI | `frontier` | 8,191 tok | 432.1 ms | $30.000 / $60.000 | $30.0 / $60.0 | **78.9 / 100** |
+| **google/gemini-3.1-flash-image** | OpenRouter | `multimodal` | 65,536 tok | 432.1 ms | $0.500 / $3.000 | $0.5 / $3.0 | **78.0 / 100** |
+| **google/gemini-3-pro-image** | OpenRouter | `multimodal` | 65,536 tok | 432.1 ms | $2.000 / $12.000 | $2.0 / $12.0 | **78.0 / 100** |
+| **openai/gpt-5.4-image-2** | OpenRouter | `multimodal` | 1,050,000 tok | 432.1 ms | $2.500 / $15.000 | $2.5 / $15.0 | **78.0 / 100** |
+| **openai/gpt-audio** | OpenRouter | `multimodal` | 128,000 tok | 432.1 ms | $0.600 / $2.400 | $0.6 / $2.4 | **78.0 / 100** |
+| **qwen/qwen3-vl-32b-instruct** | OpenRouter | `multimodal` | 131,072 tok | 432.1 ms | $0.104 / $0.416 | $0.104 / $0.416 | **78.0 / 100** |
+| **openai/gpt-5-image-mini** | OpenRouter | `multimodal` | 400,000 tok | 432.1 ms | $10.000 / $10.000 | $10.0 / $10.0 | **78.0 / 100** |
+| **qwen/qwen3-vl-8b-instruct** | OpenRouter | `multimodal` | 262,144 tok | 432.1 ms | $0.117 / $0.455 | $0.117 / $0.455 | **78.0 / 100** |
+| **qwen/qwen3-vl-30b-a3b-instruct** | OpenRouter | `multimodal` | 262,144 tok | 432.1 ms | $0.130 / $0.520 | $0.13 / $0.52 | **78.0 / 100** |
+| **qwen/qwen3-vl-235b-a22b-instruct** | OpenRouter | `multimodal` | 262,144 tok | 432.1 ms | $0.210 / $1.900 | $0.21 / $1.9 | **78.0 / 100** |
+| **baidu/ernie-4.5-vl-424b-a47b** | OpenRouter | `multimodal` | 123,000 tok | 432.1 ms | $0.420 / $1.250 | $0.42 / $1.25 | **78.0 / 100** |
+| **qwen/qwen2.5-vl-72b-instruct** | OpenRouter | `multimodal` | 128,000 tok | 432.1 ms | $0.250 / $0.750 | $0.25 / $0.75 | **78.0 / 100** |
+| **Google Gemini 3.5 Flash (Multi)** | Google | `multimodal` | 1,048,576 tok | 432.1 ms | $0.750 / $4.500 | $0.75 / $4.5 | **78.0 / 100** |
+| **Google Gemini 2.0 Flash** | Google | `realtime` | 1,048,576 tok | 474.1 ms | 🆓 GRATIS | $0.1 / $0.4 | **77.1 / 100** |
+| **Qwen 2.5 Coder 32B Instruct** | Alibaba | `coding` | 32,768 tok | 432.1 ms | $0.660 / $1.000 | $0.66 / $1.0 | **76.1 / 100** |
 | **bytedance-seed/seed-2.0-code** | OpenRouter | `coding` | 262,144 tok | 432.1 ms | $0.500 / $3.000 | $0.5 / $3.0 | **76.0 / 100** |
 | **kwaipilot/kat-coder-air-v2.5** | OpenRouter | `coding` | 256,000 tok | 432.1 ms | $0.150 / $0.600 | $0.15 / $0.6 | **76.0 / 100** |
 | **kwaipilot/kat-coder-pro-v2.5** | OpenRouter | `coding` | 262,144 tok | 432.1 ms | $0.300 / $1.200 | $0.3 / $1.2 | **76.0 / 100** |
@@ -107,9 +145,7 @@ Responde al usuario ofreciendo:
 | **qwen/qwen3-coder-flash** | OpenRouter | `coding` | 1,000,000 tok | 432.1 ms | $0.195 / $0.975 | $0.195 / $0.975 | **76.0 / 100** |
 | **qwen/qwen3-coder-30b-a3b-instruct** | OpenRouter | `coding` | 262,144 tok | 432.1 ms | $0.070 / $0.280 | $0.07 / $0.28 | **76.0 / 100** |
 | **Poolside Laguna S 2.1 (Code)** | Poolside | `coding` | 262,144 tok | 432.1 ms | 🆓 GRATIS | $0.0 / $0.0 | **76.0 / 100** |
-| **Mistral Codestral Latest** | Mistral | `coding` | 256,000 tok | 679.9 ms | $0.300 / $0.900 | $0.3 / $0.9 | **76.0 / 100** |
-| **Qwen 2.5 Coder 32B Instruct** | Alibaba | `coding` | 32,768 tok | 432.1 ms | $0.660 / $1.000 | $0.66 / $1.0 | **75.9 / 100** |
-| **OpenAI GPT-4o-mini** | OpenAI | `workhorse` | 128,000 tok | 432.1 ms | $0.150 / $0.600 | $0.15 / $0.6 | **74.0 / 100** |
+| **mistralai/mistral-large-2512** | OpenRouter | `workhorse` | 128,000 tok | 432.1 ms | $2.000 / $6.000 | $2.0 / $6.0 | **75.8 / 100** |
 | **qwen/qwen3.8-flash** | OpenRouter | `workhorse` | 1,000,000 tok | 432.1 ms | $0.150 / $0.470 | $0.15 / $0.47 | **74.0 / 100** |
 | **z-ai/glm-5.3-flash** | OpenRouter | `workhorse` | 1,048,576 tok | 432.1 ms | $1.400 / $4.400 | $1.4 / $4.4 | **74.0 / 100** |
 | **meta/muse-spark-1.2-contributor** | OpenRouter | `workhorse` | 1,048,576 tok | 432.1 ms | $1.250 / $4.250 | $1.25 / $4.25 | **74.0 / 100** |
@@ -171,7 +207,6 @@ Responde al usuario ofreciendo:
 | **z-ai/glm-4.6v** | OpenRouter | `workhorse` | 204,800 tok | 432.1 ms | $0.430 / $1.750 | $0.43 / $1.75 | **74.0 / 100** |
 | **openrouter/bodybuilder** | OpenRouter | `workhorse` | 128,000 tok | 432.1 ms | $-1000000.000 / $-1000000.000 | $-1000000.0 / $-1000000.0 | **74.0 / 100** |
 | **amazon/nova-2-lite-v1** | OpenRouter | `workhorse` | 1,000,000 tok | 432.1 ms | $0.300 / $2.500 | $0.3 / $2.5 | **74.0 / 100** |
-| **mistralai/mistral-large-2512** | OpenRouter | `workhorse` | 128,000 tok | 432.1 ms | $2.000 / $6.000 | $2.0 / $6.0 | **74.0 / 100** |
 | **allenai/olmo-3-32b-think** | OpenRouter | `workhorse` | 65,536 tok | 432.1 ms | $0.150 / $0.500 | $0.15 / $0.5 | **74.0 / 100** |
 | **amazon/nova-premier-v1** | OpenRouter | `workhorse` | 1,000,000 tok | 432.1 ms | $2.500 / $12.500 | $2.5 / $12.5 | **74.0 / 100** |
 | **openai/gpt-oss-safeguard-20b** | OpenRouter | `workhorse` | 131,072 tok | 432.1 ms | $0.075 / $0.300 | $0.075 / $0.3 | **74.0 / 100** |
@@ -220,63 +255,29 @@ Responde al usuario ofreciendo:
 | **mancer/weaver** | OpenRouter | `workhorse` | 8,000 tok | 432.1 ms | $0.500 / $0.750 | $0.5 / $0.75 | **74.0 / 100** |
 | **inclusionai/ling-3.0-flash-fin:free** | OpenRouter | `workhorse` | 262,144 tok | 432.1 ms | $0.021 / $0.063 | $0.021 / $0.063 | **74.0 / 100** |
 | **Google Gemini 3.6 Flash (Fast)** | Google | `workhorse` | 1,048,576 tok | 432.1 ms | $0.375 / $1.875 | $0.375 / $1.875 | **74.0 / 100** |
-| **Meta Llama 3.3 70B Instruct** | Meta | `agentic` | 131,072 tok | 432.1 ms | $0.710 / $0.710 | $0.71 / $0.71 | **73.4 / 100** |
-| **Google Gemini 2.0 Flash** | Google | `realtime` | 1,048,576 tok | 474.1 ms | 🆓 GRATIS | $0.1 / $0.4 | **65.0 / 100** |
-| **Nous Hermes 3 70B** | Nous Research | `uncensored` | 131,072 tok | 432.1 ms | $0.700 / $0.700 | $0.7 / $0.7 | **65.0 / 100** |
-| **bytedance-seed/seed-2-1-turbo** | OpenRouter | `realtime` | 262,144 tok | 432.1 ms | $0.500 / $2.500 | $0.5 / $2.5 | **65.0 / 100** |
-| **thinkingmachines/inkling-small** | OpenRouter | `reasoning` | 1,048,576 tok | 432.1 ms | $0.950 / $4.050 | $0.95 / $4.05 | **65.0 / 100** |
-| **meituan/longcat-2.0** | OpenRouter | `long_context` | 1,048,756 tok | 432.1 ms | $0.300 / $1.200 | $0.3 / $1.2 | **65.0 / 100** |
-| **thinkingmachines/inkling:batch** | OpenRouter | `reasoning` | 524,288 tok | 432.1 ms | $1.000 / $4.050 | $1.0 / $4.05 | **65.0 / 100** |
-| **thinkingmachines/inkling:free** | OpenRouter | `reasoning` | 1,048,576 tok | 432.1 ms | 🆓 GRATIS | $0.0 / $0.0 | **65.0 / 100** |
-| **google/gemini-3.1-flash-lite-image** | OpenRouter | `realtime` | 1,048,576 tok | 432.1 ms | $0.250 / $1.500 | $0.25 / $1.5 | **65.0 / 100** |
-| **google/gemini-3.1-flash-image** | OpenRouter | `multimodal` | 65,536 tok | 432.1 ms | $0.500 / $3.000 | $0.5 / $3.0 | **65.0 / 100** |
-| **google/gemini-3-pro-image** | OpenRouter | `multimodal` | 65,536 tok | 432.1 ms | $2.000 / $12.000 | $2.0 / $12.0 | **65.0 / 100** |
-| **google/gemini-3.1-flash-lite:batch** | OpenRouter | `realtime` | 1,048,576 tok | 432.1 ms | $0.125 / $0.750 | $0.125 / $0.75 | **65.0 / 100** |
-| **openai/gpt-5.4-image-2** | OpenRouter | `multimodal` | 1,050,000 tok | 432.1 ms | $2.500 / $15.000 | $2.5 / $15.0 | **65.0 / 100** |
-| **z-ai/glm-5v-turbo** | OpenRouter | `realtime` | 202,752 tok | 432.1 ms | $1.200 / $4.000 | $1.2 / $4.0 | **65.0 / 100** |
-| **arcee-ai/trinity-large-thinking** | OpenRouter | `reasoning` | 262,144 tok | 432.1 ms | $0.220 / $0.850 | $0.22 / $0.85 | **65.0 / 100** |
-| **x-ai/grok-4.20-multi-agent** | OpenRouter | `agentic` | 2,000,000 tok | 432.1 ms | $1.250 / $2.500 | $1.25 / $2.5 | **65.0 / 100** |
-| **z-ai/glm-5-turbo** | OpenRouter | `realtime` | 202,752 tok | 432.1 ms | $1.200 / $4.000 | $1.2 / $4.0 | **65.0 / 100** |
-| **google/gemini-3.1-flash-lite-preview** | OpenRouter | `realtime` | 1,048,576 tok | 432.1 ms | $0.250 / $1.500 | $0.25 / $1.5 | **65.0 / 100** |
-| **google/gemini-3.1-pro-preview-customtools** | OpenRouter | `agentic` | 1,048,576 tok | 432.1 ms | $2.000 / $12.000 | $2.0 / $12.0 | **65.0 / 100** |
-| **qwen/qwen3-max-thinking** | OpenRouter | `reasoning` | 262,144 tok | 432.1 ms | $0.780 / $3.900 | $0.78 / $3.9 | **65.0 / 100** |
-| **openai/gpt-audio** | OpenRouter | `multimodal` | 128,000 tok | 432.1 ms | $0.600 / $2.400 | $0.6 / $2.4 | **65.0 / 100** |
-| **moonshotai/kimi-k2-thinking** | OpenRouter | `reasoning` | 262,144 tok | 432.1 ms | $0.600 / $2.500 | $0.6 / $2.5 | **65.0 / 100** |
-| **qwen/qwen3-vl-32b-instruct** | OpenRouter | `multimodal` | 131,072 tok | 432.1 ms | $0.104 / $0.416 | $0.104 / $0.416 | **65.0 / 100** |
-| **openai/gpt-5-image-mini** | OpenRouter | `multimodal` | 400,000 tok | 432.1 ms | $10.000 / $10.000 | $10.0 / $10.0 | **65.0 / 100** |
-| **qwen/qwen3-vl-8b-thinking** | OpenRouter | `reasoning` | 131,072 tok | 432.1 ms | $0.180 / $2.100 | $0.18 / $2.1 | **65.0 / 100** |
-| **qwen/qwen3-vl-8b-instruct** | OpenRouter | `multimodal` | 262,144 tok | 432.1 ms | $0.117 / $0.455 | $0.117 / $0.455 | **65.0 / 100** |
-| **qwen/qwen3-vl-30b-a3b-thinking** | OpenRouter | `reasoning` | 262,144 tok | 432.1 ms | $0.200 / $2.400 | $0.2 / $2.4 | **65.0 / 100** |
-| **qwen/qwen3-vl-30b-a3b-instruct** | OpenRouter | `multimodal` | 262,144 tok | 432.1 ms | $0.130 / $0.520 | $0.13 / $0.52 | **65.0 / 100** |
-| **qwen/qwen3-vl-235b-a22b-thinking** | OpenRouter | `reasoning` | 131,072 tok | 432.1 ms | $0.400 / $4.000 | $0.4 / $4.0 | **65.0 / 100** |
-| **qwen/qwen3-vl-235b-a22b-instruct** | OpenRouter | `multimodal` | 262,144 tok | 432.1 ms | $0.210 / $1.900 | $0.21 / $1.9 | **65.0 / 100** |
-| **qwen/qwen3-next-80b-a3b-thinking** | OpenRouter | `reasoning` | 262,144 tok | 432.1 ms | $0.150 / $1.200 | $0.15 / $1.2 | **65.0 / 100** |
-| **qwen/qwen3-30b-a3b-thinking-2507** | OpenRouter | `reasoning` | 131,072 tok | 432.1 ms | $0.120 / $0.500 | $0.12 / $0.5 | **65.0 / 100** |
-| **nousresearch/hermes-4-70b** | OpenRouter | `uncensored` | 131,072 tok | 432.1 ms | $0.130 / $0.400 | $0.13 / $0.4 | **65.0 / 100** |
-| **nousresearch/hermes-4-405b** | OpenRouter | `uncensored` | 131,072 tok | 432.1 ms | $1.000 / $3.000 | $1.0 / $3.0 | **65.0 / 100** |
-| **qwen/qwen3-235b-a22b-thinking-2507** | OpenRouter | `reasoning` | 131,072 tok | 432.1 ms | $0.455 / $1.820 | $0.455 / $1.82 | **65.0 / 100** |
-| **cognitivecomputations/dolphin-mistral-24b-venice-edition** | OpenRouter | `uncensored` | 128,000 tok | 432.1 ms | $0.200 / $0.900 | $0.2 / $0.9 | **65.0 / 100** |
-| **baidu/ernie-4.5-vl-424b-a47b** | OpenRouter | `multimodal` | 123,000 tok | 432.1 ms | $0.420 / $1.250 | $0.42 / $1.25 | **65.0 / 100** |
-| **openai/o3-pro** | OpenRouter | `reasoning` | 200,000 tok | 432.1 ms | $10.000 / $40.000 | $10.0 / $40.0 | **65.0 / 100** |
-| **openai/o3:batch** | OpenRouter | `reasoning` | 200,000 tok | 432.1 ms | $1.000 / $4.000 | $1.0 / $4.0 | **65.0 / 100** |
-| **openai/o1-pro** | OpenRouter | `reasoning` | 200,000 tok | 432.1 ms | $15.000 / $60.000 | $15.0 / $60.0 | **65.0 / 100** |
-| **qwen/qwen2.5-vl-72b-instruct** | OpenRouter | `multimodal` | 128,000 tok | 432.1 ms | $0.250 / $0.750 | $0.25 / $0.75 | **65.0 / 100** |
-| **sao10k/l3.3-euryale-70b** | OpenRouter | `reasoning` | 131,072 tok | 432.1 ms | $0.650 / $0.750 | $0.65 / $0.75 | **65.0 / 100** |
-| **openai/o1:batch** | OpenRouter | `reasoning` | 200,000 tok | 432.1 ms | $7.500 / $30.000 | $7.5 / $30.0 | **65.0 / 100** |
-| **sao10k/l3.1-euryale-70b** | OpenRouter | `reasoning` | 131,072 tok | 432.1 ms | $0.850 / $0.850 | $0.85 / $0.85 | **65.0 / 100** |
-| **nousresearch/hermes-3-llama-3.1-405b** | OpenRouter | `uncensored` | 131,072 tok | 432.1 ms | $1.000 / $1.000 | $1.0 / $1.0 | **65.0 / 100** |
-| **sao10k/l3-lunaris-8b** | OpenRouter | `reasoning` | 8,192 tok | 432.1 ms | $0.040 / $0.050 | $0.04 / $0.05 | **65.0 / 100** |
-| **microsoft/wizardlm-2-8x22b** | OpenRouter | `uncensored` | 65,535 tok | 432.1 ms | $0.620 / $0.620 | $0.62 / $0.62 | **65.0 / 100** |
-| **openai/gpt-4-turbo** | OpenRouter | `realtime` | 128,000 tok | 432.1 ms | $10.000 / $30.000 | $10.0 / $30.0 | **65.0 / 100** |
-| **openai/gpt-3.5-turbo-0613** | OpenRouter | `realtime` | 16,385 tok | 432.1 ms | $0.500 / $1.500 | $0.5 / $1.5 | **65.0 / 100** |
-| **openai/gpt-3.5-turbo-instruct** | OpenRouter | `realtime` | 4,095 tok | 432.1 ms | $1.500 / $2.000 | $1.5 / $2.0 | **65.0 / 100** |
-| **openai/gpt-3.5-turbo-16k** | OpenRouter | `realtime` | 16,385 tok | 432.1 ms | $3.000 / $4.000 | $3.0 / $4.0 | **65.0 / 100** |
-| **openai/gpt-3.5-turbo:batch** | OpenRouter | `realtime` | 16,385 tok | 432.1 ms | $0.250 / $0.750 | $0.25 / $0.75 | **65.0 / 100** |
-| **Google Gemini 3.5 Flash (Multi)** | Google | `multimodal` | 1,048,576 tok | 432.1 ms | $0.750 / $4.500 | $0.75 / $4.5 | **65.0 / 100** |
-| **Gemma 4 31B IT (Agent)** | Google | `agentic` | 262,144 tok | 797.0 ms | 🆓 GRATIS | $0.0 / $0.0 | **65.0 / 100** |
-| **NVIDIA Nemotron 3 Super 120B** | NVIDIA | `reasoning` | 262,144 tok | 432.1 ms | 🆓 GRATIS | $0.0 / $0.0 | **65.0 / 100** |
-| **NVIDIA Nemotron 3 Nano Omni 30B** | NVIDIA | `realtime` | 262,144 tok | 2857.2 ms | $0.050 / $0.200 | $0.05 / $0.2 | **65.0 / 100** |
-| **Moonshot Kimi K3** | Moonshot AI | `long_context` | 1,048,576 tok | 576.9 ms | $3.000 / $15.000 | $3.0 / $15.0 | **65.0 / 100** |
+| **Meta Llama 3.3 70B Instruct** | Meta | `agentic` | 131,072 tok | 432.1 ms | $0.710 / $0.710 | $0.71 / $0.71 | **73.8 / 100** |
+| **nousresearch/hermes-4-70b** | OpenRouter | `uncensored` | 131,072 tok | 432.1 ms | $0.130 / $0.400 | $0.13 / $0.4 | **72.0 / 100** |
+| **nousresearch/hermes-4-405b** | OpenRouter | `uncensored` | 131,072 tok | 432.1 ms | $1.000 / $3.000 | $1.0 / $3.0 | **72.0 / 100** |
+| **cognitivecomputations/dolphin-mistral-24b-venice-edition** | OpenRouter | `uncensored` | 128,000 tok | 432.1 ms | $0.200 / $0.900 | $0.2 / $0.9 | **72.0 / 100** |
+| **nousresearch/hermes-3-llama-3.1-405b** | OpenRouter | `uncensored` | 131,072 tok | 432.1 ms | $1.000 / $1.000 | $1.0 / $1.0 | **72.0 / 100** |
+| **microsoft/wizardlm-2-8x22b** | OpenRouter | `uncensored` | 65,535 tok | 432.1 ms | $0.620 / $0.620 | $0.62 / $0.62 | **72.0 / 100** |
+| **Mistral Codestral Latest** | Mistral | `coding` | 256,000 tok | 679.9 ms | $0.300 / $0.900 | $0.3 / $0.9 | **71.2 / 100** |
+| **OpenAI GPT-4o-mini** | OpenAI | `workhorse` | 128,000 tok | 432.1 ms | $0.150 / $0.600 | $0.15 / $0.6 | **70.9 / 100** |
+| **Nous Hermes 3 70B** | Nous Research | `uncensored` | 131,072 tok | 432.1 ms | $0.700 / $0.700 | $0.7 / $0.7 | **70.2 / 100** |
+| **bytedance-seed/seed-2-1-turbo** | OpenRouter | `realtime` | 262,144 tok | 432.1 ms | $0.500 / $2.500 | $0.5 / $2.5 | **70.0 / 100** |
+| **google/gemini-3.1-flash-lite-image** | OpenRouter | `realtime` | 1,048,576 tok | 432.1 ms | $0.250 / $1.500 | $0.25 / $1.5 | **70.0 / 100** |
+| **google/gemini-3.1-flash-lite:batch** | OpenRouter | `realtime` | 1,048,576 tok | 432.1 ms | $0.125 / $0.750 | $0.125 / $0.75 | **70.0 / 100** |
+| **z-ai/glm-5v-turbo** | OpenRouter | `realtime` | 202,752 tok | 432.1 ms | $1.200 / $4.000 | $1.2 / $4.0 | **70.0 / 100** |
+| **z-ai/glm-5-turbo** | OpenRouter | `realtime` | 202,752 tok | 432.1 ms | $1.200 / $4.000 | $1.2 / $4.0 | **70.0 / 100** |
+| **google/gemini-3.1-flash-lite-preview** | OpenRouter | `realtime` | 1,048,576 tok | 432.1 ms | $0.250 / $1.500 | $0.25 / $1.5 | **70.0 / 100** |
+| **openai/gpt-4-turbo** | OpenRouter | `realtime` | 128,000 tok | 432.1 ms | $10.000 / $30.000 | $10.0 / $30.0 | **70.0 / 100** |
+| **openai/gpt-3.5-turbo-0613** | OpenRouter | `realtime` | 16,385 tok | 432.1 ms | $0.500 / $1.500 | $0.5 / $1.5 | **70.0 / 100** |
+| **openai/gpt-3.5-turbo-instruct** | OpenRouter | `realtime` | 4,095 tok | 432.1 ms | $1.500 / $2.000 | $1.5 / $2.0 | **70.0 / 100** |
+| **openai/gpt-3.5-turbo-16k** | OpenRouter | `realtime` | 16,385 tok | 432.1 ms | $3.000 / $4.000 | $3.0 / $4.0 | **70.0 / 100** |
+| **openai/gpt-3.5-turbo:batch** | OpenRouter | `realtime` | 16,385 tok | 432.1 ms | $0.250 / $0.750 | $0.25 / $0.75 | **70.0 / 100** |
+| **NVIDIA Nemotron 3 Nano Omni 30B** | NVIDIA | `realtime` | 262,144 tok | 2857.2 ms | $0.050 / $0.200 | $0.05 / $0.2 | **70.0 / 100** |
+| **minimax/minimax-m3** | OpenRouter | `frontier` | 1,048,576 tok | 432.1 ms | 🆓 GRATIS | $0.0 / $0.0 | **68.0 / 100** |
+| **google/gemma-2-27b-it** | OpenRouter | `edge` | 8,192 tok | 432.1 ms | $0.650 / $0.650 | $0.65 / $0.65 | **67.7 / 100** |
 | **tencent/hy-mt2-1.8b** | OpenRouter | `edge` | 8,192 tok | 432.1 ms | $0.044 / $0.177 | $0.044 / $0.177 | **62.0 / 100** |
 | **tencent/hy-mt2-30b-a3b** | OpenRouter | `edge` | 8,192 tok | 432.1 ms | $0.074 / $0.295 | $0.074 / $0.295 | **62.0 / 100** |
 | **tencent/hy-mt2-7b** | OpenRouter | `edge` | 8,192 tok | 432.1 ms | $0.074 / $0.295 | $0.074 / $0.295 | **62.0 / 100** |
@@ -316,7 +317,6 @@ Responde al usuario ofreciendo:
 | **meta-llama/llama-3.2-1b-instruct** | OpenRouter | `edge` | 60,000 tok | 432.1 ms | $0.027 / $0.201 | $0.027 / $0.201 | **62.0 / 100** |
 | **meta-llama/llama-3.2-3b-instruct** | OpenRouter | `edge` | 131,072 tok | 432.1 ms | $0.050 / $0.330 | $0.05 / $0.33 | **62.0 / 100** |
 | **meta-llama/llama-3.1-8b-instruct** | OpenRouter | `edge` | 131,072 tok | 432.1 ms | $0.050 / $0.080 | $0.05 / $0.08 | **62.0 / 100** |
-| **google/gemma-2-27b-it** | OpenRouter | `edge` | 8,192 tok | 432.1 ms | $0.650 / $0.650 | $0.65 / $0.65 | **62.0 / 100** |
 | **undi95/remm-slerp-l2-13b** | OpenRouter | `edge` | 6,144 tok | 432.1 ms | $0.450 / $0.650 | $0.45 / $0.65 | **62.0 / 100** |
 | **Microsoft Phi-4 (GitHub Models)** | Microsoft | `reasoning` | 16,384 tok | 432.1 ms | $0.070 / $0.140 | $0.07 / $0.14 | **30.0 / 100** |
 
@@ -327,21 +327,21 @@ Responde al usuario ofreciendo:
 
 | Ranking | Modelo | Proveedor | Categoría | Inteligencia | Elo LMSYS | Coste / 1M |
 |:---:|---|---|---|:---:|:---:|---|
-| #1 | **Anthropic Claude 3.7 Sonnet** | Anthropic | `agentic` | 90.0 / 100 | 1346 | $3.0 / $15.0 |
-| #5 | **Qwen 2.5 Max** | Alibaba | `frontier` | 88.0 / 100 | 1318 | $1.6 / $6.4 |
-| #6 | **deepseek/deepseek-v4-pro-0813** | OpenRouter | `frontier` | 88.0 / 100 | 1150 | $0.87 / $1.74 |
-| #58 | **GPT-4.5-Preview** | Unknown | `frontier` | 88.0 / 100 | 1400 | Gratis |
-| #59 | **Claude Opus 4 (20250514)** | Unknown | `frontier` | 88.0 / 100 | 1368 | Gratis |
-| #60 | **Qwen2.5-Max** | Unknown | `frontier` | 88.0 / 100 | 1363 | Gratis |
-| #61 | **Gemini-1.5-Pro-002** | Unknown | `frontier` | 88.0 / 100 | 1317 | Gratis |
-| #62 | **Qwen-Max-0919** | Unknown | `frontier` | 88.0 / 100 | 1278 | Gratis |
-| #63 | **Gemini-1.5-Pro-001** | Unknown | `frontier` | 88.0 / 100 | 1275 | Gratis |
-| #64 | **Claude 3 Opus** | Unknown | `frontier` | 88.0 / 100 | 1262 | Gratis |
-| #65 | **Amazon Nova Pro 1.0** | Unknown | `frontier` | 88.0 / 100 | 1260 | Gratis |
-| #72 | **OpenAI GPT-4o** | OpenAI | `multimodal` | 77.2 / 100 | 1319 | $2.5 / $10.0 |
-| #73 | **Anthropic Claude 3.5 Sonnet** | Anthropic | `coding` | 76.0 / 100 | 1362 | $3.0 / $15.0 |
-| #89 | **mistralai/codestral-2508** | OpenRouter | `coding` | 76.0 / 100 | 1150 | $0.3 / $0.9 |
-| #94 | **Anthropic Claude 3.5 Haiku** | Anthropic | `workhorse` | 74.0 / 100 | 1270 | $0.8 / $4.0 |
+| #1 | **Anthropic Claude 3.7 Sonnet** | Anthropic | `agentic` | 90.0 / 100 | 1349 | $3.0 / $15.0 |
+| #4 | **Qwen 2.5 Max** | Alibaba | `frontier` | 88.0 / 100 | 1325 | $1.6 / $6.4 |
+| #5 | **deepseek/deepseek-v4-pro-0813** | OpenRouter | `frontier` | 88.0 / 100 | 1150 | $0.87 / $1.74 |
+| #56 | **GPT-4.5-Preview** | Unknown | `frontier` | 88.0 / 100 | 1400 | Gratis |
+| #57 | **Claude Opus 4 (20250514)** | Unknown | `frontier` | 88.0 / 100 | 1368 | Gratis |
+| #58 | **Qwen2.5-Max** | Unknown | `frontier` | 88.0 / 100 | 1363 | Gratis |
+| #59 | **Gemini-1.5-Pro-002** | Unknown | `frontier` | 88.0 / 100 | 1317 | Gratis |
+| #60 | **Qwen-Max-0919** | Unknown | `frontier` | 88.0 / 100 | 1278 | Gratis |
+| #61 | **Gemini-1.5-Pro-001** | Unknown | `frontier` | 88.0 / 100 | 1275 | Gratis |
+| #62 | **Claude 3 Opus** | Unknown | `frontier` | 88.0 / 100 | 1262 | Gratis |
+| #63 | **Amazon Nova Pro 1.0** | Unknown | `frontier` | 88.0 / 100 | 1260 | Gratis |
+| #87 | **o3-2025-04-16** | Unknown | `reasoning` | 85.0 / 100 | 1400 | Gratis |
+| #88 | **Qwen3-235B-A22B-no-thinking** | Unknown | `reasoning` | 85.0 / 100 | 1392 | Gratis |
+| #89 | **Claude Opus 4 (thinking-16k)** | Unknown | `reasoning` | 85.0 / 100 | 1371 | Gratis |
+| #90 | **o1-2024-12-17** | Unknown | `reasoning` | 85.0 / 100 | 1365 | Gratis |
 
 ---
 
@@ -355,18 +355,18 @@ Responde al usuario ofreciendo:
 - 🟢 [EN MI PC] **anthropic/claude-opus-5-fast** (OpenRouter): Score **88.0/100** · Contexto: 1,000,000 tokens
 
 ### ⚡ Top Caballos de Batalla (Workhorses de Alta Eficiencia)
-- 🟢 [EN MI PC] **DeepSeek V3 (Chat)** ($0.2574/M): Eficiencia **72.7/100** · Contexto: 163,840 tokens
-- ⚪ [EXTERNO] **Anthropic Claude 3.5 Haiku** ($0.8/M): Eficiencia **56.2/100** · Contexto: 200,000 tokens
-- 🟢 [EN MI PC] **OpenAI GPT-4o-mini** ($0.15/M): Eficiencia **73.5/100** · Contexto: 128,000 tokens
+- 🟢 [EN MI PC] **DeepSeek V3 (Chat)** ($0.2574/M): Eficiencia **64.5/100** · Contexto: 163,840 tokens
+- 🟢 [EN MI PC] **mistralai/mistral-large-2512** ($2.0/M): Eficiencia **53.4/100** · Contexto: 128,000 tokens
+- ⚪ [EXTERNO] **Anthropic Claude 3.5 Haiku** ($0.8/M): Eficiencia **61.5/100** · Contexto: 200,000 tokens
 - 🟢 [EN MI PC] **qwen/qwen3.8-flash** ($0.15/M): Eficiencia **74.9/100** · Contexto: 1,000,000 tokens
 - 🟢 [EN MI PC] **z-ai/glm-5.3-flash** ($1.4/M): Eficiencia **54.7/100** · Contexto: 1,048,576 tokens
 
 ### 💻 Top Especialistas en Programación y Agentes
-- ⚪ [EXTERNO] **Anthropic Claude 3.5 Sonnet**: Score Coding **93.8/100**
+- ⚪ [EXTERNO] **Anthropic Claude 3.5 Sonnet**: Score Coding **72.1/100**
+- 🟢 [EN MI PC] **Qwen 2.5 Coder 32B Instruct**: Score Coding **67.7/100**
 - 🟢 [EN MI PC] **bytedance-seed/seed-2.0-code**: Score Coding **83.6/100**
 - 🟢 [EN MI PC] **kwaipilot/kat-coder-air-v2.5**: Score Coding **83.6/100**
 - 🟢 [EN MI PC] **kwaipilot/kat-coder-pro-v2.5**: Score Coding **83.6/100**
-- 🟢 [EN MI PC] **cohere/north-mini-code:free**: Score Coding **83.6/100**
 
 ---
 

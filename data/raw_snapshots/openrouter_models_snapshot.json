@@ -13873,9 +13873,9 @@
         "instruct_type": null
       },
       "pricing": {
-        "prompt": "0.00000007798",
-        "completion": "0.00000015596",
-        "input_cache_read": "0.000000015596"
+        "prompt": "0.00000007644",
+        "completion": "0.00000015288",
+        "input_cache_read": "0.000000015288"
       },
       "top_provider": {
         "context_length": 1024000,
@@ -36855,59 +36855,6 @@
       }
     },
     {
-      "id": "thedrummer/rocinante-12b",
-      "canonical_slug": "thedrummer/rocinante-12b",
-      "hugging_face_id": "TheDrummer/Rocinante-12B-v1.1",
-      "name": "TheDrummer: Rocinante 12B",
-      "created": 1727654400,
-      "description": "Rocinante 12B is designed for engaging storytelling and rich prose. Early testers have reported: - Expanded vocabulary with unique and expressive word choices - Enhanced creativity for vivid narratives -...",
-      "context_length": 65536,
-      "architecture": {
-        "modality": "text->text",
-        "input_modalities": [
-          "text"
-        ],
-        "output_modalities": [
-          "text"
-        ],
-        "tokenizer": "Qwen",
-        "instruct_type": "chatml"
-      },
-      "pricing": {
-        "prompt": "0.00000025",
-        "completion": "0.0000005"
-      },
-      "top_provider": {
-        "context_length": 65536,
-        "max_completion_tokens": 58982,
-        "is_moderated": false
-      },
-      "per_request_limits": null,
-      "supported_parameters": [
-        "frequency_penalty",
-        "logit_bias",
-        "logprobs",
-        "max_tokens",
-        "presence_penalty",
-        "repetition_penalty",
-        "response_format",
-        "seed",
-        "stop",
-        "structured_outputs",
-        "temperature",
-        "top_k",
-        "top_logprobs",
-        "top_p"
-      ],
-      "default_parameters": {},
-      "supported_voices": null,
-      "knowledge_cutoff": "2024-04-30",
-      "expiration_date": null,
-      "links": {
-        "details": "/api/v1/models/thedrummer/rocinante-12b/endpoints"
-      }
-    },
-    {
       "id": "meta-llama/llama-3.2-1b-instruct",
       "canonical_slug": "meta-llama/llama-3.2-1b-instruct",
       "hugging_face_id": "meta-llama/Llama-3.2-1B-Instruct",
@@ -39101,7 +39048,7 @@
       }
     }
   ],
-  "total_count": 417,
+  "total_count": 416,
   "links": {
     "next": null
   }

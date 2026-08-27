@@ -6,17 +6,26 @@ Garantiza inmutabilidad con snapshots criptográficos SHA256 y esquemas normaliz
 import sqlite3
 import hashlib
 import json
+from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Generator
 from config.settings import DB_PATH
 
 
-def get_db_connection() -> sqlite3.Connection:
-    """Crea o retorna conexión a la base de datos SQLite con soporte para Row dicts."""
+@contextmanager
+def get_db_connection() -> Generator[sqlite3.Connection, None, None]:
+    """Crea o retorna conexión a la base de datos SQLite con soporte para Row dicts y cierre automático."""
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
-    return conn
+    try:
+        yield conn
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
 
 
 def init_db():
