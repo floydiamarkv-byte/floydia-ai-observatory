@@ -29,6 +29,7 @@ class ObservationType(str, Enum):
     OBSERVED = "OBSERVED"          # Medición real observada en vivo
     ESTIMATED = "ESTIMATED"        # Interpolado con evidencia cuantitativa
     IMPUTED = "IMPUTED"            # Completado por modelo estadístico
+    CATALOG = "CATALOG"            # Catálogo descubierto sin evaluación empírica
     DEFAULT = "DEFAULT"            # Valor por defecto / sintético detectado
     HISTORICAL = "HISTORICAL"      # Snapshot histórico no reciente
     UNKNOWN = "UNKNOWN"            # Fuente no especificada
@@ -92,3 +93,30 @@ class MetricObservation:
     confidence: float = 1.0
     quality_status: QualityStatus = QualityStatus.VALID
     raw_value: Optional[Any] = None
+
+
+@dataclass(frozen=True)
+class Measurement:
+    """
+    Contrato estricto de procedencia de datos (FloydIA Protocol V11).
+    Distingue inequívocamente mediciones empíricas de imputaciones/priors teóricos.
+    """
+    value: Optional[float]
+    measured: bool              # False si es prior/imputación/teórico -> redactor ve null
+    n_obs: int = 0              # Benchmarks empíricos reales que aportan al valor
+    source: Optional[str] = None # "swe_bench", "arena_elo", "tier_prior", etc.
+    ci_lower: Optional[float] = None
+    ci_upper: Optional[float] = None
+
+    def to_display_view(self, digits: int = 1, fallback: str = "SIN DATO") -> str:
+        """Vista pública: si no fue medido, muestra el fallback en vez del prior numérico."""
+        if not self.measured or self.value is None:
+            return fallback
+        return f"{self.value:.{digits}f}"
+
+    def to_redactor_view(self) -> Optional[float]:
+        """Lo que ve el redactor LLM en Etapa B. measured=False se convierte en null real."""
+        if not self.measured or self.value is None:
+            return None
+        return round(self.value, 2)
+

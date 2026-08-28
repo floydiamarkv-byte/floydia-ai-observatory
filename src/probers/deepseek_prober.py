@@ -18,6 +18,8 @@ def probe_deepseek() -> List[Dict[str, Any]]:
         return results
 
     models_to_test = [
+        {"model": "deepseek-v4-flash", "context": 262144, "in_cost": 0.10, "out_cost": 0.20, "reasoning": False},
+        {"model": "deepseek-v4-pro", "context": 262144, "in_cost": 0.20, "out_cost": 0.40, "reasoning": False},
         {"model": "deepseek-chat", "context": 65536, "in_cost": 0.14, "out_cost": 0.28, "reasoning": False},
         {"model": "deepseek-reasoner", "context": 65536, "in_cost": 0.55, "out_cost": 2.19, "reasoning": True}
     ]

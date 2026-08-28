@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "OpenRouterModelsPayload",
+  "type": "object",
+  "required": ["data"],
+  "properties": {
+    "data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "context_length": { "type": ["integer", "number"] },
+          "pricing": {
+            "type": "object",
+            "properties": {
+              "prompt": { "type": ["string", "number"] },
+              "completion": { "type": ["string", "number"] }
+            }
+          }
+        }
+      }
+    }
+  }
+}

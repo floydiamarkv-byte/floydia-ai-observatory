@@ -48,3 +48,7 @@ reports/daily/*.pdf
 Thumbs.db
 .cache/
 .pytest_cache/
+
+# Cachés y backups locales
+cache/
+*.bak

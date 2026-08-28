@@ -86,10 +86,13 @@ def probe_openrouter() -> List[Dict[str, Any]]:
             "provider_name": "OpenRouter",
             "model_identifier": item["id"],
             "canonical_id": can_id,
-            "is_functional": is_ok,
+            # El catálogo completo NO se marca "local verificado": solo se verificó el
+            # gateway. Los modelos individuales requieren probe real para contar en el arsenal.
+            "is_functional": False,
             "status_code": 200 if is_ok else 500,
-            "status_message": status_msg,
-            "latency_ms": latency,
+            "status_message": "📦 Catálogo disponible (gateway OK, modelo no verificado individualmente)",
+            "latency_ms": None,
+            "gateway_latency_ms": latency if is_ok else None,
             "detected_context_window": item["context"],
             "supports_tools": True,
             "supports_vision": False,

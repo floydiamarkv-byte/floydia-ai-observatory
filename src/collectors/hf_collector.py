@@ -88,9 +88,28 @@ class HuggingFaceCollector(BaseCollector):
                 {"model": "meta-llama/llama-3.3-70b-instruct", "mmlu_pro": 72.8, "math_500": 75.4, "gpqa": 56.0, "ifeval": 83.5}
             ]
 
+        VERIFIED_ORGS = (
+            "anthropic", "openai", "google", "deepseek", "meta-llama", "meta",
+            "qwen", "alibaba", "mistralai", "mistral", "microsoft", "tiiuae",
+            "allenai", "cohere", "moonshot", "01-ai", "bigcode", "internlm",
+            "upstage", "nvidia", "zhipu", "baichuan", "nousresearch", "writer"
+        )
+
         count = 0
         for item in rows_data:
-            can_id, _ = normalizer.resolve(item["model"])
+            m_name = item.get("model", "")
+            m_lower = m_name.lower()
+            
+            # Gating de calidad: Solo ingerir de organizaciones verificadas o modelos ya conocidos
+            is_verified = any(m_lower.startswith(f"{org}/") or f"/{org}" in m_lower for org in VERIFIED_ORGS)
+            provider_hint = "Hugging Face (Verified)" if is_verified else "Hugging Face (Community)"
+            
+            can_id, model_dict = normalizer.resolve(m_name, provider_hint=provider_hint)
+            
+            # Si es modelo sintético no verificado, relegarlo a tier community
+            if not is_verified and can_id not in normalizer.canonical_models:
+                model_dict["tier"] = "community"
+
             if item.get("average"):
                 save_evaluation(can_id, "HuggingFace", "hf_average", item["average"], "intelligence")
             if item.get("mmlu_pro"):

@@ -31,6 +31,7 @@ from src.reports.html_report import generate_daily_html_report
 from src.analyst.frontier_exporter import export_daily_snapshot_for_frontier_ai
 from src.analyst.ai_advisor import ask_observatory
 from src.core.engine_injector import apply_engine_configurations, sync_to_hp45
+from src.core.auth_hmac import verify_hmac_request
 
 # FIX V-02: Token de sesión para acciones mutadoras
 AUTH_TOKEN = os.getenv("FLOYDIA_DASH_TOKEN") or secrets.token_urlsafe(32)
@@ -56,10 +57,10 @@ def invalidate_rankings_cache():
 
 
 class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
-    def _authorized(self) -> bool:
-        """Verifica si la petición POST incluye el token de autorización válido."""
-        token = self.headers.get("X-Floydia-Token")
-        return token == AUTH_TOKEN
+    def _authorized(self, body: str = "") -> tuple[bool, int, str]:
+        """Verifica la autenticación mediante HMAC Anti-Replay (M-2) o Token estático."""
+        headers_dict = {k: v for k, v in self.headers.items()}
+        return verify_hmac_request(headers_dict, body, AUTH_TOKEN)
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
@@ -73,6 +74,41 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
             elif path == "/api/local-apis":
                 local_apis = get_latest_local_verified_models()
                 self._send_json(local_apis)
+                return
+
+            elif path == "/api/recommend_model":
+                query_params = urllib.parse.parse_qs(parsed.query)
+                task = query_params.get("task", ["general"])[0]
+                budget = query_params.get("budget", ["any"])[0]
+                max_lat_str = query_params.get("max_latency_ms", [None])[0]
+                max_lat = float(max_lat_str) if max_lat_str is not None else None
+                ctx_str = query_params.get("context_required", ["4000"])[0]
+                ctx = int(ctx_str) if ctx_str.isdigit() else 4000
+                req_tools = query_params.get("requires_tools", ["false"])[0].lower() in ("true", "1")
+                req_vision = query_params.get("requires_vision", ["false"])[0].lower() in ("true", "1")
+                req_reasoning = query_params.get("requires_reasoning", ["false"])[0].lower() in ("true", "1")
+                req_coding = query_params.get("requires_coding", ["false"])[0].lower() in ("true", "1")
+                local_only = query_params.get("prefer_local_only", ["true"])[0].lower() in ("true", "1")
+
+                from src.core.router import recommend_model
+                rec = recommend_model(
+                    task=task,
+                    budget=budget,
+                    max_latency_ms=max_lat,
+                    context_required=ctx,
+                    requires_tools=req_tools,
+                    requires_vision=req_vision,
+                    requires_reasoning=req_reasoning,
+                    requires_coding=req_coding,
+                    prefer_local_only=local_only
+                )
+                self._send_json(rec)
+                return
+
+            elif path == "/api/drift_events":
+                from src.core.db import get_recent_drift_events
+                events = get_recent_drift_events(limit=50)
+                self._send_json({"events": events, "count": len(events)})
                 return
 
             elif path == "/download/report":
@@ -132,12 +168,16 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(b'{"error": "internal_error"}')
 
     def do_POST(self):
-        # FIX V-02: Gate de autenticación obligatoria para acciones mutadoras
-        if not self._authorized():
-            self.send_response(403)
+        # FIX V-02 / M-2: Gate de autenticación con soporte HMAC Anti-Replay
+        content_length = int(self.headers.get('Content-Length', 0))
+        body = self.rfile.read(content_length).decode('utf-8') if content_length > 0 else ""
+
+        is_auth, status_code, auth_msg = self._authorized(body)
+        if not is_auth:
+            self.send_response(status_code)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
-            self.wfile.write(b'{"error": "forbidden", "message": "Missing or invalid X-Floydia-Token"}')
+            self.wfile.write(json.dumps({"error": "unauthorized" if status_code == 401 else "forbidden", "message": auth_msg}).encode("utf-8"))
             return
 
         parsed = urllib.parse.urlparse(self.path)
@@ -152,6 +192,26 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
             results = run_all_collectors()
             invalidate_rankings_cache()
             self._send_json({"success": True, "collectors": results})
+            return
+
+        elif path == "/api/recommend_model":
+            try:
+                req_data = json.loads(body) if body else {}
+            except Exception:
+                req_data = {}
+            from src.core.router import recommend_model
+            rec = recommend_model(
+                task=req_data.get("task", "general"),
+                budget=req_data.get("budget", "any"),
+                max_latency_ms=req_data.get("max_latency_ms"),
+                context_required=req_data.get("context_required", 4000),
+                requires_tools=req_data.get("requires_tools", False),
+                requires_vision=req_data.get("requires_vision", False),
+                requires_reasoning=req_data.get("requires_reasoning", False),
+                requires_coding=req_data.get("requires_coding", False),
+                prefer_local_only=req_data.get("prefer_local_only", True)
+            )
+            self._send_json(rec)
             return
 
         elif path == "/api/action/ask":

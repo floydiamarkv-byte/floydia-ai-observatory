@@ -11,9 +11,10 @@ estética, metadatos de perfil y workhorse se conservan aquí.
 Documentación matemática: docs/SPEC_FCI_V3.md.
 """
 
+import json
 from typing import Dict, Any, List, Optional
 from datetime import datetime
-from src.core.db import get_db_connection, get_latest_local_verified_models
+from src.core.db import get_db_connection, get_latest_local_verified_models, get_local_functional_model_keys
 from src.core.contracts import ObservationType, QualityStatus
 from src.core.quality import quality_engine
 from src.core.freshness import freshness_engine
@@ -242,8 +243,10 @@ _CORE_BENCHMARKS = (
 )
 
 
-def _enrich_workhorse(fci: float, model: Dict[str, Any], raw_benchmarks: Dict[str, float]) -> float:
+def _enrich_workhorse(fci: Optional[float], model: Dict[str, Any], raw_benchmarks: Dict[str, float]) -> Optional[float]:
     """Cálculo del Workhorse Efficiency preservado de v9.5."""
+    if fci is None:
+        return None
     input_cost = max(0.0, float(model.get("input_cost_per_m") or 0.0))
     output_cost = max(0.0, float(model.get("output_cost_per_m") or 0.0))
     is_free = bool(model.get("is_free_tier")) or (input_cost == 0.0 and output_cost == 0.0) or ":free" in model["id"].lower()
@@ -254,29 +257,36 @@ def _enrich_workhorse(fci: float, model: Dict[str, Any], raw_benchmarks: Dict[st
     return round(fci * 0.5 + (cost_factor * 100.0) * 0.3 + (speed_factor * 100.0) * 0.2, 1)
 
 
+
 def _evidence_badge(conf: float, n_sources: int, has_disagreement: bool) -> tuple:
-    if conf >= 0.85 and n_sources >= 3 and not has_disagreement:
+    if conf >= 0.80 and n_sources >= 3 and not has_disagreement:
         return "🟢 SOTA VERIFICADO", "A+ (Multi-Benchmark SOTA)"
-    if conf >= 0.80:
-        return "🟢 ALTA CERTEZA", "A (Alta Corroboración)"
     if conf >= 0.65:
-        return "🟡 EVIDENCIA MODERADA", "B (Fuentes Parciales)"
-    return "🟠 EVIDENCIA PRELIMINAR", "C (Evidencia Limitada)"
+        return "🟢 ALTA CERTEZA", "A (Alta Corroboración)"
+    if conf >= 0.45:
+        return "🟡 EVIDENCIA MODERADA", "B (Evidencia Moderada)"
+    if conf >= 0.30:
+        return "🟠 EVIDENCIA LIMITADA", "C (Evidencia Limitada)"
+    if conf >= 0.18:
+        return "⚪ CATÁLOGO NO EVALUADO", "D (Catálogo No Evaluado)"
+    return "⚪ PRELIMINAR", "E (Preliminar)"
 
 
 def calculate_multidimensional_rankings() -> List[Dict[str, Any]]:
     """
-    Fachada de compatibilidad sobre RankingEngineV3. Misma firma y mismo shape
-    de salida que versiones anteriores; la matemática interna es ahora:
-      - Probit Rank Normalization por benchmark (escala 0–100 estable).
-      - BLUE por pilar + shrinkage jerárquico a la familia canónica.
-      - Posterior de varianza propagado, margen 95% sin acotados arbitrarios.
-      - Confianza C ∈ [0,1] continua.
-      - Orden público por Lower Confidence Bound; empates según test de Welch.
+    Fachada de compatibilidad sobre RankingEngineV3 (FloydIA Protocol V11).
+    Mantiene la firma y estructura esperada por los consumidores (web, cli, gui, analyst).
+      - Probit Rank Normalization con top-stretch anti-saturación.
+      - Agregación bayesiana con procedencia estricta por campo (Measurement).
+      - Intervalo de Confianza 95% transparente [ci_lower, ci_upper].
+      - Grados de evidencia A-E calibrados empíricamente.
     """
     local_verified = get_latest_local_verified_models()
+    local_functional_keys = get_local_functional_model_keys()
     local_active_ids = {
-        m["canonical_id"]: m for m in local_verified if m["is_functional"] and m["canonical_id"]
+        m["canonical_id"]: m for m in local_verified
+        if m["is_functional"] and m.get("canonical_id")
+        and not m.get("is_synthetic") and m.get("latency_ms") is not None
     }
 
     with get_db_connection() as conn:
@@ -284,11 +294,12 @@ def calculate_multidimensional_rankings() -> List[Dict[str, Any]]:
         cursor.execute("SELECT * FROM models")
         models = [dict(r) for r in cursor.fetchall()]
 
-        # Evaluaciones crudas + calidad
+        # Evaluaciones crudas + calidad (solo mediciones empíricas: excluye fallbacks estáticos)
         cursor.execute("""
             SELECT model_id, benchmark_name, AVG(score) as avg_score, MAX(recorded_at) as last_date,
                    GROUP_CONCAT(DISTINCT source) as sources_list
             FROM evaluations
+            WHERE provenance != 'fallback'
             GROUP BY model_id, benchmark_name
         """)
         evals_raw = cursor.fetchall()
@@ -301,7 +312,6 @@ def calculate_multidimensional_rankings() -> List[Dict[str, Any]]:
         q_status, _ = quality_engine.validate_metric(bname, score_val)
         if q_status == QualityStatus.REJECTED:
             continue
-        # Las fuentes llegan agrupadas; las expandimos para que el motor las vea
         sources = [s.strip() for s in (r["sources_list"] or "").split(",") if s.strip()]
         if not sources:
             sources = ["unknown"]
@@ -314,23 +324,21 @@ def calculate_multidimensional_rankings() -> List[Dict[str, Any]]:
                 "recorded_at": r["last_date"],
             })
 
-    # Motor V3: produce ranking por LCB con empates de Welch
+    # Motor V3: produce ranking ordenado con IC y empates de Welch
     v3_results = ranking_engine_v3.score_models(models, observations)
 
-    # Mapeo al shape histórico (consumidores: web/app.py, cli/main.py, gui/,
-    # analyst/ai_advisor.py) — preservamos los 50+ campos que esperan.
     scored_models: List[Dict[str, Any]] = []
     by_id = {m["id"]: m for m in models}
 
     for r in v3_results:
-        m = by_id[r.model_id]
+        m = by_id.get(r.model_id, {})
         raw_name = m.get("canonical_name") or r.model_id
         cleaned_id = r.model_id.lower()
         owner = _infer_owner(r.model_id, m.get("provider", "Unknown"))
         variant = _infer_variant(r.model_id)
         capabilities = _infer_capabilities(m, r.family_id, variant)
 
-        # Benchmarks crudos para el panel de detalle (recargados de BD)
+        # Benchmarks crudos observados
         raw_benchmarks = {
             row["benchmark_name"]: float(row["avg_score"])
             for row in evals_raw
@@ -350,7 +358,7 @@ def calculate_multidimensional_rankings() -> List[Dict[str, Any]]:
         is_free = bool(m.get("is_free_tier")) or (input_cost == 0.0 and output_cost == 0.0) or ":free" in cleaned_id
         workhorse = _enrich_workhorse(r.fci, m, raw_benchmarks)
 
-        # Discrepancia inter-fuente (umbral coherente con v9.5: std>9)
+        # Discrepancia inter-fuente
         between_std = r.extra.get("between_source_std", 0.0)
         has_disagreement = between_std > 9.0
         disagreement_msg = "⚠️ Alta discrepancia entre fuentes de benchmark" if has_disagreement else ""
@@ -368,8 +376,18 @@ def calculate_multidimensional_rankings() -> List[Dict[str, Any]]:
         })
         all_sources = list(set(profile.get("sources", []) + sources_list))
 
-        # Local probe info
-        local_info = local_active_ids.get(r.model_id)
+        # Local probe info (Dual-key matching: canonical_id OR model_identifier OR aliases)
+        local_info = local_active_ids.get(r.model_id) or local_functional_keys.get(r.model_id) or local_functional_keys.get(m.get("id"))
+        if not local_info and m.get("aliases_json"):
+            try:
+                aliases = json.loads(m.get("aliases_json") or "[]")
+                for al in aliases:
+                    if al in local_functional_keys or al.lower() in local_functional_keys:
+                        local_info = local_functional_keys.get(al) or local_functional_keys.get(al.lower())
+                        break
+            except Exception:
+                pass
+        has_empirical = (r.n_metrics > 0 and r.fci is not None)
 
         scored_models.append({
             # Identidad
@@ -389,43 +407,50 @@ def calculate_multidimensional_rankings() -> List[Dict[str, Any]]:
             "supports_tools": bool(m.get("supports_tools")),
             "supports_vision": bool(m.get("supports_vision")),
             "supports_reasoning": bool(m.get("supports_reasoning")),
-            "family_id": r.family_id,                         # nuevo en V3
-            "canonical_variant": r.variant,                   # nuevo en V3
-            # FCI e incertidumbre (V3)
+            "family_id": r.family_id,
+            "canonical_variant": r.variant,
+            # FCI e Incertidumbre Transparente (V11)
             "intelligence_score": r.fci,
             "fci_score": r.fci,
-            "fci_display": f"{r.fci} ± {r.margin_95}",
+            "fci_display": f"{r.fci} ± {r.margin_95}" if r.fci is not None else "SIN DATO",
             "uncertainty_margin": r.margin_95,
             "ci_lower": r.ci_lower,
             "ci_upper": r.ci_upper,
-            "lower_confidence_bound": r.lower_confidence_bound,   # nuevo en V3 (orden público)
-            "effective_score": round(r.fci * (0.85 + 0.15 * r.confidence), 1),
+            "ci_display": r.ci_display,
+            "lower_confidence_bound": r.lower_confidence_bound,
+            "effective_score": round(r.fci * (0.85 + 0.15 * r.confidence), 1) if r.fci is not None else None,
             "confidence_score": r.confidence,
             "confidence_badge": badge,
             "evidence_grade": grade,
             "has_disagreement": has_disagreement,
             "disagreement_message": disagreement_msg,
             "sample_size": r.n_metrics,
-            "n_metrics": r.n_metrics,                            # alias V3
-            "n_sources": r.n_sources,                            # alias V3
-            "source_count": r.n_sources,
-            "variance": between_std ** 2,                        # compatibilidad consumidor
-            # Pilares (alias a nombres históricos)
-            "pillar_reasoning": round(r.pillars["reasoning"].mean, 1) if "reasoning" in r.pillars else None,
-            "pillar_coding": round(r.pillars["coding"].mean, 1) if "coding" in r.pillars else None,
-            "pillar_quality": round(r.pillars["quality"].mean, 1) if "quality" in r.pillars else None,
-            "pillar_preference": round(r.pillars["preference"].mean, 1) if "preference" in r.pillars else None,
-            "pillar_shrinkage": {                                # nuevo en V3
+            "n_metrics": r.n_metrics,
+            "n_sources": r.n_sources,
+            "coverage_pillars": r.coverage_pillars,
+            "measured_pillars_count": r.measured_pillars_count,
+            "is_empirically_measured": has_empirical,
+            "variance": between_std ** 2,
+            # Pilares observados (None si no tienen observación empírica real)
+            "pillar_reasoning": round(r.pillars["reasoning"].mean, 1) if ("reasoning" in r.pillars and r.pillars["reasoning"].observed) else None,
+            "pillar_coding": round(r.pillars["coding"].mean, 1) if ("coding" in r.pillars and r.pillars["coding"].observed) else None,
+            "pillar_quality": round(r.pillars["quality"].mean, 1) if ("quality" in r.pillars and r.pillars["quality"].observed) else None,
+            "pillar_preference": round(r.pillars["preference"].mean, 1) if ("preference" in r.pillars and r.pillars["preference"].observed) else None,
+            "pillar_agentic": round(r.pillars["agentic"].mean, 1) if ("agentic" in r.pillars and r.pillars["agentic"].observed) else None,
+            "pillar_shrinkage": {
                 p: round(r.pillars[p].shrinkage, 3) for p in r.pillars
             },
-            # Workhorse y alias de compatibilidad
-            "workhorse_score": workhorse,
-            "coding_score": round(r.pillars["coding"].mean, 1) if "coding" in r.pillars and r.pillars["coding"].observed else round(r.fci * 0.95, 1),
-            "preference_score": round(r.pillars["preference"].mean, 1) if "preference" in r.pillars and r.pillars["preference"].observed else 65.0,
-            "quality_score": round(r.pillars["quality"].mean, 1) if "quality" in r.pillars and r.pillars["quality"].observed else None,
-            "reasoning_score": round(r.pillars["reasoning"].mean, 1) if "reasoning" in r.pillars and r.pillars["reasoning"].observed else None,
-            # Trazabilidad
+            # Scores por dimensión (Estricta procedencia: None si no medido)
+            "workhorse_score": workhorse if r.fci is not None else "SIN DATO",
+            "coding_score": round(r.pillars["coding"].mean, 1) if ("coding" in r.pillars and r.pillars["coding"].observed) else None,
+            "preference_score": round(r.pillars["preference"].mean, 1) if ("preference" in r.pillars and r.pillars["preference"].observed) else None,
+            "quality_score": round(r.pillars["quality"].mean, 1) if ("quality" in r.pillars and r.pillars["quality"].observed) else None,
+            "reasoning_score": round(r.pillars["reasoning"].mean, 1) if ("reasoning" in r.pillars and r.pillars["reasoning"].observed) else None,
+            "agentic_score": round(r.pillars["agentic"].mean, 1) if ("agentic" in r.pillars and r.pillars["agentic"].observed) else None,
+            # Trazabilidad y Benchmarks Crudos
             "raw_benchmarks": {k: round(v, 2) for k, v in raw_benchmarks.items()},
+            "intel_benchmarks": {k: round(v, 2) for k, v in raw_benchmarks.items()},
+            "coding_benchmarks": {k: round(v, 2) for k, v in raw_benchmarks.items() if any(c in k for c in ["swe", "code", "coder", "aider", "human"])},
             "freshness_days": freshness_days,
             "freshness_status": freshness_status,
             "observation_type": r.observation_type.value,
@@ -446,4 +471,119 @@ def calculate_multidimensional_rankings() -> List[Dict[str, Any]]:
             "sources": all_sources,
         })
 
+    # Persistir tablas relacionales certificadas (model_measurements, model_grades, rankings)
+    try:
+        with get_db_connection() as conn:
+            c = conn.cursor()
+            c.execute("DELETE FROM rankings")
+            c.execute("DELETE FROM model_measurements")
+            c.execute("DELETE FROM model_grades")
+
+            for r in v3_results:
+                # 1. model_grades
+                c.execute("""
+                    INSERT OR REPLACE INTO model_grades (canonical_id, fci, confidence, grade, measured_pillars_count)
+                    VALUES (?, ?, ?, ?, ?)
+                """, (r.model_id, r.fci, r.confidence, r.evidence_grade, r.measured_pillars_count))
+
+                # 2. rankings (solo si está medido con fci y rank público)
+                if r.fci is not None and r.global_rank is not None:
+                    c.execute("""
+                        INSERT OR REPLACE INTO rankings (canonical_id, global_rank, fci, ci_lower, ci_upper, confidence, evidence_grade)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """, (r.model_id, r.global_rank, r.fci, r.ci_lower, r.ci_upper, r.confidence, r.evidence_grade))
+
+                # 3. model_measurements por pilar
+                for pill_name, p in r.pillars.items():
+                    m_sources = [o["source"] for o in observations if o["model_id"] == r.model_id]
+                    src_tag = m_sources[0] if (p.observed and m_sources) else (None if not p.observed else "BenchmarkSuite")
+                    c.execute("""
+                        INSERT INTO model_measurements (canonical_id, pillar, measured, n_obs, score, source)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                    """, (r.model_id, pill_name, 1 if p.observed else 0, p.n_obs, round(p.mean, 2) if p.observed else None, src_tag))
+
+                # 4. Inserción de pilar 'intelligence' general
+                if r.fci is not None and r.n_metrics > 0:
+                    m_sources = [o["source"] for o in observations if o["model_id"] == r.model_id]
+                    # Desglose de fuente primaria de inteligencia
+                    aa_present = any("artificial" in s.lower() for s in m_sources)
+                    hf_present = any("hugging" in s.lower() or "mmlu" in s.lower() for s in m_sources)
+                    arena_present = any("arena" in s.lower() for s in m_sources)
+                    live_present = any("live" in s.lower() or "epoch" in s.lower() for s in m_sources)
+                    
+                    intel_src = "ArtificialAnalysis" if aa_present else ("HuggingFace" if hf_present else ("ArenaAI" if arena_present else ("LiveBench" if live_present else (m_sources[0] if m_sources else "BenchmarkSuite"))))
+                    c.execute("""
+                        INSERT INTO model_measurements (canonical_id, pillar, measured, n_obs, score, source)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                    """, (r.model_id, "intelligence", 1, r.n_metrics, r.fci, intel_src))
+    except Exception as e:
+        print(f"⚠️ [Scoring] Error persistiendo tablas relacionales: {e}")
+
     return scored_models
+
+
+def build_input_data_payload(
+    rankings_data: List[Dict[str, Any]],
+    local_apis_data: List[Dict[str, Any]],
+    profile_categories: Optional[List[str]] = None
+) -> Dict[str, Any]:
+    """
+    ETAPA A (Grounded Reporting Contract V11):
+    Construye el payload JSON canónico INPUT_DATA estrictamente fundamentado en datos reales.
+    Cualquier valor numérico no observado empíricamente se serializa explícitamente como `None` (null en JSON).
+    """
+    if profile_categories is None:
+        profile_categories = ["frontier", "workhorse", "reasoning", "coding", "agentic"]
+
+    models_payload = []
+    for m in rankings_data:
+        raw_b = m.get("raw_benchmarks", {})
+        sources = m.get("sources", [])
+        is_empirical = m.get("is_empirically_measured", False) or bool(raw_b)
+
+        # Fuentes por métrica
+        intel_src = "artificial_analysis" if "aa_quality_index" in raw_b else ("livebench" if "livebench" in raw_b else ("huggingface" if "mmlu_pro" in raw_b else (sources[0].lower() if (sources and is_empirical) else None)))
+        coding_src = "livecodebench" if "livecodebench" in raw_b else ("swebench" if "swe_bench" in raw_b else ("aider" if "aider_polyglot" in raw_b else ("arena_coding" if "arena_coding_elo" in raw_b else None)))
+        elo_src = "arena_ai" if "arena_elo" in raw_b else ("lmsys" if "chatbot_arena" in raw_b else None)
+        pricing_src = "openrouter" if m.get("input_cost_per_m") is not None else None
+        latency_src = "local_probe" if m.get("local_latency_ms") is not None else None
+
+        elo_val = raw_b.get("arena_elo") or raw_b.get("chatbot_arena")
+
+        # Procedencia estricta: si no está medido empíricamente, el redactor ve null (Regla 1)
+        intel_val = m.get("intelligence_score") if is_empirical else None
+
+        models_payload.append({
+            "id": m["id"],
+            "display_name": m["canonical_name"],
+            "provider": m.get("provider", "Unknown"),
+            "category": m.get("tier", "workhorse"),
+            "is_local": bool(m.get("is_local_active")),
+            "is_measured": is_empirical,
+            "context_window": m.get("context_window"),
+            "pricing_in_per_1m": m.get("input_cost_per_m"),
+            "pricing_out_per_1m": m.get("output_cost_per_m"),
+            "pricing_source": pricing_src,
+            "latency_ms": m.get("local_latency_ms"),
+            "latency_source": latency_src,
+            "intelligence_index": intel_val,
+            "intelligence_source": intel_src if intel_val is not None else None,
+            "ci_95": m.get("ci_display"),
+            "lower_confidence_bound": m.get("lower_confidence_bound"),
+            "coding_index": m.get("coding_score"),
+            "coding_source": coding_src if m.get("coding_score") is not None else None,
+            "preference_index": m.get("preference_score"),
+            "elo_lmsys": elo_val,
+            "elo_source": elo_src,
+            "confidence_score": m.get("confidence_score"),
+            "evidence_grade": m.get("evidence_grade"),
+            "raw_benchmarks": raw_b,
+        })
+
+    return {
+        "generated_at": datetime.utcnow().isoformat() + "Z",
+        "profile_categories": profile_categories,
+        "models": models_payload
+    }
+
+

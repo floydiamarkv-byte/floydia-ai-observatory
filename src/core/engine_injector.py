@@ -107,8 +107,24 @@ def apply_engine_configurations() -> List[Tuple[str, str]]:
     opencode_cfg = {
         "$schema": "https://opencode.ai/config.json",
         "model": "google/gemini-3.6-flash",
-        "small_model": "openrouter/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+        "small_model": "opencode/nemotron-3.5-lightning-free",
         "provider": {
+            "opencode": {
+                "npm": "@ai-sdk/openai",
+                "name": "OpenCode Zen",
+                "options": {
+                    "baseURL": "https://api.opencode.ai/zen/v1",
+                    "apiKey": "{env:C1_ZEN_OPENCODE}"
+                },
+                "models": {
+                    "opencode/nemotron-3-ultra-free": {"name": "[262k•Zen Free] Nemotron 3 Ultra 550B"},
+                    "opencode/nemotron-3.5-lightning-free": {"name": "[262k•Zen Free] Nemotron 3.5 Lightning"},
+                    "opencode/mimo-v2.5-free": {"name": "[262k•Zen Free] MiMo V2.5"},
+                    "opencode/hy3-free": {"name": "[262k•Zen Free] Hy3 Free"},
+                    "opencode/big-pickle": {"name": "[131k•Zen] Big Pickle"},
+                    "opencode/muse-spark-1.2-contributor-free": {"name": "[262k•Zen Free] Muse Spark 1.2"}
+                }
+            },
             "google": {
                 "npm": "@ai-sdk/google",
                 "name": "Google AI Studio Pro",
@@ -117,7 +133,24 @@ def apply_engine_configurations() -> List[Tuple[str, str]]:
                     "gemini-3.7-flash": {"name": "[1M•Pro] Gemini 3.7 (Reasoning)"},
                     "gemini-3.6-flash": {"name": "[1M•Pro] Gemini 3.6 (Fast)"},
                     "gemini-3.5-flash": {"name": "[1M•Pro] Gemini 3.5 (Multi)"},
-                    "gemma-4-31b-it": {"name": "[262k•Pro] Gemma 4 31B (Agent)"}
+                    "gemma-4-31b-it": {"name": "[262k•Pro] Gemma 4 31B (Agent)"},
+                    "gemma-4-26b-a4b-it": {"name": "[262k•Pro] Gemma 4 26B (Fast)"},
+                    "gemini-2.5-pro": {"name": "[1M•Pro] Gemini 2.5 Pro (Frontier)"},
+                    "gemini-2.5-flash": {"name": "[1M•Pro] Gemini 2.5 Flash (Workhorse)"}
+                }
+            },
+            "deepseek": {
+                "npm": "@ai-sdk/openai",
+                "name": "DeepSeek Direct",
+                "options": {
+                    "baseURL": "https://api.deepseek.com/v1",
+                    "apiKey": "{env:DEEPSEEK_API_KEY}"
+                },
+                "models": {
+                    "deepseek-v4-flash": {"name": "[262k•Paid] DeepSeek V4 Flash"},
+                    "deepseek-v4-pro": {"name": "[262k•Paid] DeepSeek V4 Pro"},
+                    "deepseek-chat": {"name": "[128k•Paid] DeepSeek Chat V3"},
+                    "deepseek-reasoner": {"name": "[64k•Paid] DeepSeek Reasoner R1"}
                 }
             },
             "mistral": {
@@ -125,7 +158,69 @@ def apply_engine_configurations() -> List[Tuple[str, str]]:
                 "name": "Mistral AI Pro",
                 "options": {"apiKey": "{env:C1_MISTRAL}"},
                 "models": {
-                    "codestral-latest": {"name": "[256k•Trial] Codestral (Code)"}
+                    "codestral-latest": {"name": "[256k•Trial] Codestral (Code)"},
+                    "devstral-latest": {"name": "[256k•Trial] Devstral (Agent)"},
+                    "mistral-large-latest": {"name": "[128k•Trial] Mistral Large"},
+                    "mistral-small-latest": {"name": "[128k•Trial] Mistral Small"},
+                    "ministral-8b-latest": {"name": "[128k•Trial] Ministral 8B"}
+                }
+            },
+            "nvidia": {
+                "npm": "@ai-sdk/openai",
+                "name": "NVIDIA NIM",
+                "options": {
+                    "baseURL": "https://integrate.api.nvidia.com/v1",
+                    "apiKey": "{env:C7_NVIDIA}"
+                },
+                "models": {
+                    "deepseek-ai/deepseek-v4-flash-0731": {"name": "[256k•Trial] DeepSeek V4 (NIM)"},
+                    "deepseek-ai/deepseek-v4-pro-0813": {"name": "[256k•Trial] DeepSeek V4 Pro (NIM)"},
+                    "moonshotai/kimi-k3": {"name": "[256k•Trial] Kimi K3 (NIM)"},
+                    "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning": {"name": "[256k•Trial] Nemotron 3 Nano (NIM)"},
+                    "nvidia/nemotron-3-super-120b-a12b": {"name": "[262k•Trial] Nemotron 3 Super (NIM)"},
+                    "nvidia/nemotron-3-ultra-550b-a55b": {"name": "[262k•Trial] Nemotron 3 Ultra (NIM)"}
+                }
+            },
+            "z_ai": {
+                "npm": "@ai-sdk/openai",
+                "name": "Z.AI (Zhipu GLM)",
+                "options": {
+                    "baseURL": "https://open.bigmodel.cn/api/paas/v4",
+                    "apiKey": "{env:C1_Z_AI}"
+                },
+                "models": {
+                    "glm-5.3": {"name": "[262k•Pro] GLM 5.3 (Frontier)"},
+                    "glm-5.2": {"name": "[262k•Pro] GLM 5.2 (Workhorse)"},
+                    "glm-5-turbo": {"name": "[131k•Pro] GLM 5 Turbo"},
+                    "glm-5.3-flash": {"name": "[131k•Free] GLM 5.3 Flash"}
+                }
+            },
+            "grokified": {
+                "npm": "@ai-sdk/openai",
+                "name": "Grokified (xAI)",
+                "options": {
+                    "baseURL": "https://api.grokified.com/v1",
+                    "apiKey": "{env:GROKIFIED_API_KEY}"
+                },
+                "models": {
+                    "grok-4.6": {"name": "[262k•Pro] Grok 4.6 (Frontier)"},
+                    "grok-4.5": {"name": "[131k•Pro] Grok 4.5"},
+                    "grok-4.20-multi-agent-0309": {"name": "[262k•Pro] Grok 4.20 Multi-Agent"},
+                    "grok-build-0.1": {"name": "[131k•Pro] Grok Build 0.1 (Code)"}
+                }
+            },
+            "dashscope": {
+                "npm": "@ai-sdk/openai",
+                "name": "Alibaba DashScope (Qwen)",
+                "options": {
+                    "baseURL": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+                    "apiKey": "{env:C7_DASHSCOPE_API_KEY}"
+                },
+                "models": {
+                    "qwen3.8-max": {"name": "[262k•Pro] Qwen 3.8 Max (Frontier)"},
+                    "qwen3.8-flash": {"name": "[131k•Free] Qwen 3.8 Flash"},
+                    "qwen3.8-27b": {"name": "[131k•Pro] Qwen 3.8 27B"},
+                    "qwen3.7-flash": {"name": "[131k•Free] Qwen 3.7 Flash"}
                 }
             },
             "openrouter": {
@@ -142,32 +237,8 @@ def apply_engine_configurations() -> List[Tuple[str, str]]:
                     "nvidia/nemotron-3-super-120b-a12b:free": {"name": "[262k•Free] Nemotron 3 Super"},
                     "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free": {"name": "[256k•Free] Nemotron 3 Nano"},
                     "z-ai/glm-5.2:free": {"name": "[256k•Free] GLM 5.2 (Frontier)"},
-                    "poolside/laguna-s-2.1:free": {"name": "[262k•Free] Laguna S 2.1 (Code)"}
-                }
-            },
-            "nvidia": {
-                "npm": "@ai-sdk/openai",
-                "name": "NVIDIA NIM",
-                "options": {
-                    "baseURL": "https://integrate.api.nvidia.com/v1",
-                    "apiKey": "{env:C7_NVIDIA}"
-                },
-                "models": {
-                    "deepseek-ai/deepseek-v4-flash-0731": {"name": "[256k•Trial] DeepSeek V4 (NIM)"},
-                    "moonshotai/kimi-k3": {"name": "[256k•Trial] Kimi K3 (NIM)"},
-                    "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning": {"name": "[256k•Trial] Nemotron 3 Nano (NIM)"}
-                }
-            },
-            "deepseek": {
-                "npm": "@ai-sdk/openai",
-                "name": "DeepSeek Direct",
-                "options": {
-                    "baseURL": "https://api.deepseek.com/v1",
-                    "apiKey": "{env:DEEPSEEK_API_KEY}"
-                },
-                "models": {
-                    "deepseek-chat": {"name": "[128k•Paid] DeepSeek Chat V3"},
-                    "deepseek-reasoner": {"name": "[64k•Paid] DeepSeek Reasoner R1"}
+                    "poolside/laguna-s-2.1:free": {"name": "[262k•Free] Laguna S 2.1 (Code)"},
+                    "thinkingmachines/inkling:free": {"name": "[256k•Free] TM Inkling"}
                 }
             }
         }
@@ -184,18 +255,43 @@ def apply_engine_configurations() -> List[Tuple[str, str]]:
     hermes_yaml = """model:
   default: gemini-3.6-flash
   provider: google
-  base_url: https://generativelanguage.googleapis.com/v1beta/openai/
+  base_url: https://generativelanguage.googleapis.com/v1beta/openai
 providers:
   google:
     name: Google AI Studio Pro
     env_key: C1_GOOGLE_AISTUDIO
-    base_url: https://generativelanguage.googleapis.com/v1beta/openai/
+    base_url: https://generativelanguage.googleapis.com/v1beta/openai
     api: openai-completions
     models:
       - gemini-3.7-flash
       - gemini-3.6-flash
       - gemini-3.5-flash
       - gemma-4-31b-it
+      - gemma-4-26b-a4b-it
+      - gemini-2.5-pro
+      - gemini-2.5-flash
+  opencode:
+    name: OpenCode Zen
+    env_key: C1_ZEN_OPENCODE
+    base_url: https://api.opencode.ai/zen/v1
+    api: openai-completions
+    models:
+      - opencode/nemotron-3-ultra-free
+      - opencode/nemotron-3.5-lightning-free
+      - opencode/mimo-v2.5-free
+      - opencode/hy3-free
+      - opencode/big-pickle
+      - opencode/muse-spark-1.2-contributor-free
+  deepseek:
+    name: DeepSeek Direct
+    env_key: DEEPSEEK_API_KEY
+    base_url: https://api.deepseek.com/v1
+    api: openai-completions
+    models:
+      - deepseek-v4-flash
+      - deepseek-v4-pro
+      - deepseek-chat
+      - deepseek-reasoner
   openrouter:
     name: OpenRouter Free
     env_key: C7_OPENROUTER_OPENCODE_HP15
@@ -209,6 +305,7 @@ providers:
       - nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free
       - z-ai/glm-5.2:free
       - poolside/laguna-s-2.1:free
+      - thinkingmachines/inkling:free
   nvidia:
     name: NVIDIA NIM
     env_key: C7_NVIDIA
@@ -216,8 +313,11 @@ providers:
     api: openai-completions
     models:
       - deepseek-ai/deepseek-v4-flash-0731
+      - deepseek-ai/deepseek-v4-pro-0813
       - moonshotai/kimi-k3
       - nvidia/nemotron-3-nano-omni-30b-a3b-reasoning
+      - nvidia/nemotron-3-super-120b-a12b
+      - nvidia/nemotron-3-ultra-550b-a55b
   mistral:
     name: Mistral AI Pro
     env_key: C1_MISTRAL
@@ -225,34 +325,72 @@ providers:
     api: openai-completions
     models:
       - codestral-latest
-  deepseek:
-    name: DeepSeek Direct
-    env_key: DEEPSEEK_API_KEY
-    base_url: https://api.deepseek.com/v1
+      - devstral-latest
+      - mistral-large-latest
+      - mistral-small-latest
+      - ministral-8b-latest
+  z_ai:
+    name: Z.AI (Zhipu GLM)
+    env_key: C1_Z_AI
+    base_url: https://open.bigmodel.cn/api/paas/v4
     api: openai-completions
     models:
-      - deepseek-chat
-      - deepseek-reasoner
+      - glm-5.3
+      - glm-5.2
+      - glm-5-turbo
+      - glm-5.3-flash
+  grokified:
+    name: Grokified (xAI)
+    env_key: GROKIFIED_API_KEY
+    base_url: https://api.grokified.com/v1
+    api: openai-completions
+    models:
+      - grok-4.6
+      - grok-4.5
+      - grok-4.20-multi-agent-0309
+      - grok-build-0.1
+  dashscope:
+    name: Alibaba DashScope (Qwen)
+    env_key: C7_DASHSCOPE_API_KEY
+    base_url: https://dashscope-intl.aliyuncs.com/compatible-mode/v1
+    api: openai-completions
+    models:
+      - qwen3.8-max
+      - qwen3.8-flash
+      - qwen3.8-27b
+      - qwen3.7-flash
 database:
   journal_mode: wal
 runtime:
   nofile_soft_limit: 4096
-_config_version: 41
+_config_version: 42
 fallback_model:
-  provider: openrouter
-  model: minimax/minimax-m3:free
+  provider: opencode
+  model: opencode/nemotron-3.5-lightning-free
 model_aliases:
   gemini-37: gemini-3.7-flash
   gemini-36: gemini-3.6-flash
+  zen-ultra: opencode/nemotron-3-ultra-free
+  zen-lightning: opencode/nemotron-3.5-lightning-free
+  zen-mimo: opencode/mimo-v2.5-free
+  zen-hy3: opencode/hy3-free
   auto-free: openrouter/auto
   minimax-free: minimax/minimax-m3:free
   nemotron-super: nvidia/nemotron-3-super-120b-a12b:free
   nemotron-nano: nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free
   glm-free: z-ai/glm-5.2:free
-  deepseek-flash-nim: deepseek-ai/deepseek-v4-flash-0731
+  glm-53: glm-5.3
+  glm-52: glm-5.2
+  grok-46: grok-4.6
+  grok-agent: grok-4.20-multi-agent-0309
+  qwen-max: qwen3.8-max
+  qwen-flash: qwen3.8-flash
+  deepseek-flash: deepseek-v4-flash
+  deepseek-pro: deepseek-v4-pro
+  deepseek-chat: deepseek-chat
+  deepseek-r1: deepseek-reasoner
   kimi-k3-nim: moonshotai/kimi-k3
   codestral: codestral-latest
-  deepseek-chat: deepseek-chat
 plugins:
   enabled: []
 mcp_servers:
@@ -283,11 +421,15 @@ mcp_servers:
 
     # 3. Purga de Caché de Hermes
     hermes_clean_cache = {
-        "google": {"fp": "google-curated-v4", "at": time.time(), "models": ["gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemma-4-31b-it"]},
-        "openrouter": {"fp": "openrouter-curated-v4", "at": time.time(), "models": ["openrouter/auto", "openrouter/free", "minimax/minimax-m3:free", "nvidia/nemotron-3-super-120b-a12b:free", "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free", "z-ai/glm-5.2:free", "poolside/laguna-s-2.1:free"]},
-        "nvidia": {"fp": "nvidia-curated-v4", "at": time.time(), "models": ["deepseek-ai/deepseek-v4-flash-0731", "moonshotai/kimi-k3", "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning"]},
-        "mistral": {"fp": "mistral-curated-v4", "at": time.time(), "models": ["codestral-latest"]},
-        "deepseek": {"fp": "deepseek-curated-v4", "at": time.time(), "models": ["deepseek-chat", "deepseek-reasoner"]}
+        "google": {"fp": "google-curated-v5", "at": time.time(), "models": ["gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemma-4-31b-it", "gemma-4-26b-a4b-it", "gemini-2.5-pro", "gemini-2.5-flash"]},
+        "opencode": {"fp": "opencode-curated-v5", "at": time.time(), "models": ["opencode/nemotron-3-ultra-free", "opencode/nemotron-3.5-lightning-free", "opencode/mimo-v2.5-free", "opencode/hy3-free", "opencode/big-pickle", "opencode/muse-spark-1.2-contributor-free"]},
+        "z_ai": {"fp": "zai-curated-v5", "at": time.time(), "models": ["glm-5.3", "glm-5.2", "glm-5-turbo", "glm-5.3-flash"]},
+        "grokified": {"fp": "grokified-curated-v5", "at": time.time(), "models": ["grok-4.6", "grok-4.5", "grok-4.20-multi-agent-0309", "grok-build-0.1"]},
+        "dashscope": {"fp": "dashscope-curated-v5", "at": time.time(), "models": ["qwen3.8-max", "qwen3.8-flash", "qwen3.8-27b", "qwen3.7-flash"]},
+        "deepseek": {"fp": "deepseek-curated-v5", "at": time.time(), "models": ["deepseek-v4-flash", "deepseek-v4-pro", "deepseek-chat", "deepseek-reasoner"]},
+        "openrouter": {"fp": "openrouter-curated-v5", "at": time.time(), "models": ["openrouter/auto", "openrouter/free", "minimax/minimax-m3:free", "nvidia/nemotron-3-super-120b-a12b:free", "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free", "z-ai/glm-5.2:free", "poolside/laguna-s-2.1:free", "thinkingmachines/inkling:free"]},
+        "nvidia": {"fp": "nvidia-curated-v5", "at": time.time(), "models": ["deepseek-ai/deepseek-v4-flash-0731", "deepseek-ai/deepseek-v4-pro-0813", "moonshotai/kimi-k3", "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning", "nvidia/nemotron-3-super-120b-a12b", "nvidia/nemotron-3-ultra-550b-a55b"]},
+        "mistral": {"fp": "mistral-curated-v5", "at": time.time(), "models": ["codestral-latest", "devstral-latest", "mistral-large-latest", "mistral-small-latest", "ministral-8b-latest"]}
     }
     try:
         cache_json = json.dumps(hermes_clean_cache, indent=2)
@@ -304,17 +446,129 @@ agent-default-model:
   provider: google
   model: gemini-3.6-flash
 
+# ── Flota Completa Multi-Proveedor en llm-deepseek (Selector Nativo DSH) ──
 llm-deepseek:
   models:
-    - id: deepseek-ai/deepseek-v4-flash-0731
+    # Google AI Studio Pro
+    - id: "gemini-3.7-flash"
+      name: "[1M•Pro] Gemini 3.7 (Reasoning) · Google"
+      contextWindow: 1048576
+    - id: "gemini-3.6-flash"
+      name: "[1M•Pro] Gemini 3.6 (Fast) · Google"
+      contextWindow: 1048576
+    - id: "gemini-3.5-flash"
+      name: "[1M•Pro] Gemini 3.5 (Multi) · Google"
+      contextWindow: 1048576
+    - id: "gemma-4-31b-it"
+      name: "[262k•Pro] Gemma 4 31B (Agent) · Google"
+      contextWindow: 262144
+    - id: "gemini-2.5-pro"
+      name: "[1M•Pro] Gemini 2.5 Pro (Frontier) · Google"
+      contextWindow: 1048576
+    - id: "gemini-2.5-flash"
+      name: "[1M•Pro] Gemini 2.5 Flash (Workhorse) · Google"
+      contextWindow: 1048576
+
+    # OpenCode Zen Free Fleet
+    - id: "opencode/nemotron-3-ultra-free"
+      name: "[262k•Zen Free] Nemotron 3 Ultra 550B"
+      contextWindow: 262144
+    - id: "opencode/nemotron-3.5-lightning-free"
+      name: "[262k•Zen Free] Nemotron 3.5 Lightning"
+      contextWindow: 262144
+    - id: "opencode/mimo-v2.5-free"
+      name: "[262k•Zen Free] MiMo V2.5"
+      contextWindow: 262144
+    - id: "opencode/hy3-free"
+      name: "[262k•Zen Free] Hy3 Free"
+      contextWindow: 262144
+    - id: "opencode/muse-spark-1.2-contributor-free"
+      name: "[262k•Zen Free] Muse Spark 1.2"
+      contextWindow: 262144
+
+    # DeepSeek Direct
+    - id: deepseek-v4-flash
+      name: "[262k•Paid] DeepSeek V4 Flash"
+      contextWindow: 262144
+    - id: deepseek-v4-pro
+      name: "[262k•Paid] DeepSeek V4 Pro"
+      contextWindow: 262144
+    - id: deepseek-chat
+      name: "[128k•Paid] DeepSeek Chat V3"
+      contextWindow: 131072
+    - id: deepseek-reasoner
+      name: "[64k•Paid] DeepSeek Reasoner R1"
+      contextWindow: 65536
+
+    # Alibaba DashScope (Qwen)
+    - id: "qwen3.8-max"
+      name: "[262k•Pro] Qwen 3.8 Max (Frontier)"
+      contextWindow: 262144
+    - id: "qwen3.8-flash"
+      name: "[131k•Free] Qwen 3.8 Flash"
+      contextWindow: 131072
+    - id: "qwen3.8-27b"
+      name: "[131k•Pro] Qwen 3.8 27B"
+      contextWindow: 131072
+
+    # Mistral AI Pro
+    - id: "codestral-latest"
+      name: "[256k•Trial] Codestral (Code) · Mistral"
+      contextWindow: 262144
+    - id: "devstral-latest"
+      name: "[256k•Trial] Devstral (Agent) · Mistral"
+      contextWindow: 262144
+    - id: "mistral-large-latest"
+      name: "[128k•Trial] Mistral Large"
+      contextWindow: 131072
+
+    # NVIDIA NIM
+    - id: "deepseek-ai/deepseek-v4-flash-0731"
       name: "[256k•Trial] DeepSeek V4 (NIM)"
+      contextWindow: 262144
+    - id: "moonshotai/kimi-k3"
+      name: "[256k•Trial] Kimi K3 (NIM)"
+      contextWindow: 262144
+    - id: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning"
+      name: "[256k•Trial] Nemotron 3 Nano (NIM)"
+      contextWindow: 256000
+    - id: "nvidia/nemotron-3-super-120b-a12b"
+      name: "[262k•Trial] Nemotron 3 Super (NIM)"
+      contextWindow: 262144
+
+    # Z.AI (GLM)
+    - id: "glm-5.3"
+      name: "[262k•Pro] GLM 5.3 (Frontier)"
+      contextWindow: 262144
+    - id: "glm-5.2"
+      name: "[262k•Pro] GLM 5.2 (Workhorse)"
+      contextWindow: 262144
+
+    # OpenRouter Free Fleet
+    - id: "openrouter/auto"
+      name: "[Auto•Free] OpenRouter Auto"
+      contextWindow: 262144
+    - id: "openrouter/free"
+      name: "[Auto•Free] OpenRouter Free"
+      contextWindow: 262144
+    - id: "minimax/minimax-m3:free"
+      name: "[1M•Free] MiniMax M3 (Frontier)"
+      contextWindow: 1048576
+    - id: "nvidia/nemotron-3-super-120b-a12b:free"
+      name: "[262k•Free] Nemotron 3 Super"
+      contextWindow: 262144
+    - id: "z-ai/glm-5.2:free"
+      name: "[256k•Free] GLM 5.2 (Frontier)"
+      contextWindow: 262144
+    - id: "poolside/laguna-s-2.1:free"
+      name: "[262k•Free] Laguna S 2.1 (Code)"
       contextWindow: 262144
 
 llm-pi-ai:
   providers:
     google:
       apiKeyEnv: C1_GOOGLE_AISTUDIO
-      baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/"
+      baseURL: "https://generativelanguage.googleapis.com/v1beta/openai"
       models:
         - id: "gemini-3.7-flash"
           name: "[1M•Pro] Gemini 3.7 (Reasoning)"
@@ -328,6 +582,106 @@ llm-pi-ai:
         - id: "gemma-4-31b-it"
           name: "[262k•Pro] Gemma 4 31B (Agent)"
           contextWindow: 262144
+        - id: "gemma-4-26b-a4b-it"
+          name: "[262k•Pro] Gemma 4 26B (Fast)"
+          contextWindow: 262144
+        - id: "gemini-2.5-pro"
+          name: "[1M•Pro] Gemini 2.5 Pro (Frontier)"
+          contextWindow: 1048576
+        - id: "gemini-2.5-flash"
+          name: "[1M•Pro] Gemini 2.5 Flash (Workhorse)"
+          contextWindow: 1048576
+
+    opencode:
+      apiKeyEnv: C1_ZEN_OPENCODE
+      baseURL: "https://api.opencode.ai/zen/v1"
+      models:
+        - id: "opencode/nemotron-3-ultra-free"
+          name: "[262k•Zen Free] Nemotron 3 Ultra 550B"
+          contextWindow: 262144
+        - id: "opencode/nemotron-3.5-lightning-free"
+          name: "[262k•Zen Free] Nemotron 3.5 Lightning"
+          contextWindow: 262144
+        - id: "opencode/mimo-v2.5-free"
+          name: "[262k•Zen Free] MiMo V2.5"
+          contextWindow: 262144
+        - id: "opencode/hy3-free"
+          name: "[262k•Zen Free] Hy3 Free"
+          contextWindow: 262144
+        - id: "opencode/big-pickle"
+          name: "[131k•Zen] Big Pickle"
+          contextWindow: 131072
+        - id: "opencode/muse-spark-1.2-contributor-free"
+          name: "[262k•Zen Free] Muse Spark 1.2"
+          contextWindow: 262144
+
+    z_ai:
+      apiKeyEnv: C1_Z_AI
+      baseURL: "https://open.bigmodel.cn/api/paas/v4"
+      models:
+        - id: "glm-5.3"
+          name: "[262k•Pro] GLM 5.3 (Frontier)"
+          contextWindow: 262144
+        - id: "glm-5.2"
+          name: "[262k•Pro] GLM 5.2 (Workhorse)"
+          contextWindow: 262144
+        - id: "glm-5-turbo"
+          name: "[131k•Pro] GLM 5 Turbo"
+          contextWindow: 131072
+        - id: "glm-5.3-flash"
+          name: "[131k•Free] GLM 5.3 Flash"
+          contextWindow: 131072
+
+    grokified:
+      apiKeyEnv: GROKIFIED_API_KEY
+      baseURL: "https://api.grokified.com/v1"
+      models:
+        - id: "grok-4.6"
+          name: "[262k•Pro] Grok 4.6 (Frontier)"
+          contextWindow: 262144
+        - id: "grok-4.5"
+          name: "[131k•Pro] Grok 4.5"
+          contextWindow: 131072
+        - id: "grok-4.20-multi-agent-0309"
+          name: "[262k•Pro] Grok 4.20 Multi-Agent"
+          contextWindow: 262144
+        - id: "grok-build-0.1"
+          name: "[131k•Pro] Grok Build 0.1 (Code)"
+          contextWindow: 131072
+
+    dashscope:
+      apiKeyEnv: C7_DASHSCOPE_API_KEY
+      baseURL: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
+      models:
+        - id: "qwen3.8-max"
+          name: "[262k•Pro] Qwen 3.8 Max (Frontier)"
+          contextWindow: 262144
+        - id: "qwen3.8-flash"
+          name: "[131k•Free] Qwen 3.8 Flash"
+          contextWindow: 131072
+        - id: "qwen3.8-27b"
+          name: "[131k•Pro] Qwen 3.8 27B"
+          contextWindow: 131072
+        - id: "qwen3.7-flash"
+          name: "[131k•Free] Qwen 3.7 Flash"
+          contextWindow: 131072
+
+    deepseek:
+      apiKeyEnv: DEEPSEEK_API_KEY
+      baseURL: "https://api.deepseek.com/v1"
+      models:
+        - id: "deepseek-v4-flash"
+          name: "[262k•Paid] DeepSeek V4 Flash"
+          contextWindow: 262144
+        - id: "deepseek-v4-pro"
+          name: "[262k•Paid] DeepSeek V4 Pro"
+          contextWindow: 262144
+        - id: "deepseek-chat"
+          name: "[128k•Paid] DeepSeek Chat V3"
+          contextWindow: 131072
+        - id: "deepseek-reasoner"
+          name: "[64k•Paid] DeepSeek Reasoner R1"
+          contextWindow: 65536
 
     mistral:
       apiKeyEnv: C1_MISTRAL
@@ -336,6 +690,18 @@ llm-pi-ai:
         - id: "codestral-latest"
           name: "[256k•Trial] Codestral (Code)"
           contextWindow: 262144
+        - id: "devstral-latest"
+          name: "[256k•Trial] Devstral (Agent)"
+          contextWindow: 262144
+        - id: "mistral-large-latest"
+          name: "[128k•Trial] Mistral Large"
+          contextWindow: 131072
+        - id: "mistral-small-latest"
+          name: "[128k•Trial] Mistral Small"
+          contextWindow: 131072
+        - id: "ministral-8b-latest"
+          name: "[128k•Trial] Ministral 8B"
+          contextWindow: 131072
 
     openrouter:
       apiKeyEnv: C7_OPENROUTER_OPENCODE_HP15
@@ -362,6 +728,9 @@ llm-pi-ai:
         - id: "poolside/laguna-s-2.1:free"
           name: "[262k•Free] Laguna S 2.1 (Code)"
           contextWindow: 262144
+        - id: "thinkingmachines/inkling:free"
+          name: "[256k•Free] TM Inkling"
+          contextWindow: 262144
 
     nvidia:
       apiKeyEnv: C7_NVIDIA
@@ -370,20 +739,23 @@ llm-pi-ai:
         - id: "deepseek-ai/deepseek-v4-flash-0731"
           name: "[256k•Trial] DeepSeek V4 (NIM)"
           contextWindow: 262144
+        - id: "deepseek-ai/deepseek-v4-pro-0813"
+          name: "[256k•Trial] DeepSeek V4 Pro (NIM)"
+          contextWindow: 262144
         - id: "moonshotai/kimi-k3"
           name: "[256k•Trial] Kimi K3 (NIM)"
           contextWindow: 262144
         - id: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning"
           name: "[256k•Trial] Nemotron 3 Nano (NIM)"
           contextWindow: 256000
-
-    deepseek:
-      apiKeyEnv: DEEPSEEK_API_KEY
-      baseURL: "https://api.deepseek.com/v1"
-      models:
-        - id: "deepseek-chat"
-          name: "[128k•Paid] DeepSeek Chat V3"
-          contextWindow: 131072
+        - id: "nvidia/nemotron-3-super-120b-a12b"
+          name: "[262k•Trial] Nemotron 3 Super (NIM)"
+          contextWindow: 262144
+        - id: "nvidia/nemotron-3-ultra-550b-a55b"
+          name: "[262k•Trial] Nemotron 3 Ultra (NIM)"
+          contextWindow: 262144
+ui-theme:
+  preference: dark
 """
     try:
         atomic_write(DSH_CONFIG_USER, dsh_yaml, validator=_validate_yaml)

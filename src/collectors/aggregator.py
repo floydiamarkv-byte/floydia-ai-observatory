@@ -1,6 +1,6 @@
 """
-Orquestador de Recolección de Datos de Benchmarks y Rankings de IA v9.0.
-Ejecuta los 8 recolectores de fuentes públicas y sincroniza el catálogo.
+Orquestador de Recolección de Datos de Benchmarks y Rankings de IA v10.0.
+Ejecuta los 9 recolectores de fuentes públicas y sincroniza el catálogo.
 """
 
 from typing import Dict, Any
@@ -12,26 +12,28 @@ from src.collectors.livebench_epoch import LiveBenchEpochCollector
 from src.collectors.arena_collector import ArenaCollector
 from src.collectors.swebench_collector import SWEBenchCollector
 from src.collectors.aider_collector import AiderCollector
+from src.collectors.livecodebench_collector import LiveCodeBenchCollector
 from src.core.normalizer import normalizer
 
 
 def run_all_collectors() -> Dict[str, int]:
     """Ejecuta todos los recolectores de datos y devuelve el recuento de métricas."""
-    print("🚀 [Collectors] Iniciando recolección multidimensional de rankings de IA (8 fuentes)...")
+    print("🚀 [Collectors] Iniciando recolección multidimensional de rankings de IA (9 fuentes)...")
     
     # 1. Asegurar catálogo canónico
     normalizer.load_mappings()
     
     results = {}
     collectors = [
-        OpenRouterCollector(),       # Catálogo + precios en vivo
-        HuggingFaceCollector(),      # MMLU-Pro, GPQA, MATH, IFEval
-        ArtificialAnalysisCollector(), # Velocidad, latencia, quality index
-        LMSYSCollector(),            # Elo de preferencia humana (HF dataset)
-        ArenaCollector(),            # Arena.ai Elo general + coding (API comunitaria)
-        LiveBenchEpochCollector(),   # LiveBench + Epoch AI (razonamiento y ciencia)
-        SWEBenchCollector(),         # SWE-bench Verified (resolución de issues)
-        AiderCollector(),            # Aider Polyglot (coding multi-lenguaje)
+        OpenRouterCollector(),         # SSOT Catálogo + precios en vivo
+        HuggingFaceCollector(),        # SSOT Benchmarks académicos (MMLU-Pro, GPQA, MATH, IFEval)
+        ArtificialAnalysisCollector(), # SSOT Velocidad, latencia, quality index
+        LMSYSCollector(),              # SSOT Elo de preferencia humana (HF dataset)
+        ArenaCollector(),              # Arena.ai Elo general + WebDev coding (API comunitaria)
+        LiveBenchEpochCollector(),     # LiveBench + Epoch AI (razonamiento y ciencia no contaminados)
+        SWEBenchCollector(),           # SWE-bench Verified (resolución real de issues de GitHub)
+        AiderCollector(),              # Aider Polyglot (coding multi-lenguaje)
+        LiveCodeBenchCollector(),      # LiveCodeBench (evaluación holística de código no contaminada)
     ]
     
     for c in collectors:
@@ -45,3 +47,4 @@ def run_all_collectors() -> Dict[str, int]:
     total = sum(results.values())
     print(f"✨ [Collectors] Recolección completada: {total} métricas de {len(results)} fuentes.")
     return results
+

@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FloydIA AI Rankings & Local API Observatory — 2026-08-28</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --floydia-teal: #10D2AD;
+      --floydia-cyan: #10D6BD;
+      --floydia-mint: #70CBAC;
+      --floydia-navy: #152638;
+      --floydia-ink: #0B111C;
+      --floydia-paper: #F5F8F7;
+      --floydia-card-bg: #FFFFFF;
+      --floydia-card-dark: #111C2B;
+      --floydia-text-main: #111827;
+      --floydia-text-muted: #4B5563;
+      --floydia-border: #E5E7EB;
+      --floydia-border-dark: #1F3347;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'IBM Plex Sans', sans-serif;
+      background-color: var(--floydia-ink);
+      color: #E2E8F0;
+      line-height: 1.6;
+      padding: 30px 20px;
+    }
+    .container { max-width: 1280px; margin: 0 auto; }
+    header {
+      border-bottom: 1px solid var(--floydia-border-dark);
+      padding-bottom: 24px;
+      margin-bottom: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .brand-title {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: #FFFFFF;
+      letter-spacing: -0.02em;
+    }
+    .brand-title span { color: var(--floydia-teal); }
+    .brand-subtitle {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--floydia-mint);
+      margin-top: 4px;
+    }
+    .date-badge {
+      background: var(--floydia-navy);
+      border: 1px solid var(--floydia-teal);
+      color: var(--floydia-teal);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .section-card {
+      background: var(--floydia-card-dark);
+      border: 1px solid var(--floydia-border-dark);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+    .section-title {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 22px;
+      color: #FFFFFF;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .badge-local {
+      background: #064E3B;
+      color: var(--floydia-teal);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid #059669;
+    }
+    .badge-external {
+      background: #1F2937;
+      color: #9CA3AF;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      border: 1px solid #374151;
+    }
+    .tier-badge {
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .tier-frontier { background: rgba(139, 92, 246, 0.2); color: #C4B5FD; border: 1px solid #8B5CF6; }
+    .tier-workhorse { background: rgba(59, 130, 246, 0.2); color: #93C5FD; border: 1px solid #3B82F6; }
+    .tier-coding { background: rgba(16, 185, 129, 0.2); color: #6EE7B7; border: 1px solid #10B981; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 14px;
+    }
+    th, td {
+      padding: 12px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--floydia-border-dark);
+    }
+    th {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--floydia-mint);
+      background: rgba(21, 38, 56, 0.5);
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+    tr:hover { background: rgba(16, 210, 173, 0.03); }
+    .code-val { font-family: 'JetBrains Mono', monospace; }
+    .score-cell {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: var(--floydia-teal);
+    }
+    .free-tag { color: var(--floydia-teal); font-weight: 600; }
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid var(--floydia-border-dark);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: #64748B;
+    }
+    footer strong { color: var(--floydia-teal); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <div class="brand-title">FLOYD<span>IA</span> OBSERVATORY</div>
+        <div class="brand-subtitle">WEB & IA AUTOMATION · SISTEMA DE BENCHMARKS Y ARSENAL LOCAL</div>
+      </div>
+      <div class="date-badge">📅 2026-08-28</div>
+    </header>
+
+    <!-- SECCIÓN 1: ARSENAL LOCAL -->
+    <div class="section-card" style="border-left: 4px solid var(--floydia-teal);">
+      <div class="section-title">
+        <span>🟢 Modelos Activos en tu Computadora (APIs Verificadas)</span>
+      </div>
+      <p style="font-size: 14px; color: #94A3B8; margin-bottom: 16px;">
+        Modelos con credenciales operativas detectadas en tu entorno local.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Modelo Local</th>
+            <th>Proveedor</th>
+            <th>Categoría</th>
+            <th>Ventana Contexto</th>
+            <th>Latencia</th>
+            <th>Precio ($/1M)</th>
+            <th>Score</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <tr>
+            <td><strong>Google Gemini 3.5 Flash (Multi)</strong></td>
+            <td>Google</td>
+            <td><span class="tier-badge tier-multimodal">multimodal</span></td>
+            <td class="code-val">1,048,576 tok</td>
+            <td class="code-val">1833.5 ms</td>
+            <td class="code-val">$0.750 / $4.500</td>
+            <td class="score-cell">98.82 / 100</td>
+          </tr>
+        
+          <tr>
+            <td><strong>Google Gemini 2.5 Pro</strong></td>
+            <td>Google</td>
+            <td><span class="tier-badge tier-long_context">long_context</span></td>
+            <td class="code-val">1,048,576 tok</td>
+            <td class="code-val">474.1 ms</td>
+            <td class="code-val">$1.250 / $10.000</td>
+            <td class="score-cell">85.29 / 100</td>
+          </tr>
+        
+          <tr>
+            <td><strong>DeepSeek R1 (Reasoner)</strong></td>
+            <td>DeepSeek</td>
+            <td><span class="tier-badge tier-reasoning">reasoning</span></td>
+            <td class="code-val">64,000 tok</td>
+            <td class="code-val">716.5 ms</td>
+            <td class="code-val">$0.700 / $2.500</td>
+            <td class="score-cell">81.01 / 100</td>
+          </tr>
+        
+          <tr>
+            <td><strong>DeepSeek V4 Flash</strong></td>
+            <td>DeepSeek</td>
+            <td><span class="tier-badge tier-frontier">frontier</span></td>
+            <td class="code-val">262,144 tok</td>
+            <td class="code-val">716.5 ms</td>
+            <td class="code-val">$0.100 / $0.200</td>
+            <td class="score-cell">72.78 / 100</td>
+          </tr>
+        
+          <tr>
+            <td><strong>Google Gemini 2.5 Flash</strong></td>
+            <td>Google</td>
+            <td><span class="tier-badge tier-long_context">long_context</span></td>
+            <td class="code-val">1,048,576 tok</td>
+            <td class="code-val">474.1 ms</td>
+            <td class="code-val">$0.150 / $1.250</td>
+            <td class="score-cell">69.76 / 100</td>
+          </tr>
+        
+          <tr>
+            <td><strong>DeepSeek V3 (Chat)</strong></td>
+            <td>DeepSeek</td>
+            <td><span class="tier-badge tier-workhorse">workhorse</span></td>
+            <td class="code-val">163,840 tok</td>
+            <td class="code-val">920.2 ms</td>
+            <td class="code-val">$0.257 / $1.029</td>
+            <td class="score-cell">56.4 / 100</td>
+          </tr>
+        
+          <tr>
+            <td><strong>Google Gemini 2.0 Flash</strong></td>
+            <td>Google</td>
+            <td><span class="tier-badge tier-realtime">realtime</span></td>
+            <td class="code-val">1,048,576 tok</td>
+            <td class="code-val">474.1 ms</td>
+            <td class="code-val"><span class='free-tag'>🆓 GRATIS</span></td>
+            <td class="score-cell">51.68 / 100</td>
+          </tr>
+        
+          <tr>
+            <td><strong>Mistral Codestral Latest</strong></td>
+            <td>Mistral</td>
+            <td><span class="tier-badge tier-coding">coding</span></td>
+            <td class="code-val">256,000 tok</td>
+            <td class="code-val">720.8 ms</td>
+            <td class="code-val">$0.300 / $0.900</td>
+            <td class="score-cell">44.54 / 100</td>
+          </tr>
+        
+          <tr>
+            <td><strong>Gemma 4 31B IT (Agent)</strong></td>
+            <td>Google</td>
+            <td><span class="tier-badge tier-agentic">agentic</span></td>
+            <td class="code-val">262,144 tok</td>
+            <td class="code-val">644.9 ms</td>
+            <td class="code-val"><span class='free-tag'>🆓 GRATIS</span></td>
+            <td class="score-cell">None / 100</td>
+          </tr>
+        
+          <tr>
+            <td><strong>NVIDIA Nemotron 3 Nano Omni 30B</strong></td>
+            <td>NVIDIA</td>
+            <td><span class="tier-badge tier-realtime">realtime</span></td>
+            <td class="code-val">262,144 tok</td>
+            <td class="code-val">1434.3 ms</td>
+            <td class="code-val">$0.050 / $0.200</td>
+            <td class="score-cell">None / 100</td>
+          </tr>
+        
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SECCIÓN 2: RADAR DE FRONTERA GLOBAL -->
+    <div class="section-card">
+      <div class="section-title">
+        <span>⚪ Radar de Frontera Global (Modelos de Referencia Externa)</span>
+      </div>
+      <p style="font-size: 14px; color: #94A3B8; margin-bottom: 16px;">
+        Modelos punteros a nivel mundial que no tienes configurados localmente.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Modelo</th>
+            <th>Proveedor</th>
+            <th>Categoría</th>
+            <th>Inteligencia</th>
+            <th>Elo LMSYS</th>
+            <th>Precio / 1M</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <tr>
+            <td class="code-val">#1</td>
+            <td><strong>Anthropic Claude Opus 5 (Max)</strong></td>
+            <td>Anthropic</td>
+            <td><span class="tier-badge tier-frontier">frontier</span></td>
+            <td class="score-cell">99.58</td>
+            <td class="code-val">1399</td>
+            <td class="code-val">$20.0 / $100.0</td>
+          </tr>
+        
+          <tr>
+            <td class="code-val">#2</td>
+            <td><strong>Anthropic Claude Opus 5 (High)</strong></td>
+            <td>Anthropic</td>
+            <td><span class="tier-badge tier-frontier">frontier</span></td>
+            <td class="score-cell">99.57</td>
+            <td class="code-val">1399</td>
+            <td class="code-val">$2.5 / $12.5</td>
+          </tr>
+        
+          <tr>
+            <td class="code-val">#3</td>
+            <td><strong>Anthropic Claude Opus 4.7 (High)</strong></td>
+            <td>Anthropic</td>
+            <td><span class="tier-badge tier-frontier">frontier</span></td>
+            <td class="score-cell">99.5</td>
+            <td class="code-val">1397</td>
+            <td class="code-val">$2.5 / $12.5</td>
+          </tr>
+        
+          <tr>
+            <td class="code-val">#4</td>
+            <td><strong>OpenAI GPT 5.5 (High)</strong></td>
+            <td>OpenAI</td>
+            <td><span class="tier-badge tier-frontier">frontier</span></td>
+            <td class="score-cell">99.4</td>
+            <td class="code-val">1396</td>
+            <td class="code-val">$5.0 / $30.0</td>
+          </tr>
+        
+          <tr>
+            <td class="code-val">#5</td>
+            <td><strong>Anthropic Claude Fable 5</strong></td>
+            <td>Anthropic</td>
+            <td><span class="tier-badge tier-frontier">frontier</span></td>
+            <td class="score-cell">99.23</td>
+            <td class="code-val">1397</td>
+            <td class="code-val">$5.0 / $25.0</td>
+          </tr>
+        
+          <tr>
+            <td class="code-val">#6</td>
+            <td><strong>Anthropic Claude Opus 4.8 (High)</strong></td>
+            <td>Anthropic</td>
+            <td><span class="tier-badge tier-frontier">frontier</span></td>
+            <td class="score-cell">99.21</td>
+            <td class="code-val">1397</td>
+            <td class="code-val">$2.5 / $12.5</td>
+          </tr>
+        
+          <tr>
+            <td class="code-val">#7</td>
+            <td><strong>OpenAI GPT 5.6 Sol (xHigh)</strong></td>
+            <td>OpenAI</td>
+            <td><span class="tier-badge tier-frontier">frontier</span></td>
+            <td class="score-cell">99.17</td>
+            <td class="code-val">1397</td>
+            <td class="code-val">$2.0 / $10.0</td>
+          </tr>
+        
+          <tr>
+            <td class="code-val">#8</td>
+            <td><strong>Moonshot Kimi K3 (Max)</strong></td>
+            <td>Moonshot</td>
+            <td><span class="tier-badge tier-coding">coding</span></td>
+            <td class="score-cell">99.16</td>
+            <td class="code-val">1397</td>
+            <td class="code-val">$2.55 / $12.75</td>
+          </tr>
+        
+          <tr>
+            <td class="code-val">#9</td>
+            <td><strong>Anthropic Claude Opus 4.6 (High)</strong></td>
+            <td>Anthropic</td>
+            <td><span class="tier-badge tier-frontier">frontier</span></td>
+            <td class="score-cell">99.07</td>
+            <td class="code-val">1394</td>
+            <td class="code-val">$2.5 / $12.5</td>
+          </tr>
+        
+          <tr>
+            <td class="code-val">#10</td>
+            <td><strong>Meta Muse Spark 1.2 (xHigh)</strong></td>
+            <td>Meta</td>
+            <td><span class="tier-badge tier-multimodal">multimodal</span></td>
+            <td class="score-cell">99.07</td>
+            <td class="code-val">1394</td>
+            <td class="code-val">$1.25 / $4.25</td>
+          </tr>
+        
+          <tr>
+            <td class="code-val">#11</td>
+            <td><strong>Meta Muse Spark 1.1</strong></td>
+            <td>Meta</td>
+            <td><span class="tier-badge tier-multimodal">multimodal</span></td>
+            <td class="score-cell">98.97</td>
+            <td class="code-val">1394</td>
+            <td class="code-val">$1.25 / $4.25</td>
+          </tr>
+        
+          <tr>
+            <td class="code-val">#12</td>
+            <td><strong>Alibaba Qwen 3.8 Max</strong></td>
+            <td>Alibaba</td>
+            <td><span class="tier-badge tier-coding">coding</span></td>
+            <td class="score-cell">98.94</td>
+            <td class="code-val">1393</td>
+            <td class="code-val">$2.0 / $6.0</td>
+          </tr>
+        
+        </tbody>
+      </table>
+    </div>
+
+    <footer>
+      <p>«Construimos la inteligencia. Desde la infraestructura.» — <strong>FloydIA</strong></p>
+      <p style="margin-top: 4px; color: #475569;">«Desde la infraestructura, todo.»</p>
+    </footer>
+  </div>
+</body>
+</html>

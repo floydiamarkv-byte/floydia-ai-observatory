@@ -90,6 +90,9 @@ def ask_observatory(user_query: str) -> Dict[str, Any]:
         # Cruzar con telemetría de red si está disponible
         live_net = radar_telemetry.get("models", {}).get(m_id, {})
         
+        raw_b = m.get("raw_benchmarks", {})
+        elo_val = raw_b.get("arena_elo") or raw_b.get("chatbot_arena")
+
         models_context.append({
             "id": m_id,
             "name": m.get("canonical_name"),
@@ -98,9 +101,9 @@ def ask_observatory(user_query: str) -> Dict[str, Any]:
             "intelligence_score": m.get("intelligence_score"),
             "workhorse_score": m.get("workhorse_score"),
             "coding_score": m.get("coding_score"),
-            "speed_tok_s": m.get("speed_tokens_sec"),
-            "ttft_s": m.get("ttft_seconds"),
-            "elo_arena": m.get("arena_elo"),
+            "speed_tok_s": raw_b.get("speed_tokens_sec"),
+            "ttft_s": raw_b.get("ttft_seconds"),
+            "elo_arena": elo_val,
             "input_cost_1m": m.get("input_cost_per_m"),
             "output_cost_1m": m.get("output_cost_per_m"),
             "is_free_tier": m.get("is_free_tier"),
@@ -109,7 +112,8 @@ def ask_observatory(user_query: str) -> Dict[str, Any]:
             "live_ping_status": live_net.get("status", "🟢 200 OK"),
             "live_ping_latency": live_net.get("latency", "N/A"),
             "supports_tools": m.get("supports_tools", False),
-            "supports_vision": m.get("supports_vision", False)
+            "supports_vision": m.get("supports_vision", False),
+            "evidence_grade": m.get("evidence_grade", "D")
         })
 
     system_prompt = """Eres el Asesor Senior de Arquitectura e Inteligencia Artificial de FloydIA.

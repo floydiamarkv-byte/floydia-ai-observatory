@@ -203,18 +203,26 @@ def generate_daily_html_report(rankings_data: List[Dict[str, Any]], local_apis_d
 """
 
     for m in local_active:
-        tier_cls = f"tier-{m['tier']}"
-        free_txt = "<span class='free-tag'>🆓 GRATIS</span>" if m.get("is_free_tier") else f"${m['input_cost_per_m']:.3f} / ${m['output_cost_per_m']:.3f}"
-        lat = f"{m['local_latency_ms']} ms" if m.get("local_latency_ms") else "-"
+        tier_val = m.get('tier') or 'workhorse'
+        tier_cls = f"tier-{tier_val}"
+        if m.get("is_free_tier"):
+            free_txt = "<span class='free-tag'>🆓 GRATIS</span>"
+        elif m.get("input_cost_per_m") is not None:
+            free_txt = f"${m['input_cost_per_m']:.3f} / ${m.get('output_cost_per_m', 0.0):.3f}"
+        else:
+            free_txt = "—"
+        lat = f"{m['local_latency_ms']} ms" if m.get("local_latency_ms") is not None else "-"
+        ctx = f"{m['context_window']:,} tok" if m.get('context_window') else "—"
+        intel = f"{m.get('intelligence_score', '—')} / 100"
         html += f"""
           <tr>
-            <td><strong>{m['canonical_name']}</strong></td>
-            <td>{m['provider']}</td>
-            <td><span class="tier-badge {tier_cls}">{m['tier']}</span></td>
-            <td class="code-val">{m['context_window']:,} tok</td>
+            <td><strong>{m.get('canonical_name', 'Unknown')}</strong></td>
+            <td>{m.get('provider', '—')}</td>
+            <td><span class="tier-badge {tier_cls}">{tier_val}</span></td>
+            <td class="code-val">{ctx}</td>
             <td class="code-val">{lat}</td>
             <td class="code-val">{free_txt}</td>
-            <td class="score-cell">{m['intelligence_score']} / 100</td>
+            <td class="score-cell">{intel}</td>
           </tr>
         """
 
@@ -250,16 +258,25 @@ def generate_daily_html_report(rankings_data: List[Dict[str, Any]], local_apis_d
 """
 
     for m in external_models[:12]:
-        tier_cls = f"tier-{m['tier']}"
-        cost_txt = "Gratis" if m.get("is_free_tier") else f"${m['input_cost_per_m']} / ${m['output_cost_per_m']}"
-        elo = f"{m['preference_score']*4 + 1000:.0f}"
+        tier_val = m.get('tier') or 'workhorse'
+        tier_cls = f"tier-{tier_val}"
+        if m.get("is_free_tier"):
+            cost_txt = "Gratis"
+        elif m.get("input_cost_per_m") is not None:
+            cost_txt = f"${m['input_cost_per_m']} / ${m.get('output_cost_per_m', 0.0)}"
+        else:
+            cost_txt = "—"
+        
+        pref = m.get('preference_score')
+        elo = f"{pref*4 + 1000:.0f}" if pref is not None else "—"
+        intel_score = f"{m.get('intelligence_score', '—')}"
         html += f"""
           <tr>
-            <td class="code-val">#{m['global_rank']}</td>
-            <td><strong>{m['canonical_name']}</strong></td>
-            <td>{m['provider']}</td>
-            <td><span class="tier-badge {tier_cls}">{m['tier']}</span></td>
-            <td class="score-cell">{m['intelligence_score']}</td>
+            <td class="code-val">#{m.get('global_rank', '—')}</td>
+            <td><strong>{m.get('canonical_name', 'Unknown')}</strong></td>
+            <td>{m.get('provider', '—')}</td>
+            <td><span class="tier-badge {tier_cls}">{tier_val}</span></td>
+            <td class="score-cell">{intel_score}</td>
             <td class="code-val">{elo}</td>
             <td class="code-val">{cost_txt}</td>
           </tr>

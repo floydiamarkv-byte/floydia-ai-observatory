@@ -121,6 +121,23 @@ GOOGLE_ACCOUNTS = get_all_available_keys([
     "GEMINI_API_KEY", "GOOGLE_API_KEY"
 ])
 
+ZEN_ACCOUNTS = get_all_available_keys([
+    "C1_ZEN_OPENCODE", "C2_ZEN_OPENCODE", "C3_ZEN_OPENCODE",
+    "C4_ZEN_OPENCODE", "C5_ZEN_OPENCODE", "C6_ZEN_OPENCODE", "C7_ZEN_OPENCODE"
+])
+
+Z_AI_ACCOUNTS = get_all_available_keys([
+    "C1_Z_AI", "C2_Z_AI", "C3_Z_AI", "C4_Z_AI", "C5_Z_AI", "C6_Z_AI"
+])
+
+GROKIFIED_ACCOUNTS = get_all_available_keys([
+    "GROKIFIED_API_KEY", "GROKIFIED_API_KEY_AUX"
+])
+
+DASHSCOPE_ACCOUNTS = get_all_available_keys([
+    "C7_DASHSCOPE_API_KEY", "C7_QWEN_API_KEY", "C8_ALIBABA_API"
+])
+
 DEEPSEEK_ACCOUNTS = get_all_available_keys([
     "C1_DEEPSEEK", "C2_DEEPSEEK", "C3_DEEPSEEK", "C4_DEEPSEEK", 
     "C5_DEEPSEEK", "C6_DEEPSEEK", "C7_DEEPSEEK", "DEEPSEEK_API_KEY"
@@ -147,6 +164,10 @@ GROQ_ACCOUNTS = get_all_available_keys([
 
 # Claves primarias individuales (Compatibilidad hacia atrás)
 GEMINI_API_KEY = GOOGLE_ACCOUNTS[0]["key"] if GOOGLE_ACCOUNTS else None
+ZEN_API_KEY = ZEN_ACCOUNTS[0]["key"] if ZEN_ACCOUNTS else None
+Z_AI_API_KEY = Z_AI_ACCOUNTS[0]["key"] if Z_AI_ACCOUNTS else None
+GROKIFIED_API_KEY = GROKIFIED_ACCOUNTS[0]["key"] if GROKIFIED_ACCOUNTS else None
+DASHSCOPE_API_KEY = DASHSCOPE_ACCOUNTS[0]["key"] if DASHSCOPE_ACCOUNTS else None
 OPENROUTER_API_KEY = OPENROUTER_ACCOUNTS[0]["key"] if OPENROUTER_ACCOUNTS else None
 DEEPSEEK_API_KEY = DEEPSEEK_ACCOUNTS[0]["key"] if DEEPSEEK_ACCOUNTS else None
 NVIDIA_API_KEY = NVIDIA_ACCOUNTS[0]["key"] if NVIDIA_ACCOUNTS else None
@@ -167,6 +188,10 @@ HF_TOKEN = get_first_available_key(["HF_TOKEN", "HUGGINGFACE_TOKEN", "HUGGING_FA
 GEMINI_MODEL = os.getenv("DEFAULT_GEMINI_MODEL", "gemini-3.6-flash")
 GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta"
 GOOGLE_OPENAI_BASE = "https://generativelanguage.googleapis.com/v1beta/openai"
+ZEN_API_BASE = "https://api.opencode.ai/zen/v1"
+Z_AI_API_BASE = "https://open.bigmodel.cn/api/paas/v4"
+GROKIFIED_API_BASE = os.getenv("GROKIFIED_BASE_URL", "https://api.grokified.com/v1")
+DASHSCOPE_API_BASE = os.getenv("C7_DASHSCOPE_BASE_URL", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1")
 OPENROUTER_API_BASE = "https://openrouter.ai/api/v1"
 DEEPSEEK_API_BASE = "https://api.deepseek.com"
 NVIDIA_API_BASE = "https://integrate.api.nvidia.com/v1"
@@ -174,3 +199,111 @@ MISTRAL_API_BASE = "https://api.mistral.ai/v1"
 GROQ_API_BASE = "https://api.groq.com/openai/v1"
 FIREWORKS_API_BASE = "https://api.fireworks.ai/inference/v1"
 GITHUB_MODELS_BASE = "https://models.inference.ai.azure.com"
+
+# ---------------------------------------------------------------------------
+# Mapeo de Cuentas: variable env → email/label para mostrar en la UI.
+# NO expone secretos, solo el nombre legible de la cuenta asociada.
+# ---------------------------------------------------------------------------
+ACCOUNT_LABELS: Dict[str, str] = {
+    # Cuenta 1 (Pro)
+    "C1_GOOGLE_AISTUDIO": "eliutec.aux.ia1@gmail.com",
+    "C1_NVIDIA": "eliutec.aux.ia1@gmail.com",
+    "C1_GROQ": "eliutec.aux.ia1@gmail.com",
+    "C1_OPENROUTER": "eliutec.aux.ia1@gmail.com",
+    "C1_Z_AI": "eliutec.aux.ia1@gmail.com",
+    "C1_MISTRAL": "eliutec.aux.ia1@gmail.com",
+    "C1_ZEN_OPENCODE": "eliutec.aux.ia1@gmail.com",
+    "C1_DEEPSEEK": "eliutec.aux.ia1@gmail.com",
+    # Cuenta 2
+    "C2_GOOGLE_AISTUDIO": "eliutec.aux.ia2@gmail.com",
+    "C2_NVIDIA": "eliutec.aux.ia2@gmail.com",
+    "C2_GROQ": "eliutec.aux.ia2@gmail.com",
+    "C2_OPENROUTER": "eliutec.aux.ia2@gmail.com",
+    "C2_Z_AI": "eliutec.aux.ia2@gmail.com",
+    "C2_MISTRAL": "eliutec.aux.ia2@gmail.com",
+    "C2_ZEN_OPENCODE": "eliutec.aux.ia2@gmail.com",
+    "C2_DEEPSEEK": "eliutec.aux.ia2@gmail.com",
+    # Cuenta 3
+    "C3_GOOGLE_AISTUDIO": "eliutec.aux.ia3@gmail.com",
+    "C3_GROQ": "eliutec.aux.ia3@gmail.com",
+    "C3_OPENROUTER": "eliutec.aux.ia3@gmail.com",
+    "C3_Z_AI": "eliutec.aux.ia3@gmail.com",
+    "C3_MISTRAL": "eliutec.aux.ia3@gmail.com",
+    "C3_ZEN_OPENCODE": "eliutec.aux.ia3@gmail.com",
+    "C3_DEEPSEEK": "eliutec.aux.ia3@gmail.com",
+    # Cuenta 4
+    "C4_GOOGLE_AISTUDIO": "eliutec.aux.ia4@gmail.com",
+    "C4_GROQ": "eliutec.aux.ia4@gmail.com",
+    "C4_OPENROUTER": "eliutec.aux.ia4@gmail.com",
+    "C4_Z_AI": "eliutec.aux.ia4@gmail.com",
+    "C4_MISTRAL": "eliutec.aux.ia4@gmail.com",
+    "C4_ZEN_OPENCODE": "eliutec.aux.ia4@gmail.com",
+    "C4_DEEPSEEK": "eliutec.aux.ia4@gmail.com",
+    # Cuenta 5
+    "C5_GOOGLE_AISTUDIO": "eliutec.aux.ia5@gmail.com",
+    "C5_GROQ": "eliutec.aux.ia5@gmail.com",
+    "C5_OPENROUTER": "eliutec.aux.ia5@gmail.com",
+    "C5_Z_AI": "eliutec.aux.ia5@gmail.com",
+    "C5_MISTRAL": "eliutec.aux.ia5@gmail.com",
+    "C5_ZEN_OPENCODE": "eliutec.aux.ia5@gmail.com",
+    "C5_DEEPSEEK": "eliutec.aux.ia5@gmail.com",
+    # Cuenta 6
+    "C6_GOOGLE_AISTUDIO": "eliutec.aux.ia6@gmail.com",
+    "C6_GROQ": "eliutec.aux.ia6@gmail.com",
+    "C6_OPENROUTER": "eliutec.aux.ia6@gmail.com",
+    "C6_Z_AI": "eliutec.aux.ia6@gmail.com",
+    "C6_MISTRAL": "eliutec.aux.ia6@gmail.com",
+    "C6_ZEN_OPENCODE": "eliutec.aux.ia6@gmail.com",
+    "C6_DEEPSEEK": "eliutec.aux.ia6@gmail.com",
+    # Cuenta 7 (Master)
+    "C7_OPENROUTER": "floydiamarkv@gmail.com",
+    "C7_OPENROUTER_HERMES_HP15": "floydiamarkv@gmail.com",
+    "C7_OPENROUTER_OPENCODE_HP15": "floydiamarkv@gmail.com",
+    "C7_OPENROUTER_API_KEY": "floydiamarkv@gmail.com",
+    "C7_DEEPSEEK": "floydiamarkv@gmail.com",
+    "C7_NVIDIA": "floydiamarkv@gmail.com",
+    "C7_ZEN_OPENCODE": "floydiamarkv@gmail.com",
+    "C7_DASHSCOPE_API_KEY": "floydiamarkv@gmail.com",
+    "C7_QWEN_API_KEY": "floydiamarkv@gmail.com",
+    "C7_FIREWORKS_API_KEY": "floydiamarkv@gmail.com",
+    "C7_KIMI_PLATFORM_API": "floydiamarkv@gmail.com",
+    # Cuenta 8
+    "C8_ALIBABA_API": "lacoquita.elsa@gmail.com",
+    "C8_FIREWORKS_API": "lacoquita.elsa@gmail.com",
+    # Claves standalone (fuera de serie C1..C8)
+    "GROKIFIED_API_KEY": "floydiamarkv@gmail.com",
+    "GROKIFIED_API_KEY_AUX": "eliutec.aux.ia1@gmail.com",
+    "DEEPSEEK_API_KEY": "floydiamarkv@gmail.com",
+    "NVIDIA_API_KEY": "eliutec.aux.ia1@gmail.com",
+    "MISTRAL_API_KEY": "eliutec.aux.ia1@gmail.com",
+    "GROQ_API_KEY": "eliutec.aux.ia1@gmail.com",
+    "OPENROUTER_API_KEY": "floydiamarkv@gmail.com",
+    "S02_GITHUB_TOKEN_ANTIGRAVITY": "floydiamarkv@gmail.com",
+    "S02_GITHUB_PAT": "floydiamarkv@gmail.com",
+}
+
+
+def resolve_account_email(env_key_name: str) -> str:
+    """Dado el nombre de la variable de entorno, retorna el email de la cuenta asociada."""
+    return ACCOUNT_LABELS.get(env_key_name, "—")
+
+
+# M-6: Vida media continua por fuente de benchmark (en días)
+HALF_LIVES_BY_SOURCE: Dict[str, float] = {
+    "arena_ai": 30.0,
+    "arenaai": 30.0,
+    "lmsys": 30.0,
+    "livebench": 45.0,
+    "epoch_ai": 45.0,
+    "epochai": 45.0,
+    "swebench": 45.0,
+    "swe_bench": 45.0,
+    "aider": 30.0,
+    "livecodebench": 30.0,
+    "artificial_analysis": 30.0,
+    "artificialanalysis": 30.0,
+    "huggingface": 60.0,
+    "openrouter": 7.0,
+    "default": 30.0
+}
+
