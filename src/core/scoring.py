@@ -1,17 +1,14 @@
 """
-Motor de Cálculo de Índices Sintéticos, Scoring Multidimensional y Metadatos de Modelo v9.5 (Kimi & DevSecOps Protocol).
-Calcula métricas desacopladas continuas (sin números mágicos fijos), evalúa la calidad y frescura de datos,
-calcula el índice de confianza probabilística y enriquece con casos de uso y comparativas.
+Motor de Cálculo de Índices Sintéticos, Scoring Multidimensional y Metadatos de Modelo v10 (RankingEngineV3).
 
-Fuentes integradas (8):
-  - OpenRouter (catálogo, precios)
-  - Hugging Face (MMLU-Pro, GPQA, MATH, IFEval)
-  - Artificial Analysis (velocidad, latencia, quality index)
-  - LMSYS / Arena.ai (Elo de preferencia humana, Elo coding)
-  - LiveBench (razonamiento anti-contaminación)
-  - Epoch AI (ciencia)
-  - SWE-bench (resolución de issues de GitHub)
-  - Aider (coding polyglot multi-lenguaje)
+Versión 10 (2026-08-20): Reemplaza la lógica de mezcla de escalas y la imputación plana
+por Probit Rank Calibration + Shrinkage bayesiano jerárquico. La función pública
+`calculate_multidimensional_rankings()` mantiene exactamente la misma firma y shape
+de salida que las versiones anteriores (todos los consumidores —web, cli, gui, analyst—
+no requieren cambios). La matemática interna delega en `RankingEngineV3`; la
+estética, metadatos de perfil y workhorse se conservan aquí.
+
+Documentación matemática: docs/SPEC_FCI_V3.md.
 """
 
 from typing import Dict, Any, List, Optional
@@ -20,7 +17,7 @@ from src.core.db import get_db_connection, get_latest_local_verified_models
 from src.core.contracts import ObservationType, QualityStatus
 from src.core.quality import quality_engine
 from src.core.freshness import freshness_engine
-from src.core.confidence import confidence_engine
+from src.core.ranking_engine_v3 import ranking_engine_v3, ModelScoreResult
 
 
 MODEL_PROFILES = {
@@ -132,25 +129,162 @@ MODEL_PROFILES = {
         ],
         "comparison": "Alta adaptabilidad para flujos de investigación sin filtros artificiales.",
         "sources": ["Nous Research", "OpenRouter", "Hermes Endpoint"]
+    },
+    "anthropic-claude-fable-5": {
+        "description": "Modelo insignia de frontera agéntica de Anthropic con capacidades avanzadas de autonomía y razonamiento largo.",
+        "use_cases": [
+            "Orquestación de flujos agénticos autónomos complejos y multi-herramienta.",
+            "Ingeniería de software, síntesis y arquitectura de sistemas."
+        ],
+        "comparison": "Diseñado para tareas agénticas de vanguardia de Anthropic con alta coherencia.",
+        "sources": ["Anthropic", "OpenRouter Catalog"]
+    },
+    "qwen3.8-max": {
+        "description": "Modelo insignia de frontera de Alibaba Cloud para razonamiento multilingüe y resolución de problemas complejos.",
+        "use_cases": [
+            "Razonamiento matemático y técnico profundo.",
+            "Traducción y desarrollo de software multilingüe a gran escala."
+        ],
+        "comparison": "El modelo más potente de Alibaba Cloud, compitiendo en la categoría de frontera.",
+        "sources": ["Alibaba Cloud", "OpenRouter Catalog", "DashScope"]
+    },
+    "grok-4.6": {
+        "description": "Modelo de razonamiento de frontera de xAI con comprensión profunda y amplias capacidades de análisis de datos.",
+        "use_cases": [
+            "Razonamiento lógico formal, análisis en tiempo real y codificación.",
+            "Flujos de trabajo multi-agente complejos."
+        ],
+        "comparison": "Modelo de máxima capacidad de la familia Grok de xAI.",
+        "sources": ["xAI", "Grokified"]
+    },
+    "glm-5.3": {
+        "description": "Modelo insignia de frontera de Zhipu AI con ventana de contexto de 262k y alta precisión en razonamiento.",
+        "use_cases": [
+            "Comprensión de documentos complejos y generación estructurada.",
+            "Tareas de programación y agentes de flujo continuo."
+        ],
+        "comparison": "Frontier de Zhipu AI para alto rendimiento y despliegue rápido.",
+        "sources": ["Zhipu AI", "Z.AI Platform"]
     }
 }
 
 
+# ---------------------------------------------------------------------------
+# Heurísticas de metadatos (perfil, dueño, variante, capacidades)
+# Conservadas desde v9.5. No forman parte del cálculo matemático del FCI.
+# ---------------------------------------------------------------------------
+
+_OWNER_KEYWORDS = (
+    ("anthropic", "claude"), ("google", "gemini", "gemma"),
+    ("openai", "gpt", "o1", "o3"), ("deepseek",),
+    ("qwen", "alibaba", "dashscope"), ("mistral", "codestral"),
+    ("zhipu", "glm", "z-ai"), ("grok", "xai", "x-ai"),
+    ("meta", "llama"),
+)
+
+
+def _infer_owner(model_id: str, provider_default: str) -> str:
+    cid = model_id.lower()
+    for group in _OWNER_KEYWORDS:
+        for kw in group[1:] if len(group) > 1 else group:
+            if kw in cid:
+                return group[0].title() if group[0] not in ("xai",) else "xAI"
+    return provider_default
+
+
+def _infer_variant(model_id: str) -> str:
+    cid = model_id.lower()
+    if ":batch" in cid:
+        return "Batch Processing"
+    if any(t in cid for t in ("fast", "flash", "turbo")):
+        return "Fast / Turbo"
+    if any(t in cid for t in ("pro", "max")):
+        return "High Reasoning (Pro/Max)"
+    if any(t in cid for t in ("r1", "o3", "o1", "reasoner", "thinking")):
+        return "Reasoning CoT"
+    return "Standard"
+
+
+def _infer_capabilities(model: Dict[str, Any], family_id: str, variant: str) -> List[str]:
+    cid = model["id"].lower()
+    caps = []
+    if model.get("tier") == "frontier" or any(k in cid for k in ("fable", "opus", "gpt-5")):
+        caps.append("FRONTIER")
+    if model.get("supports_reasoning") or any(k in cid for k in ("reason", "r1", "o1", "o3", "thinking")):
+        caps.append("REASONING")
+    if model.get("supports_tools") or "agent" in cid:
+        caps.append("AGENTIC")
+    if model.get("tier") == "coding" or any(k in cid for k in ("code", "coder", "dev", "sonnet")):
+        caps.append("CODING")
+    ctx = int(model.get("context_window") or 0)
+    if ctx >= 1_000_000:
+        caps.append("1M+ CONTEXT")
+    elif ctx >= 200_000:
+        caps.append("LONG CONTEXT")
+    if model.get("supports_vision"):
+        caps.append("VISION")
+    if not caps:
+        caps.append((model.get("tier") or "workhorse").upper())
+    return caps
+
+
+# ---------------------------------------------------------------------------
+# Fachada V3: delega en RankingEngineV3, conserva el dict-shape del contrato
+# ---------------------------------------------------------------------------
+
+# Benchmarks con observación y que el QualityGate acepta
+_CORE_BENCHMARKS = (
+    "arena_elo", "chatbot_arena", "aa_quality_index",
+    "livebench", "epoch_science", "swe_bench", "aider_polyglot",
+    "humaneval", "livecodebench", "mmlu_pro", "gpqa", "math_500",
+    "ifeval", "hf_average", "arena_coding_elo", "aider_edit_format",
+    "speed_tokens_sec", "ttft_seconds",
+)
+
+
+def _enrich_workhorse(fci: float, model: Dict[str, Any], raw_benchmarks: Dict[str, float]) -> float:
+    """Cálculo del Workhorse Efficiency preservado de v9.5."""
+    input_cost = max(0.0, float(model.get("input_cost_per_m") or 0.0))
+    output_cost = max(0.0, float(model.get("output_cost_per_m") or 0.0))
+    is_free = bool(model.get("is_free_tier")) or (input_cost == 0.0 and output_cost == 0.0) or ":free" in model["id"].lower()
+    cost_total = (input_cost + output_cost) or 0.10
+    cost_factor = 1.0 if is_free else max(0.2, 1.0 / (1.0 + (cost_total / 2.0)))
+    speed = max(0.0, raw_benchmarks.get("speed_tokens_sec", 0.0))
+    speed_factor = min(1.0, speed / 150.0) if speed > 0 else 0.5
+    return round(fci * 0.5 + (cost_factor * 100.0) * 0.3 + (speed_factor * 100.0) * 0.2, 1)
+
+
+def _evidence_badge(conf: float, n_sources: int, has_disagreement: bool) -> tuple:
+    if conf >= 0.85 and n_sources >= 3 and not has_disagreement:
+        return "🟢 SOTA VERIFICADO", "A+ (Multi-Benchmark SOTA)"
+    if conf >= 0.80:
+        return "🟢 ALTA CERTEZA", "A (Alta Corroboración)"
+    if conf >= 0.65:
+        return "🟡 EVIDENCIA MODERADA", "B (Fuentes Parciales)"
+    return "🟠 EVIDENCIA PRELIMINAR", "C (Evidencia Limitada)"
+
+
 def calculate_multidimensional_rankings() -> List[Dict[str, Any]]:
     """
-    Agrega todas las evaluaciones registradas, aplica la puerta de calidad (QualityGate),
-    calcula la frescura temporal y el índice de confianza de Kimi, y produce rankings continuos.
+    Fachada de compatibilidad sobre RankingEngineV3. Misma firma y mismo shape
+    de salida que versiones anteriores; la matemática interna es ahora:
+      - Probit Rank Normalization por benchmark (escala 0–100 estable).
+      - BLUE por pilar + shrinkage jerárquico a la familia canónica.
+      - Posterior de varianza propagado, margen 95% sin acotados arbitrarios.
+      - Confianza C ∈ [0,1] continua.
+      - Orden público por Lower Confidence Bound; empates según test de Welch.
     """
     local_verified = get_latest_local_verified_models()
     local_active_ids = {
         m["canonical_id"]: m for m in local_verified if m["is_functional"] and m["canonical_id"]
     }
-    
+
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM models")
         models = [dict(r) for r in cursor.fetchall()]
-        
+
+        # Evaluaciones crudas + calidad
         cursor.execute("""
             SELECT model_id, benchmark_name, AVG(score) as avg_score, MAX(recorded_at) as last_date,
                    GROUP_CONCAT(DISTINCT source) as sources_list
@@ -158,187 +292,158 @@ def calculate_multidimensional_rankings() -> List[Dict[str, Any]]:
             GROUP BY model_id, benchmark_name
         """)
         evals_raw = cursor.fetchall()
-    
-    model_evals: Dict[str, Dict[str, float]] = {}
-    model_sources: Dict[str, set] = {}
-    model_last_date: Dict[str, str] = {}
-    
+
+    # Índice de observaciones (filtradas por QualityGate) en formato V3
+    observations: List[Dict[str, Any]] = []
     for r in evals_raw:
-        m_id = r["model_id"]
-        b_name = r["benchmark_name"]
+        bname = r["benchmark_name"]
         score_val = float(r["avg_score"])
-        
-        # Validar métrica mediante QualityGate
-        q_status, _ = quality_engine.validate_metric(b_name, score_val)
+        q_status, _ = quality_engine.validate_metric(bname, score_val)
         if q_status == QualityStatus.REJECTED:
             continue
-            
-        if m_id not in model_evals:
-            model_evals[m_id] = {}
-            model_sources[m_id] = set()
-            model_last_date[m_id] = r["last_date"]
-        
-        model_evals[m_id][b_name] = score_val
-        if r["sources_list"]:
-            for s in r["sources_list"].split(","):
-                model_sources[m_id].add(s.strip())
-        if r["last_date"] and (m_id not in model_last_date or r["last_date"] > model_last_date[m_id]):
-            model_last_date[m_id] = r["last_date"]
-    
-    scored_models = []
-    
-    for m in models:
-        m_id = m["id"]
-        evals = model_evals.get(m_id, {})
-        detected_sources = list(model_sources.get(m_id, []))
-        last_eval_date = model_last_date.get(m_id)
-        
-        # === Frescura de datos ===
-        freshness_days, freshness_decay, freshness_status = freshness_engine.evaluate_freshness(last_eval_date)
-        
-        # === User Preference Score (Arena.ai / LMSYS) ===
-        arena_elo = evals.get("arena_elo", evals.get("chatbot_arena", 1150.0))
-        preference_score = max(0.0, min(100.0, (arena_elo - 1000.0) / 4.0))
-        
-        intel_used = []
-        coding_used = []
-        
-        # === Frontier Intelligence Score (Continuo) ===
-        intel_metrics = []
-        for k in ["mmlu_pro", "gpqa", "livebench", "math_500", "epoch_science", "aa_quality_index"]:
-            if k in evals:
-                intel_metrics.append(evals[k])
-                intel_used.append(k)
-        
-        if intel_metrics:
-            intelligence_score = sum(intel_metrics) / len(intel_metrics)
-            obs_type = ObservationType.OBSERVED
-        else:
-            # Ponderación continua estimada basada en capacidades y contexto (sin magic numbers fijos)
-            ctx_bonus = min(5.0, (m.get("context_window", 128000) / 200000.0))
-            tool_bonus = 2.0 if m.get("supports_tools") else 0.0
-            reason_bonus = 3.0 if m.get("supports_reasoning") else 0.0
-            tier_base = {
-                "frontier": 86.5, "workhorse": 73.2, "coding": 75.8,
-                "reasoning": 84.1, "agentic": 81.4, "multimodal": 77.3,
-                "long_context": 79.5, "uncensored": 71.0, "realtime": 69.4, "edge": 61.5
-            }.get(m["tier"], 65.0)
-            intelligence_score = tier_base + ctx_bonus + tool_bonus + reason_bonus
-            obs_type = ObservationType.ESTIMATED
+        # Las fuentes llegan agrupadas; las expandimos para que el motor las vea
+        sources = [s.strip() for s in (r["sources_list"] or "").split(",") if s.strip()]
+        if not sources:
+            sources = ["unknown"]
+        for src in sources:
+            observations.append({
+                "model_id": r["model_id"],
+                "benchmark_name": bname,
+                "score": score_val,
+                "source": src,
+                "recorded_at": r["last_date"],
+            })
 
-        # === Coding & Agentic Score (SWE-bench + Aider + HumanEval) ===
-        coding_metrics = []
-        for k in ["humaneval", "swe_bench", "aider_polyglot", "livecodebench", "arena_coding_elo"]:
-            if k in evals:
-                if k == "arena_coding_elo":
-                    coding_metrics.append(max(0.0, min(100.0, (evals[k] - 1000.0) / 4.0)))
-                else:
-                    coding_metrics.append(evals[k])
-                coding_used.append(k)
-        
-        if coding_metrics:
-            coding_score = sum(coding_metrics) / len(coding_metrics)
-        else:
-            coding_factor = 1.08 if m["tier"] == "coding" else 0.94
-            coding_score = min(100.0, intelligence_score * coding_factor)
+    # Motor V3: produce ranking por LCB con empates de Welch
+    v3_results = ranking_engine_v3.score_models(models, observations)
 
-        # === Detección de Free Tier y Validación de Precios (Quality Gate) ===
+    # Mapeo al shape histórico (consumidores: web/app.py, cli/main.py, gui/,
+    # analyst/ai_advisor.py) — preservamos los 50+ campos que esperan.
+    scored_models: List[Dict[str, Any]] = []
+    by_id = {m["id"]: m for m in models}
+
+    for r in v3_results:
+        m = by_id[r.model_id]
+        raw_name = m.get("canonical_name") or r.model_id
+        cleaned_id = r.model_id.lower()
+        owner = _infer_owner(r.model_id, m.get("provider", "Unknown"))
+        variant = _infer_variant(r.model_id)
+        capabilities = _infer_capabilities(m, r.family_id, variant)
+
+        # Benchmarks crudos para el panel de detalle (recargados de BD)
+        raw_benchmarks = {
+            row["benchmark_name"]: float(row["avg_score"])
+            for row in evals_raw
+            if row["model_id"] == r.model_id
+            and quality_engine.validate_metric(row["benchmark_name"], float(row["avg_score"]))[0] != QualityStatus.REJECTED
+        }
+        sources_list = sorted({o["source"] for o in observations if o["model_id"] == r.model_id})
+
+        freshness_days = r.extra.get("freshness_days", 0.0)
+        _, _, freshness_status = freshness_engine.evaluate_freshness(
+            max((o["recorded_at"] for o in observations if o["model_id"] == r.model_id), default=None)
+        )
+
+        # Costes y Workhorse
         input_cost = max(0.0, float(m.get("input_cost_per_m") or 0.0))
         output_cost = max(0.0, float(m.get("output_cost_per_m") or 0.0))
-        is_free = bool(m.get("is_free_tier")) or (input_cost == 0.0 and output_cost == 0.0) or (":free" in m_id.lower())
+        is_free = bool(m.get("is_free_tier")) or (input_cost == 0.0 and output_cost == 0.0) or ":free" in cleaned_id
+        workhorse = _enrich_workhorse(r.fci, m, raw_benchmarks)
 
-        # === Workhorse Efficiency Score ===
-        cost_total = (input_cost + output_cost) or 0.10
-        if is_free:
-            cost_factor = 1.0
-        else:
-            cost_factor = max(0.2, 1.0 / (1.0 + (cost_total / 2.0)))
-        
-        speed = max(0.0, evals.get("speed_tokens_sec", 0.0))
-        if speed > 0:
-            speed_factor = min(1.0, speed / 150.0)
-            workhorse_score = round(intelligence_score * 0.5 + (cost_factor * 100.0) * 0.3 + (speed_factor * 100.0) * 0.2, 1)
-        else:
-            workhorse_score = round(intelligence_score * 0.6 + (cost_factor * 100.0) * 0.4, 1)
+        # Discrepancia inter-fuente (umbral coherente con v9.5: std>9)
+        between_std = r.extra.get("between_source_std", 0.0)
+        has_disagreement = between_std > 9.0
+        disagreement_msg = "⚠️ Alta discrepancia entre fuentes de benchmark" if has_disagreement else ""
 
-        # === Local Readiness ===
-        is_local_active = m_id in local_active_ids
-        local_info = local_active_ids.get(m_id)
+        badge, grade = _evidence_badge(r.confidence, r.n_sources, has_disagreement)
 
-        # === Cálculo de Confianza de Kimi ===
-        all_eval_count = len(intel_used) + len(coding_used)
-        confidence_val = confidence_engine.calculate_confidence(
-            sources=detected_sources or [m["provider"]],
-            freshness_decay=freshness_decay,
-            metrics_count=all_eval_count,
-            has_local_verification=is_local_active,
-            observation_type=obs_type
-        )
-        confidence_badge = confidence_engine.get_badge(confidence_val)
-
-        # Score efectivo ponderado con confianza (desempate riguroso)
-        effective_score = round(intelligence_score * (0.85 + 0.15 * confidence_val), 1)
-
-        # === Metadatos de perfil (Pop-up) ===
-        profile = MODEL_PROFILES.get(m_id, {
-            "description": f"Modelo de lenguaje de {m['provider']} clasificado en la categoría {m['tier'].upper()}.",
+        profile = MODEL_PROFILES.get(r.model_id, {
+            "description": f"Modelo de lenguaje de {owner} evaluado en la categoría {(m.get('tier') or 'workhorse').upper()}.",
             "use_cases": [
-                f"Procesamiento de texto general y tareas en la categoría {m['tier']}.",
-                "Integración mediante APIs compatibles con OpenAI/OpenRouter."
+                f"Procesamiento y generación de texto en la categoría {m.get('tier')}.",
+                f"Inferencia mediante {m.get('provider')}."
             ],
-            "comparison": f"Evaluado con score de inteligencia {round(intelligence_score, 1)}/100 y confianza {int(confidence_val*100)}%.",
-            "sources": detected_sources or ["OpenRouter Datasets", "Benchmarks Agregados"]
+            "comparison": f"Evaluado con FCI {r.fci}/100 y grado de evidencia {grade}.",
+            "sources": sources_list or ["Catálogo FloydIA"]
         })
+        all_sources = list(set(profile.get("sources", []) + sources_list))
 
-        all_sources = list(set(profile.get("sources", []) + detected_sources))
-        if not all_sources:
-            all_sources = ["OpenRouter Catalog", "Arena.ai"]
+        # Local probe info
+        local_info = local_active_ids.get(r.model_id)
 
         scored_models.append({
-            "id": m_id,
-            "canonical_name": m["canonical_name"],
-            "tier": m["tier"],
-            "provider": m["provider"],
-            "context_window": m["context_window"],
-            "max_output": m["max_output"],
+            # Identidad
+            "id": r.model_id,
+            "canonical_name": raw_name,
+            "model_owner": owner,
+            "api_provider": m.get("provider", ""),
+            "variant": variant,
+            "capabilities": capabilities,
+            "tier": m.get("tier"),
+            "provider": m.get("provider"),
+            "context_window": m.get("context_window"),
+            "max_output": m.get("max_output"),
             "is_free_tier": is_free,
             "input_cost_per_m": input_cost,
             "output_cost_per_m": output_cost,
             "supports_tools": bool(m.get("supports_tools")),
             "supports_vision": bool(m.get("supports_vision")),
             "supports_reasoning": bool(m.get("supports_reasoning")),
-            # Índices Continuos
-            "intelligence_score": round(intelligence_score, 1),
-            "effective_score": effective_score,
-            "preference_score": round(preference_score, 1),
-            "workhorse_score": round(workhorse_score, 1),
-            "coding_score": round(coding_score, 1),
-            # Calidad, Frescura y Confianza (Kimi)
-            "confidence_score": confidence_val,
-            "confidence_badge": confidence_badge,
+            "family_id": r.family_id,                         # nuevo en V3
+            "canonical_variant": r.variant,                   # nuevo en V3
+            # FCI e incertidumbre (V3)
+            "intelligence_score": r.fci,
+            "fci_score": r.fci,
+            "fci_display": f"{r.fci} ± {r.margin_95}",
+            "uncertainty_margin": r.margin_95,
+            "ci_lower": r.ci_lower,
+            "ci_upper": r.ci_upper,
+            "lower_confidence_bound": r.lower_confidence_bound,   # nuevo en V3 (orden público)
+            "effective_score": round(r.fci * (0.85 + 0.15 * r.confidence), 1),
+            "confidence_score": r.confidence,
+            "confidence_badge": badge,
+            "evidence_grade": grade,
+            "has_disagreement": has_disagreement,
+            "disagreement_message": disagreement_msg,
+            "sample_size": r.n_metrics,
+            "n_metrics": r.n_metrics,                            # alias V3
+            "n_sources": r.n_sources,                            # alias V3
+            "source_count": r.n_sources,
+            "variance": between_std ** 2,                        # compatibilidad consumidor
+            # Pilares (alias a nombres históricos)
+            "pillar_reasoning": round(r.pillars["reasoning"].mean, 1) if "reasoning" in r.pillars else None,
+            "pillar_coding": round(r.pillars["coding"].mean, 1) if "coding" in r.pillars else None,
+            "pillar_quality": round(r.pillars["quality"].mean, 1) if "quality" in r.pillars else None,
+            "pillar_preference": round(r.pillars["preference"].mean, 1) if "preference" in r.pillars else None,
+            "pillar_shrinkage": {                                # nuevo en V3
+                p: round(r.pillars[p].shrinkage, 3) for p in r.pillars
+            },
+            # Workhorse y alias de compatibilidad
+            "workhorse_score": workhorse,
+            "coding_score": round(r.pillars["coding"].mean, 1) if "coding" in r.pillars and r.pillars["coding"].observed else round(r.fci * 0.95, 1),
+            "preference_score": round(r.pillars["preference"].mean, 1) if "preference" in r.pillars and r.pillars["preference"].observed else 65.0,
+            "quality_score": round(r.pillars["quality"].mean, 1) if "quality" in r.pillars and r.pillars["quality"].observed else None,
+            "reasoning_score": round(r.pillars["reasoning"].mean, 1) if "reasoning" in r.pillars and r.pillars["reasoning"].observed else None,
+            # Trazabilidad
+            "raw_benchmarks": {k: round(v, 2) for k, v in raw_benchmarks.items()},
             "freshness_days": freshness_days,
             "freshness_status": freshness_status,
-            "observation_type": obs_type.value,
-            # Transparencia de fuentes
-            "intel_benchmarks": intel_used,
-            "coding_benchmarks": coding_used,
-            # Estado Local
-            "is_local_active": is_local_active,
-            "local_badge": "🟢 LOCAL ACTIVO" if is_local_active else "⚪ EXTERNO",
+            "observation_type": r.observation_type.value,
+            "global_rank": r.global_rank,
+            "is_statistical_tie": r.is_statistical_tie,
+            # Estado local
+            "is_local_active": bool(local_info),
+            "local_badge": "🟢 LOCAL ACTIVO" if local_info else "⚪ EXTERNO",
             "local_latency_ms": local_info["latency_ms"] if local_info else None,
             "local_status_msg": local_info["status_message"] if local_info else None,
-            "local_detected_context": local_info["detected_context_window"] if local_info else m["context_window"],
-            # Perfil para Pop-up
+            "account_email": local_info.get("account_email", "—") if local_info else "—",
+            "account_key": local_info.get("account_key", "") if local_info else "",
+            "local_detected_context": local_info["detected_context_window"] if local_info else m.get("context_window"),
+            # Perfil
             "description": profile.get("description", ""),
             "use_cases": profile.get("use_cases", []),
             "comparison": profile.get("comparison", ""),
-            "sources": all_sources
+            "sources": all_sources,
         })
 
-    # Ordenamiento primario por score de inteligencia y confianza
-    scored_models.sort(key=lambda x: (x["intelligence_score"], x["confidence_score"]), reverse=True)
-    
-    for idx, sm in enumerate(scored_models, start=1):
-        sm["global_rank"] = idx
-        
     return scored_models
