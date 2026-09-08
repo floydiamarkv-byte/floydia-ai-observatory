@@ -177,6 +177,115 @@ class ModelNormalizer:
         
         return synthetic_id, synthetic_model
 
+    def format_display_name(self, model: Dict[str, Any]) -> str:
+        """
+        Estandariza deterministamente el nombre del modelo bajo el protocolo canónico:
+        [<VentanaContexto>•<NivelCosto>] <Nombre del Modelo> (<Proveedor/Hub>)
+        Ejemplo: [1M•Free] Gemini 2.5 Flash (Google AI Studio)
+        """
+        # 1. Ventana de Contexto (normalizada a potencias y múltiplos estándar)
+        ctx = model.get("context_window") or model.get("detected_context_window") or 128000
+        if ctx >= 1900000:
+            ctx_str = "2M"
+        elif ctx >= 900000:
+            ctx_str = "1M"
+        elif ctx >= 240000:
+            ctx_str = "256k"
+        elif ctx >= 120000:
+            ctx_str = "128k"
+        elif ctx >= 60000:
+            ctx_str = "64k"
+        elif ctx >= 30000:
+            ctx_str = "32k"
+        elif ctx >= 15000:
+            ctx_str = "16k"
+        elif ctx >= 7000:
+            ctx_str = "8k"
+        elif ctx >= 1000:
+            ctx_str = f"{int(round(ctx/1000))}k"
+        else:
+            ctx_str = f"{ctx}"
+
+        # 2. Proveedor Canónico
+        prov_raw = str(model.get("provider") or model.get("provider_name") or "")
+        p_lower = prov_raw.lower()
+        if "google" in p_lower:
+            prov_str = "Google AI Studio"
+        elif "deepseek" in p_lower:
+            prov_str = "DeepSeek Direct"
+        elif "openrouter" in p_lower:
+            prov_str = "OpenRouter Fleet"
+        elif "groq" in p_lower:
+            prov_str = "Groq"
+        elif "mistral" in p_lower:
+            prov_str = "Mistral AI"
+        elif "nvidia" in p_lower or "nim" in p_lower:
+            prov_str = "NVIDIA NIM"
+        elif "dashscope" in p_lower or "alibaba" in p_lower or "qwen" in p_lower:
+            prov_str = "Alibaba DashScope"
+        elif "z_ai" in p_lower or "zhipu" in p_lower or "z.ai" in p_lower:
+            prov_str = "Z.AI"
+        elif "fireworks" in p_lower:
+            prov_str = "Fireworks AI"
+        elif "github" in p_lower:
+            prov_str = "GitHub Models"
+        elif "anthropic" in p_lower:
+            prov_str = "Anthropic Direct"
+        elif "openai" in p_lower:
+            prov_str = "OpenAI Direct"
+        elif "zen" in p_lower:
+            prov_str = "OpenCode Zen"
+        else:
+            prov_str = prov_raw or "Clúster Local"
+
+        # Diferenciador de cuenta (ej. C1, C2, C3, C7)
+        acc_tag = ""
+        acc_raw = model.get("account_tag") or model.get("account_key") or model.get("account_name") or ""
+        if acc_raw:
+            m_acc = re.match(r"^(C\d+|[A-Z0-9]+)", str(acc_raw))
+            if m_acc:
+                acc_tag = m_acc.group(1)
+            else:
+                acc_tag = str(acc_raw)[:4]
+
+        # 3. Nivel de Costo
+        in_cost = model.get("input_cost_per_m", model.get("cost_input_m", 0.0)) or 0.0
+        out_cost = model.get("output_cost_per_m", model.get("cost_output_m", 0.0)) or 0.0
+        is_free_flag = model.get("is_free_tier", False) or (in_cost == 0.0 and out_cost == 0.0 and "deepseek" not in p_lower and "anthropic" not in p_lower and "openai" not in p_lower)
+        
+        tier = (model.get("tier") or "").lower()
+
+        if is_free_flag or ":free" in str(model.get("id", "")):
+            cost_str = "Free"
+        elif any(x in prov_str.lower() for x in ["nim", "trial", "z.ai"]):
+            cost_str = "Trial"
+        elif "pro" in str(model.get("id", "")).lower() and "google" in prov_str.lower():
+            cost_str = "Pro"
+        else:
+            cost_str = "Paid"
+
+        # 4. Nombre Limpio
+        canonical_name = model.get("canonical_name") or model.get("name") or model.get("model_identifier") or model.get("id") or "Modelo"
+        # Eliminar prefijos de corchetes existentes para no duplicar
+        clean_name = re.sub(r"^\[[^\]]+\]\s*", "", canonical_name).strip()
+        # Eliminar sufijo de proveedor entre paréntesis si ya estuviera
+        clean_name = re.sub(r"\s*\([^)]+\)$", "", clean_name).strip()
+        
+        # Corrección de nombres legibles comunes si repiten el proveedor innecesariamente
+        if clean_name.startswith("Google ") and "Google" in prov_str:
+            clean_name = clean_name.replace("Google ", "")
+
+        if acc_tag and f"[{acc_tag}]" not in clean_name and f"[{acc_tag}]" not in prov_str:
+            clean_name = f"{clean_name} [{acc_tag}]"
+
+        return f"[{ctx_str}•{cost_str}] {clean_name} ({prov_str})"
+
 
 normalizer = ModelNormalizer()
+
+
+def format_display_name(model: Dict[str, Any]) -> str:
+    """Helper global para formatear nombres de modelos."""
+    return normalizer.format_display_name(model)
+
 

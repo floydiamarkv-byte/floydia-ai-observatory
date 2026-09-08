@@ -139,8 +139,9 @@ DASHSCOPE_ACCOUNTS = get_all_available_keys([
 ])
 
 DEEPSEEK_ACCOUNTS = get_all_available_keys([
+    "C7_DEEPSEEK", "DEEPSEEK_API_KEY",
     "C1_DEEPSEEK", "C2_DEEPSEEK", "C3_DEEPSEEK", "C4_DEEPSEEK", 
-    "C5_DEEPSEEK", "C6_DEEPSEEK", "C7_DEEPSEEK", "DEEPSEEK_API_KEY"
+    "C5_DEEPSEEK", "C6_DEEPSEEK"
 ])
 
 OPENROUTER_ACCOUNTS = get_all_available_keys([
@@ -185,10 +186,10 @@ GITHUB_TOKEN = get_first_available_key([
 HF_TOKEN = get_first_available_key(["HF_TOKEN", "HUGGINGFACE_TOKEN", "HUGGING_FACE_HUB_TOKEN"])
 
 # Configuración de Endpoints
-GEMINI_MODEL = os.getenv("DEFAULT_GEMINI_MODEL", "gemini-3.6-flash")
+GEMINI_MODEL = os.getenv("DEFAULT_GEMINI_MODEL", "gemini-3.5-flash")
 GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta"
 GOOGLE_OPENAI_BASE = "https://generativelanguage.googleapis.com/v1beta/openai"
-ZEN_API_BASE = "https://api.opencode.ai/zen/v1"
+ZEN_API_BASE = "https://zenmux.ai/api/v1"
 Z_AI_API_BASE = "https://open.bigmodel.cn/api/paas/v4"
 GROKIFIED_API_BASE = os.getenv("GROKIFIED_BASE_URL", "https://api.grokified.com/v1")
 DASHSCOPE_API_BASE = os.getenv("C7_DASHSCOPE_BASE_URL", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1")

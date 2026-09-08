@@ -19,12 +19,10 @@ def probe_opencode_zen() -> List[Dict[str, Any]]:
         return results
 
     models_to_test = [
-        {"model": "opencode/nemotron-3-ultra-free", "context": 262144, "badge": "Nemotron 3 Ultra 550B (Zen Free)", "is_free": True, "in_cost": 0.0, "out_cost": 0.0},
-        {"model": "opencode/nemotron-3.5-lightning-free", "context": 262144, "badge": "Nemotron 3.5 Lightning (Zen Free)", "is_free": True, "in_cost": 0.0, "out_cost": 0.0},
-        {"model": "opencode/mimo-v2.5-free", "context": 262144, "badge": "MiMo V2.5 (Zen Free)", "is_free": True, "in_cost": 0.0, "out_cost": 0.0},
-        {"model": "opencode/hy3-free", "context": 262144, "badge": "Hy3 (Zen Free)", "is_free": True, "in_cost": 0.0, "out_cost": 0.0},
-        {"model": "opencode/big-pickle", "context": 131072, "badge": "Big Pickle (Zen)", "is_free": True, "in_cost": 0.0, "out_cost": 0.0},
-        {"model": "opencode/muse-spark-1.2-contributor-free", "context": 262144, "badge": "Muse Spark 1.2 (Zen Free)", "is_free": True, "in_cost": 0.0, "out_cost": 0.0}
+        {"model": "qwen/qwen3.8-flash", "context": 262144, "badge": "Qwen 3.8 Flash (ZenMux)", "is_free": True, "in_cost": 0.0, "out_cost": 0.0},
+        {"model": "z-ai/glm-5.3-flash", "context": 131072, "badge": "GLM 5.3 Flash (ZenMux)", "is_free": True, "in_cost": 0.0, "out_cost": 0.0},
+        {"model": "deepseek/deepseek-v4-pro", "context": 262144, "badge": "DeepSeek V4 Pro (ZenMux)", "is_free": False, "in_cost": 0.20, "out_cost": 0.40},
+        {"model": "meta/muse-spark-1.2", "context": 262144, "badge": "Muse Spark 1.2 (ZenMux)", "is_free": True, "in_cost": 0.0, "out_cost": 0.0}
     ]
 
     check_url = f"{ZEN_API_BASE}/chat/completions"
@@ -32,6 +30,7 @@ def probe_opencode_zen() -> List[Dict[str, Any]]:
     # 1. Probar modelos de OpenCode Zen en la cuenta principal con llamada real
     primary_acc = ZEN_ACCOUNTS[0]
     headers_primary = {
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
         "Content-Type": "application/json",
         "Authorization": f"Bearer {primary_acc['key']}"
     }
@@ -96,6 +95,7 @@ def probe_opencode_zen() -> List[Dict[str, Any]]:
         for acc in ZEN_ACCOUNTS[1:]:
             acc_name = acc["name"]
             headers_acc = {
+                "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {acc['key']}"
             }
@@ -110,7 +110,7 @@ def probe_opencode_zen() -> List[Dict[str, Any]]:
                     check_url,
                     headers=headers_acc,
                     json={
-                        "model": "opencode/nemotron-3.5-lightning-free",
+                        "model": "qwen/qwen3.8-flash",
                         "messages": [{"role": "user", "content": "1"}],
                         "max_tokens": 2
                     },

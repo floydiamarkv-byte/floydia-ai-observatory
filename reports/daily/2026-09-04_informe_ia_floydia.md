@@ -1,5 +1,5 @@
 # 📊 FLOYDIA AI RANKINGS & LOCAL APIS OBSERVATORY
-> **Informe Ejecutivo Diario** · Fecha: **2026-08-28**  
+> **Informe Ejecutivo Diario** · Fecha: **2026-09-04**  
 > **Firma**: FloydIA — *WEB & IA AUTOMATION*  
 > **Motor Analista**: Motor Grounded v2 (Anti-Alucinación & Procedencia Estricta V11)  
 > **SSOT**: `FLOYDIA/SUBTOOLS/AI_RANKINGS_OBSERVATORY/reports/daily/`
@@ -11,19 +11,17 @@
 
 | Modelo Local | Proveedor | Ventana Contexto | Latencia Inferencia | Coste / 1M Tokens | Score Inteligencia | Estado Sonda |
 |---|---|---|---|---|:---:|:---:|
-| **Moonshot Kimi K3 (Max)** | Moonshot | 1,048,576 tokens | 2201.3 ms | $2.550 In / $12.750 Out | **99.19 / 100** | 🟢 Operativa (200 OK) |
+| **Moonshot Kimi K3 (Max)** | Moonshot | 1,048,576 tokens | 796.5 ms | $2.500 In / $14.000 Out | **99.19 / 100** | 🟢 Operativa (200 OK) |
 | **Meta Muse Spark 1.2 (xHigh)** | Meta | 1,048,576 tokens | 484.3 ms | $1.250 In / $4.250 Out | **99.07 / 100** | 🟢 Operativa (200 OK) |
-| **Google Gemini 3.5 Flash (Multi)** | Google | 1,048,576 tokens | 911.2 ms | $0.750 In / $4.500 Out | **98.82 / 100** | 🟢 Operativa (200 OK) |
+| **Google Gemini 3.5 Flash (Multi)** | Google | 1,048,576 tokens | 1208.1 ms | $0.750 In / $4.500 Out | **98.82 / 100** | 🟢 Operativa (200 OK) |
 | **Google Gemini 3.6 Flash (Fast)** | Google | 1,048,576 tokens | 1143.9 ms | $0.375 In / $1.875 Out | **95.78 / 100** | 🟢 Operativa (200 OK) |
 | **Google Gemini 2.5 Pro** | Google | 1,048,576 tokens | 474.1 ms | $1.250 In / $10.000 Out | **82.92 / 100** | 🟢 Operativa (Free Tier activo) |
-| **DeepSeek R1 (Reasoner)** | DeepSeek | 64,000 tokens | 1345.5 ms | $0.700 In / $2.500 Out | **81.16 / 100** | 🟢 Operativa (200 OK) |
-| **DeepSeek V4 Flash** | DeepSeek | 262,144 tokens | 1345.5 ms | $0.100 In / $0.200 Out | **72.78 / 100** | 🟢 Operativa (200 OK) |
+| **DeepSeek R1 (Reasoner)** | DeepSeek | 64,000 tokens | 709.1 ms | $0.700 In / $2.500 Out | **81.16 / 100** | 🟢 Operativa (200 OK) |
+| **DeepSeek V4 Flash** | DeepSeek | 262,144 tokens | 709.1 ms | $0.100 In / $0.200 Out | **72.78 / 100** | 🟢 Operativa (200 OK) |
 | **Google Gemini 2.5 Flash** | Google | 1,048,576 tokens | 474.1 ms | $0.150 In / $1.250 Out | **68.92 / 100** | 🟢 Operativa (Free Tier activo) |
-| **DeepSeek V3 (Chat)** | DeepSeek | 163,840 tokens | 1345.5 ms | $0.257 In / $1.029 Out | **56.4 / 100** | 🟢 Operativa (200 OK) |
+| **DeepSeek V3 (Chat)** | DeepSeek | 163,840 tokens | 1123.5 ms | $0.320 In / $0.890 Out | **57.62 / 100** | 🟢 Operativa (200 OK) |
 | **Google Gemini 2.0 Flash** | Google | 1,048,576 tokens | 474.1 ms | 🆓 GRATUITO | **51.68 / 100** | 🟢 Operativa (Free Tier activo) |
-| **Mistral Codestral Latest** | Mistral | 256,000 tokens | 1012.8 ms | $0.300 In / $0.900 Out | **44.54 / 100** | 🟢 Operativa (200 OK) |
-| **Gemma 4 31B IT (Agent)** | Google | 262,144 tokens | 1955.0 ms | 🆓 GRATUITO | SIN DATO | 🟢 Operativa (200 OK) |
-| **NVIDIA Nemotron 3 Nano Omni 30B** | NVIDIA | 262,144 tokens | 1886.7 ms | $0.050 In / $0.200 Out | SIN DATO | 🟢 Operativa (200 OK) |
+| **Mistral Codestral Latest** | Mistral | 256,000 tokens | 598.7 ms | $0.300 In / $0.900 Out | **44.54 / 100** | 🟢 Operativa (200 OK) |
 
 ---
 
@@ -35,9 +33,9 @@
 | #1 | **Anthropic Claude Opus 5 (High)** | Anthropic | `frontier` | 99.57 / 100 | [98.5, 100.0] | 1492 Elo | $2.5 In / $12.5 Out |
 | #2 | **Anthropic Claude Opus 5 (Max)** | Anthropic | `frontier` | 99.57 / 100 | [98.5, 100.0] | 1487 Elo | $20.0 In / $100.0 Out |
 | #3 | **Anthropic Claude Opus 4.7 (High)** | Anthropic | `frontier` | 99.5 / 100 | [96.7, 100.0] | 1494 Elo | $2.5 In / $12.5 Out |
-| #4 | **OpenAI GPT 5.5 (High)** | OpenAI | `frontier` | 99.4 / 100 | [96.6, 100.0] | 1476 Elo | $5.0 In / $30.0 Out |
+| #4 | **OpenAI GPT 5.5 (High)** | OpenAI | `frontier` | 99.4 / 100 | [96.6, 100.0] | 1476 Elo | $2.5 In / $15.0 Out |
 | #5 | **Anthropic Claude Fable 5** | Anthropic | `frontier` | 99.28 / 100 | [98.2, 100.0] | 1507 Elo | $5.0 In / $25.0 Out |
-| #6 | **OpenAI GPT 5.6 Sol (xHigh)** | OpenAI | `frontier` | 99.22 / 100 | [98.2, 100.0] | 1482 Elo | $2.0 In / $10.0 Out |
+| #6 | **OpenAI GPT 5.6 Sol (xHigh)** | OpenAI | `frontier` | 99.22 / 100 | [98.2, 100.0] | 1482 Elo | $1.0 In / $5.0 Out |
 | #7 | **Anthropic Claude Opus 4.8 (High)** | Anthropic | `frontier` | 99.21 / 100 | [97.6, 100.0] | 1482 Elo | $2.5 In / $12.5 Out |
 | #9 | **Anthropic Claude Opus 4.6 (High)** | Anthropic | `frontier` | 99.07 / 100 | [95.1, 100.0] | 1497 Elo | $2.5 In / $12.5 Out |
 | #11 | **Meta Muse Spark 1.1** | Meta | `multimodal` | 98.97 / 100 | [95.0, 100.0] | 1488 Elo | $1.25 In / $4.25 Out |
@@ -52,18 +50,17 @@
 ### 🧠 Síntesis Ejecutiva del Observatorio FloydIA (Grounded v2 - Procedencia Estricta V11)
 
 #### 1. 🏛️ Diagnóstico de tu Arsenal Local (APIs Verificadas en tu PC)
-- Cuentas con **13 modelos locales activos** verificados.
-- **Modelo local líder**: `Moonshot Kimi K3 (Max)` (Inteligencia: 99.19/100, Latencia local: 2201.3 ms).
-- **Opciones costo-cero locales**: `Gemma 4 31B IT (Agent)`.
+- Cuentas con **11 modelos locales activos** verificados.
+- **Modelo local líder**: `Moonshot Kimi K3 (Max)` (Inteligencia: 99.19/100, Latencia local: 796.5 ms).
 
 #### 2. 🌐 Radar de Frontera Global (Modelos de Referencia Externa)
 - **Modelos de Frontera Evaluados**: `Anthropic Claude Opus 5 (High)`, `Anthropic Claude Opus 5 (Max)`, `Anthropic Claude Opus 4.7 (High)`, `OpenAI GPT 5.5 (High)`, `Anthropic Claude Fable 5`.
 
 #### 3. 📊 Cobertura Empírica Real de Mediciones
-- **Índice de Inteligencia / Calidad Medido**: 193/450 modelos con benchmarks empíricos reales.
-- **Índice de Coding Medido**: 30/450 modelos con evaluaciones de código comprobadas.
-- **Preferencia Humana (Elo)**: 112/450 modelos con votos en Arena registrados.
-- **Latencia en Homelab Directa**: 13/450 modelos sondeados localmente.
+- **Índice de Inteligencia / Calidad Medido**: 193/454 modelos con benchmarks empíricos reales.
+- **Índice de Coding Medido**: 30/454 modelos con evaluaciones de código comprobadas.
+- **Preferencia Humana (Elo)**: 112/454 modelos con votos en Arena registrados.
+- **Latencia en Homelab Directa**: 11/454 modelos sondeados localmente.
 
 > **FloydIA** — «Construimos la inteligencia. Desde la infraestructura.»  
 > «Desde la infraestructura, todo.»
@@ -79,7 +76,7 @@
 | #3 | **Anthropic Claude Opus 4.7 (High)** | ⚪ EXTERNO | `frontier` | **99.5** | [96.7, 100.0] | 65.8 | SIN DATO | 99.2 | B (Evidencia Moderada) |
 | #4 | **OpenAI GPT 5.5 (High)** | ⚪ EXTERNO | `frontier` | **99.4** | [96.6, 100.0] | 65.7 | SIN DATO | 99.1 | B (Evidencia Moderada) |
 | #5 | **Anthropic Claude Fable 5** | ⚪ EXTERNO | `frontier` | **99.28** | [98.2, 100.0] | 66.3 | 98.3 | 99.3 | A (Alta Corroboración) |
-| #6 | **OpenAI GPT 5.6 Sol (xHigh)** | ⚪ EXTERNO | `frontier` | **99.22** | [98.2, 100.0] | 66.9 | 98.2 | 99.2 | A (Alta Corroboración) |
+| #6 | **OpenAI GPT 5.6 Sol (xHigh)** | ⚪ EXTERNO | `frontier` | **99.22** | [98.2, 100.0] | 68.4 | 98.2 | 99.2 | A (Alta Corroboración) |
 | #7 | **Anthropic Claude Opus 4.8 (High)** | ⚪ EXTERNO | `frontier` | **99.21** | [97.6, 100.0] | 65.6 | SIN DATO | 99.2 | A+ (Multi-Benchmark SOTA) |
 | #8 | **Moonshot Kimi K3 (Max)** | 🟢 **LOCAL** | `coding` | **99.19** | [98.1, 100.0] | 68.3 | 98.3 | 99.2 | A (Alta Corroboración) |
 | #9 | **Anthropic Claude Opus 4.6 (High)** | ⚪ EXTERNO | `frontier` | **99.07** | [95.1, 100.0] | 65.5 | SIN DATO | 98.6 | B (Evidencia Moderada) |
@@ -89,14 +86,14 @@
 | #16 | **Google Gemini 3.7 Flash (High)** | ⚪ EXTERNO | `frontier` | **98.77** | [97.6, 100.0] | 86.5 | 97.0 | 98.5 | A (Alta Corroboración) |
 | #17 | **Z.ai GLM 5.3 Max** | ⚪ EXTERNO | `coding` | **98.73** | [97.5, 99.9] | 68.8 | 97.2 | 98.4 | A (Alta Corroboración) |
 | #18 | **Anthropic Claude Sonnet 5 (High)** | ⚪ EXTERNO | `agentic` | **98.69** | [97.5, 99.8] | 68.8 | 96.5 | 98.9 | A (Alta Corroboración) |
-| #19 | **Alibaba Qwen 3.8 27B** | ⚪ EXTERNO | `workhorse` | **98.34** | [96.4, 100.0] | 71.2 | 97.4 | SIN DATO | A (Alta Corroboración) |
+| #19 | **Alibaba Qwen 3.8 27B** | ⚪ EXTERNO | `workhorse` | **98.34** | [96.4, 100.0] | 70.2 | 97.4 | SIN DATO | A (Alta Corroboración) |
 | #21 | **Grok-4-0709** | ⚪ EXTERNO | `workhorse` | **97.46** | [93.0, 100.0] | 88.7 | SIN DATO | 96.4 | B (Evidencia Moderada) |
 | #23 | **o3-2025-04-16** | ⚪ EXTERNO | `reasoning` | **95.96** | [91.3, 100.0] | 88.0 | SIN DATO | 94.5 | B (Evidencia Moderada) |
 | #24 | **Google Gemini 3.6 Flash (Fast)** | 🟢 **LOCAL** | `workhorse` | **95.78** | [93.7, 97.8] | 82.0 | 84.5 | 98.2 | A (Alta Corroboración) |
 | #25 | **Grok-3-Preview-02-24** | ⚪ EXTERNO | `workhorse` | **95.27** | [90.5, 100.0] | 87.6 | SIN DATO | 93.7 | B (Evidencia Moderada) |
 | #26 | **GPT-4.5-Preview** | ⚪ EXTERNO | `frontier` | **92.19** | [87.2, 97.2] | 86.1 | SIN DATO | 91.0 | B (Evidencia Moderada) |
 | #27 | **Anthropic Claude 3.7 Sonnet** | ⚪ EXTERNO | `agentic` | **86.61** | [85.0, 88.2] | 60.5 | 90.6 | 40.1 | A (Alta Corroboración) |
-| #29 | **OpenAI o3-mini** | ⚪ EXTERNO | `reasoning` | **82.9** | [81.2, 84.6] | 57.7 | 78.7 | 47.3 | A (Alta Corroboración) |
+| #29 | **OpenAI o3-mini** | ⚪ EXTERNO | `reasoning` | **82.9** | [81.2, 84.6] | 62.3 | 78.7 | 47.3 | A (Alta Corroboración) |
 | #30 | **Qwen3-235B-A22B-no-thinking** | ⚪ EXTERNO | `reasoning` | **82.69** | [77.2, 88.2] | 81.3 | SIN DATO | 82.7 | B (Evidencia Moderada) |
 | #31 | **DeepSeek R1 (Reasoner)** | 🟢 **LOCAL** | `reasoning` | **81.16** | [79.5, 82.8] | 56.8 | 59.0 | 75.2 | A (Alta Corroboración) |
 | #32 | **Aryanne/QwentileSwap** | ⚪ EXTERNO | `workhorse` | **80.49** | [78.3, 82.7] | 80.2 | SIN DATO | SIN DATO | B (Evidencia Moderada) |
@@ -107,25 +104,25 @@
 | #38 | **Aashraf995/QwenStock-14B** | ⚪ EXTERNO | `workhorse` | **73.57** | [71.3, 75.8] | 76.8 | SIN DATO | SIN DATO | B (Evidencia Moderada) |
 | #39 | **anthropic/claude-opus-4** | ⚪ EXTERNO | `frontier` | **73.49** | [67.4, 79.6] | 52.7 | SIN DATO | 73.5 | B (Evidencia Moderada) |
 | #40 | **qwen/qwen3-235b-a22b** | ⚪ EXTERNO | `workhorse` | **73.48** | [67.3, 79.6] | 60.8 | SIN DATO | 73.5 | B (Evidencia Moderada) |
-| #41 | **qwen/qwen3-235b-a22b-thinking-2507** | ⚪ EXTERNO | `reasoning` | **73.48** | [67.3, 79.7] | 60.0 | SIN DATO | 73.5 | B (Evidencia Moderada) |
-| #42 | **DeepSeek V4 Flash** | 🟢 **LOCAL** | `frontier` | **72.78** | [68.3, 77.2] | 72.5 | SIN DATO | 72.8 | A (Alta Corroboración) |
+| #41 | **qwen/qwen3-235b-a22b-thinking-2507** | ⚪ EXTERNO | `reasoning` | **73.48** | [66.4, 80.6] | 60.0 | SIN DATO | 73.5 | B (Evidencia Moderada) |
+| #42 | **DeepSeek V4 Flash** | 🟢 **LOCAL** | `frontier` | **72.78** | [67.7, 77.9] | 72.5 | SIN DATO | 72.8 | B (Evidencia Moderada) |
 | #43 | **minimax/minimax-m1** | ⚪ EXTERNO | `frontier` | **71.67** | [65.5, 77.8] | 58.5 | SIN DATO | 71.7 | B (Evidencia Moderada) |
 | #44 | **o1-2024-12-17** | ⚪ EXTERNO | `reasoning` | **71.64** | [65.5, 77.8] | 75.8 | SIN DATO | 71.6 | B (Evidencia Moderada) |
 | #45 | **Qwen2.5-Max** | ⚪ EXTERNO | `frontier` | **71.2** | [65.0, 77.4] | 75.6 | SIN DATO | 71.2 | B (Evidencia Moderada) |
 | #46 | **Anthropic Claude 3.5 Sonnet** | ⚪ EXTERNO | `coding` | **70.3** | [68.5, 72.1] | 51.1 | 51.2 | 28.8 | A (Alta Corroboración) |
 | #50 | **1-800-LLMs/Qwen-2.5-14B-Hindi** | ⚪ EXTERNO | `workhorse` | **68.31** | [65.8, 70.8] | 74.2 | SIN DATO | SIN DATO | B (Evidencia Moderada) |
-| #52 | **OpenAI GPT-4o (GitHub Models Free Tier)** | ⚪ EXTERNO | `frontier` | **67.36** | [65.5, 69.2] | 73.7 | 24.1 | SIN DATO | A (Alta Corroboración) |
+| #52 | **OpenAI GPT-4o (GitHub Models Free Tier)** | ⚪ EXTERNO | `frontier` | **67.36** | [65.2, 69.5] | 73.7 | 24.1 | SIN DATO | A (Alta Corroboración) |
 | #54 | **BAAI/Infinity-Instruct-3M-0625-Llama3-70B** | ⚪ EXTERNO | `workhorse` | **66.04** | [63.2, 68.9] | 73.0 | SIN DATO | SIN DATO | B (Evidencia Moderada) |
 | #55 | **BAAI/Infinity-Instruct-3M-0613-Llama3-70B** | ⚪ EXTERNO | `workhorse` | **64.29** | [61.4, 67.2] | 72.1 | SIN DATO | SIN DATO | B (Evidencia Moderada) |
 | #56 | **1024m/PHI-4-Hindi** | ⚪ EXTERNO | `workhorse` | **63.7** | [61.3, 66.1] | 71.8 | SIN DATO | SIN DATO | B (Evidencia Moderada) |
 | #57 | **Aashraf995/Gemma-Evo-10B** | ⚪ EXTERNO | `workhorse` | **63.59** | [60.7, 66.5] | 71.8 | SIN DATO | SIN DATO | B (Evidencia Moderada) |
 | #58 | **openai/o1** | ⚪ EXTERNO | `reasoning` | **63.21** | [56.8, 69.6] | 47.6 | SIN DATO | 63.2 | B (Evidencia Moderada) |
 | #59 | **qwen/qwen3-32b** | ⚪ EXTERNO | `workhorse` | **60.57** | [54.0, 67.1] | 65.7 | SIN DATO | 60.6 | B (Evidencia Moderada) |
-| #62 | **o3-mini-high** | ⚪ EXTERNO | `reasoning` | **59.15** | [52.6, 65.7] | 69.6 | SIN DATO | 59.2 | B (Evidencia Moderada) |
+| #62 | **o3-mini-high** | ⚪ EXTERNO | `reasoning` | **59.15** | [51.6, 66.7] | 69.6 | SIN DATO | 59.2 | B (Evidencia Moderada) |
 | #63 | **anthropic/claude-sonnet-4** | ⚪ EXTERNO | `workhorse` | **58.95** | [52.4, 65.5] | 45.5 | SIN DATO | 59.0 | B (Evidencia Moderada) |
 | #64 | **AELLM/gemma-2-aeria-infinity-9b** | ⚪ EXTERNO | `workhorse` | **58.92** | [55.8, 62.1] | 69.5 | SIN DATO | SIN DATO | B (Evidencia Moderada) |
-| #65 | **google/gemma-3-12b-it** | ⚪ EXTERNO | `workhorse` | **56.77** | [50.2, 63.4] | 65.7 | SIN DATO | 56.8 | B (Evidencia Moderada) |
-| #66 | **DeepSeek V3 (Chat)** | 🟢 **LOCAL** | `workhorse` | **56.4** | [52.1, 60.6] | 56.5 | 49.2 | 67.0 | A (Alta Corroboración) |
+| #65 | **DeepSeek V3 (Chat)** | 🟢 **LOCAL** | `workhorse` | **57.62** | [53.4, 61.9] | 57.5 | 49.2 | 71.4 | A (Alta Corroboración) |
+| #66 | **google/gemma-3-12b-it** | ⚪ EXTERNO | `workhorse` | **56.77** | [50.2, 63.4] | 65.7 | SIN DATO | 56.8 | B (Evidencia Moderada) |
 | #69 | **01-ai/Yi-1.5-34B** | ⚪ EXTERNO | `workhorse` | **54.55** | [51.4, 57.7] | 67.3 | SIN DATO | SIN DATO | B (Evidencia Moderada) |
 | #70 | **Amaorynho/BBAIIFEV1** | ⚪ EXTERNO | `workhorse` | **54.04** | [50.7, 57.4] | 67.0 | SIN DATO | SIN DATO | B (Evidencia Moderada) |
 | #71 | **QwQ-32B** | ⚪ EXTERNO | `workhorse` | **54.02** | [47.4, 60.6] | 67.0 | SIN DATO | 54.0 | B (Evidencia Moderada) |
@@ -137,19 +134,19 @@
 | #80 | **152334H/miqu-1-70b-sf** | ⚪ EXTERNO | `workhorse` | **51.13** | [48.0, 54.3] | 65.6 | SIN DATO | SIN DATO | B (Evidencia Moderada) |
 | #81 | **Qwen-Plus-0125** | ⚪ EXTERNO | `workhorse` | **50.14** | [43.5, 56.8] | 65.1 | SIN DATO | 50.1 | B (Evidencia Moderada) |
 | #82 | **Amazon-Nova-Experimental-Chat-05-14** | ⚪ EXTERNO | `workhorse` | **50.14** | [43.5, 56.8] | 65.1 | SIN DATO | 50.1 | B (Evidencia Moderada) |
-| #83 | **Meta Llama 3.3 70B Instruct** | ⚪ EXTERNO | `agentic` | **49.99** | [48.1, 51.9] | 52.5 | 17.7 | 24.5 | A (Alta Corroboración) |
+| #83 | **Meta Llama 3.3 70B Instruct** | ⚪ EXTERNO | `agentic` | **49.99** | [48.1, 51.9] | 59.8 | 17.7 | 24.5 | A (Alta Corroboración) |
 | #84 | **Ahdoot/StructuredThinker-v0.3-MoreStructure** | ⚪ EXTERNO | `workhorse` | **48.71** | [45.7, 51.7] | 64.4 | SIN DATO | SIN DATO | B (Evidencia Moderada) |
-| #86 | **o1-mini** | ⚪ EXTERNO | `reasoning` | **47.85** | [41.2, 54.5] | 63.9 | SIN DATO | 47.9 | B (Evidencia Moderada) |
-| #88 | **qwen/qwen3-30b-a3b-thinking-2507** | ⚪ EXTERNO | `reasoning` | **47.62** | [41.0, 54.3] | 46.9 | SIN DATO | 47.6 | B (Evidencia Moderada) |
-| #89 | **Step-2-16K-Exp** | ⚪ EXTERNO | `workhorse` | **47.36** | [40.7, 54.0] | 63.7 | SIN DATO | 47.4 | B (Evidencia Moderada) |
-| #90 | **Gemini-1.5-Pro-002** | ⚪ EXTERNO | `frontier` | **47.34** | [40.8, 53.9] | 63.7 | SIN DATO | 47.3 | B (Evidencia Moderada) |
-| #93 | **Mistral Codestral Latest** | 🟢 **LOCAL** | `coding` | **44.54** | [37.6, 51.5] | 51.0 | 44.5 | SIN DATO | B (Evidencia Moderada) |
-| #95 | **AbacusResearch/Jallabi-34B** | ⚪ EXTERNO | `workhorse` | **42.97** | [39.8, 46.1] | 61.5 | SIN DATO | SIN DATO | B (Evidencia Moderada) |
-| #96 | **Llama-3.3-Nemotron-Super-49B-v1** | ⚪ EXTERNO | `workhorse` | **42.95** | [36.4, 49.5] | 61.5 | SIN DATO | 42.9 | B (Evidencia Moderada) |
-| #97 | **BAAI/Gemma2-9B-IT-Simpo-Infinity-Preference** | ⚪ EXTERNO | `workhorse` | **42.34** | [39.1, 45.6] | 61.2 | SIN DATO | SIN DATO | B (Evidencia Moderada) |
-| #98 | **01-ai/Yi-1.5-9B** | ⚪ EXTERNO | `workhorse` | **42.32** | [38.9, 45.8] | 61.2 | SIN DATO | SIN DATO | B (Evidencia Moderada) |
-| #101 | **01-ai/Yi-34B** | ⚪ EXTERNO | `workhorse` | **41.47** | [38.3, 44.7] | 60.7 | SIN DATO | SIN DATO | B (Evidencia Moderada) |
-| #102 | **GLM-4-Plus-0111** | ⚪ EXTERNO | `workhorse` | **40.5** | [34.0, 47.0] | 60.2 | SIN DATO | 40.5 | B (Evidencia Moderada) |
+| #85 | **GLM-4-Plus-0111** | ⚪ EXTERNO | `workhorse` | **48.41** | [41.8, 55.0] | 64.2 | SIN DATO | 48.4 | B (Evidencia Moderada) |
+| #87 | **o1-mini** | ⚪ EXTERNO | `reasoning` | **47.85** | [41.2, 54.5] | 63.9 | SIN DATO | 47.9 | B (Evidencia Moderada) |
+| #89 | **qwen/qwen3-30b-a3b-thinking-2507** | ⚪ EXTERNO | `reasoning` | **47.62** | [40.0, 55.3] | 46.9 | SIN DATO | 47.6 | B (Evidencia Moderada) |
+| #90 | **Step-2-16K-Exp** | ⚪ EXTERNO | `workhorse` | **47.36** | [40.7, 54.0] | 63.7 | SIN DATO | 47.4 | B (Evidencia Moderada) |
+| #91 | **Gemini-1.5-Pro-002** | ⚪ EXTERNO | `frontier` | **47.34** | [40.8, 53.9] | 63.7 | SIN DATO | 47.3 | B (Evidencia Moderada) |
+| #94 | **Mistral Codestral Latest** | 🟢 **LOCAL** | `coding` | **44.54** | [37.6, 51.5] | 51.0 | 44.5 | SIN DATO | B (Evidencia Moderada) |
+| #96 | **AbacusResearch/Jallabi-34B** | ⚪ EXTERNO | `workhorse` | **42.97** | [39.8, 46.1] | 61.5 | SIN DATO | SIN DATO | B (Evidencia Moderada) |
+| #97 | **Llama-3.3-Nemotron-Super-49B-v1** | ⚪ EXTERNO | `workhorse` | **42.95** | [36.4, 49.5] | 61.5 | SIN DATO | 42.9 | B (Evidencia Moderada) |
+| #98 | **BAAI/Gemma2-9B-IT-Simpo-Infinity-Preference** | ⚪ EXTERNO | `workhorse` | **42.34** | [39.1, 45.6] | 61.2 | SIN DATO | SIN DATO | B (Evidencia Moderada) |
+| #99 | **01-ai/Yi-1.5-9B** | ⚪ EXTERNO | `workhorse` | **42.32** | [38.9, 45.8] | 61.2 | SIN DATO | SIN DATO | B (Evidencia Moderada) |
+| #102 | **01-ai/Yi-34B** | ⚪ EXTERNO | `workhorse` | **41.47** | [38.3, 44.7] | 60.7 | SIN DATO | SIN DATO | B (Evidencia Moderada) |
 | #104 | **Aryanne/SuperHeart** | ⚪ EXTERNO | `workhorse` | **39.87** | [36.4, 43.4] | 59.9 | SIN DATO | SIN DATO | B (Evidencia Moderada) |
 | #105 | **Gemma-3n-e4b-it** | ⚪ EXTERNO | `workhorse` | **39.16** | [32.6, 45.7] | 59.6 | SIN DATO | 39.2 | B (Evidencia Moderada) |
 | #106 | **Ateron/Glowing-Forest-12B** | ⚪ EXTERNO | `workhorse` | **38.68** | [35.4, 42.0] | 59.3 | SIN DATO | SIN DATO | B (Evidencia Moderada) |
@@ -178,7 +175,7 @@
 | #139 | **AtAndDev/Qwen2.5-1.5B-continuous-learnt** | ⚪ EXTERNO | `coding` | **27.63** | [24.3, 31.0] | 53.8 | SIN DATO | SIN DATO | B (Evidencia Moderada) |
 | #141 | **Qwen-Max-0919** | ⚪ EXTERNO | `frontier` | **27.51** | [21.5, 33.5] | 53.8 | SIN DATO | 27.5 | B (Evidencia Moderada) |
 | #143 | **Anthropic Claude 3.5 Haiku** | ⚪ EXTERNO | `workhorse` | **26.9** | [21.9, 31.9] | 32.3 | 30.9 | 16.2 | A (Alta Corroboración) |
-| #147 | **OpenAI GPT-4o-mini** | ⚪ EXTERNO | `workhorse` | **26.21** | [21.2, 31.2] | 44.9 | 24.4 | 28.3 | A (Alta Corroboración) |
+| #147 | **OpenAI GPT-4o-mini** | ⚪ EXTERNO | `workhorse` | **26.21** | [21.2, 31.2] | 48.4 | 24.4 | 28.3 | A (Alta Corroboración) |
 | #148 | **Gemini-1.5-Pro-001** | ⚪ EXTERNO | `frontier` | **26.17** | [20.3, 32.1] | 53.1 | SIN DATO | 26.2 | B (Evidencia Moderada) |
 | #150 | **Hunyuan-Standard-2025-02-10** | ⚪ EXTERNO | `workhorse` | **24.81** | [18.8, 30.8] | 52.4 | SIN DATO | 24.8 | B (Evidencia Moderada) |
 | #151 | **1TuanPham/T-VisStar-v0.1** | ⚪ EXTERNO | `workhorse` | **24.21** | [20.9, 27.6] | 52.1 | SIN DATO | SIN DATO | A (Alta Corroboración) |
@@ -210,7 +207,7 @@
 | #191 | **Amaorynho/BBAI270V4** | ⚪ EXTERNO | `workhorse` | **10.9** | [7.1, 14.7] | 45.5 | SIN DATO | SIN DATO | A (Alta Corroboración) |
 | — | **Qwen 2.5 Max** | ⚪ EXTERNO | `frontier` | SIN DATO | SIN DATO | SIN DATO | SIN DATO | SIN DATO | D (Catálogo No Evaluado) |
 | — | **Google Gemini 3.7 Flash (Reasoning)** | ⚪ EXTERNO | `frontier` | SIN DATO | SIN DATO | SIN DATO | SIN DATO | SIN DATO | D (Catálogo No Evaluado) |
-| — | **Gemma 4 31B IT (Agent)** | 🟢 **LOCAL** | `agentic` | SIN DATO | SIN DATO | SIN DATO | SIN DATO | SIN DATO | D (Catálogo No Evaluado) |
+| — | **Gemma 4 31B IT (Agent)** | ⚪ EXTERNO | `agentic` | SIN DATO | SIN DATO | SIN DATO | SIN DATO | SIN DATO | D (Catálogo No Evaluado) |
 | — | **NVIDIA Nemotron 3 Super 120B** | ⚪ EXTERNO | `reasoning` | SIN DATO | SIN DATO | SIN DATO | SIN DATO | SIN DATO | D (Catálogo No Evaluado) |
 | — | **Zhipu GLM 5.2 Frontier** | ⚪ EXTERNO | `frontier` | SIN DATO | SIN DATO | SIN DATO | SIN DATO | SIN DATO | D (Catálogo No Evaluado) |
 | — | **Poolside Laguna S 2.1 (Code)** | ⚪ EXTERNO | `coding` | SIN DATO | SIN DATO | SIN DATO | SIN DATO | SIN DATO | D (Catálogo No Evaluado) |
@@ -218,7 +215,7 @@
 | — | **Microsoft Phi-4 (GitHub Models)** | ⚪ EXTERNO | `reasoning` | SIN DATO | SIN DATO | SIN DATO | SIN DATO | SIN DATO | D (Catálogo No Evaluado) |
 | — | **Alibaba Qwen 3.8 Flash** | ⚪ EXTERNO | `workhorse` | SIN DATO | SIN DATO | SIN DATO | SIN DATO | SIN DATO | D (Catálogo No Evaluado) |
 | — | **tencent/hy4-preview** | ⚪ EXTERNO | `workhorse` | SIN DATO | SIN DATO | SIN DATO | SIN DATO | SIN DATO | D (Catálogo No Evaluado) |
-| — | **inclusionai/ling-3.0-flash-fin:free** | ⚪ EXTERNO | `workhorse` | SIN DATO | SIN DATO | SIN DATO | SIN DATO | SIN DATO | D (Catálogo No Evaluado) |
+| — | **inclusionai/ling-3.0-flash-fin** | ⚪ EXTERNO | `workhorse` | SIN DATO | SIN DATO | SIN DATO | SIN DATO | SIN DATO | D (Catálogo No Evaluado) |
 | — | **dots-studio/dots-3-note-preview:free** | ⚪ EXTERNO | `workhorse` | SIN DATO | SIN DATO | SIN DATO | SIN DATO | SIN DATO | D (Catálogo No Evaluado) |
 | — | **qwen/qwen3.8-2.4t-a95b** | ⚪ EXTERNO | `workhorse` | SIN DATO | SIN DATO | SIN DATO | SIN DATO | SIN DATO | D (Catálogo No Evaluado) |
 | — | **bytedance-seed/seed-2.0-code** | ⚪ EXTERNO | `coding` | SIN DATO | SIN DATO | SIN DATO | SIN DATO | SIN DATO | D (Catálogo No Evaluado) |
@@ -243,7 +240,7 @@
 | — | **openrouter/fusion** | ⚪ EXTERNO | `workhorse` | SIN DATO | SIN DATO | SIN DATO | SIN DATO | SIN DATO | D (Catálogo No Evaluado) |
 | — | **moonshotai/kimi-k2.7-code** | ⚪ EXTERNO | `coding` | SIN DATO | SIN DATO | SIN DATO | SIN DATO | SIN DATO | D (Catálogo No Evaluado) |
 | — | **nex-agi/nex-n2-pro** | ⚪ EXTERNO | `frontier` | SIN DATO | SIN DATO | SIN DATO | SIN DATO | SIN DATO | D (Catálogo No Evaluado) |
-| — | **nvidia/nemotron-3.5-content-safety:free** | ⚪ EXTERNO | `workhorse` | SIN DATO | SIN DATO | SIN DATO | SIN DATO | SIN DATO | D (Catálogo No Evaluado) |
+| — | **nvidia/nemotron-3.5-content-safety** | ⚪ EXTERNO | `workhorse` | SIN DATO | SIN DATO | SIN DATO | SIN DATO | SIN DATO | D (Catálogo No Evaluado) |
 | — | **nvidia/nemotron-3-ultra-550b-a55b** | ⚪ EXTERNO | `workhorse` | SIN DATO | SIN DATO | SIN DATO | SIN DATO | SIN DATO | D (Catálogo No Evaluado) |
 | — | **qwen/qwen3.7-plus** | ⚪ EXTERNO | `workhorse` | SIN DATO | SIN DATO | SIN DATO | SIN DATO | SIN DATO | D (Catálogo No Evaluado) |
 | — | **minimax/minimax-m3** | ⚪ EXTERNO | `frontier` | SIN DATO | SIN DATO | SIN DATO | SIN DATO | SIN DATO | D (Catálogo No Evaluado) |
@@ -401,6 +398,8 @@
 | — | **mistralai/mistral-large** | ⚪ EXTERNO | `workhorse` | SIN DATO | SIN DATO | SIN DATO | SIN DATO | SIN DATO | D (Catálogo No Evaluado) |
 | — | **openrouter/auto** | ⚪ EXTERNO | `workhorse` | SIN DATO | SIN DATO | SIN DATO | SIN DATO | SIN DATO | D (Catálogo No Evaluado) |
 | — | **openai/gpt-4** | ⚪ EXTERNO | `workhorse` | SIN DATO | SIN DATO | SIN DATO | SIN DATO | SIN DATO | D (Catálogo No Evaluado) |
+| — | **inception/mercury-2.5-preview** | ⚪ EXTERNO | `workhorse` | SIN DATO | SIN DATO | SIN DATO | SIN DATO | SIN DATO | D (Catálogo No Evaluado) |
+| — | **~z-ai/glm-flash-latest** | ⚪ EXTERNO | `workhorse` | SIN DATO | SIN DATO | SIN DATO | SIN DATO | SIN DATO | D (Catálogo No Evaluado) |
 
 ---
 
@@ -427,7 +426,7 @@
 | #72 | **AALF/FuseChat-Llama-3.1-8B-Instruct-preview** | Hugging Face (Community) | `edge` | 53.9 | Gratis |
 | #74 | **AALF/FuseChat-Llama-3.1-8B-SFT-preview** | Hugging Face (Community) | `edge` | 52.07 | Gratis |
 | #75 | **Google Gemini 2.0 Flash** | Google | `realtime` | 51.68 | Gratis |
-| #85 | **Nous Hermes 3 70B** | Nous Research | `uncensored` | 48.35 | $0.7 In |
+| #86 | **Nous Hermes 3 70B** | Nous Research | `uncensored` | 48.35 | $0.7 In |
 
 ---
 
@@ -437,7 +436,7 @@
 - **Hugging Face**: Open LLM Leaderboard v2 (MMLU-Pro, MATH, GPQA, IFEval).
 - **LiveCodeBench & SWE-bench & Aider**: Evaluación holística de código no contaminada.
 - **LMSYS / Arena.ai**: Preferencia Humana (Elo).
-- **Cobertura Empírica Real**: Inteligencia Medida: 193/450 | Coding: 30/450 | Preferencia Humana: 112/450 | Sonda Directa: 13/450
+- **Cobertura Empírica Real**: Inteligencia Medida: 193/454 | Coding: 30/454 | Preferencia Humana: 112/454 | Sonda Directa: 11/454
 
 > **FloydIA** — *«Construimos la inteligencia. Desde la infraestructura.»*  
 > **«Desde la infraestructura, todo.»**

@@ -158,10 +158,13 @@ class LLMRouter:
         cost_txt = "Gratuito" if primary.get("is_free_tier") else f"${primary.get('input_cost_per_m')}/1M"
         reason = f"Seleccionado para tarea '{task}' (Presupuesto: {budget}). Score FCI: {primary.get('intelligence_score')}/100, Latencia real: {lat_txt}, Coste: {cost_txt}, Grado Evidencia: {primary.get('evidence_grade', 'B')}."
 
+        from src.core.normalizer import format_display_name
+
         def _format_model_res(m_dict: Dict[str, Any], r_note: str) -> Dict[str, Any]:
             return {
                 "id": m_dict.get("id"),
                 "canonical_name": m_dict.get("canonical_name"),
+                "display_name": format_display_name(m_dict),
                 "provider": m_dict.get("provider"),
                 "tier": m_dict.get("tier"),
                 "context_window": m_dict.get("context_window"),

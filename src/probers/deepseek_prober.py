@@ -12,47 +12,101 @@ from src.core.key_pool import key_pool
 
 
 def probe_deepseek() -> List[Dict[str, Any]]:
-    """Comprueba el estado de las cuentas de DeepSeek."""
+    """Comprueba el estado y balance de todas las cuentas de DeepSeek."""
     results = []
     if not DEEPSEEK_ACCOUNTS:
         return results
 
     models_to_test = [
+        {"model": "deepseek-chat", "context": 131072, "in_cost": 0.14, "out_cost": 0.28, "reasoning": False},
+        {"model": "deepseek-reasoner", "context": 65536, "in_cost": 0.55, "out_cost": 2.19, "reasoning": True},
         {"model": "deepseek-v4-flash", "context": 262144, "in_cost": 0.10, "out_cost": 0.20, "reasoning": False},
-        {"model": "deepseek-v4-pro", "context": 262144, "in_cost": 0.20, "out_cost": 0.40, "reasoning": False},
-        {"model": "deepseek-chat", "context": 65536, "in_cost": 0.14, "out_cost": 0.28, "reasoning": False},
-        {"model": "deepseek-reasoner", "context": 65536, "in_cost": 0.55, "out_cost": 2.19, "reasoning": True}
+        {"model": "deepseek-v4-pro", "context": 262144, "in_cost": 0.20, "out_cost": 0.40, "reasoning": False}
     ]
 
-    # 1. Probar modelos con la cuenta principal
-    primary_acc = DEEPSEEK_ACCOUNTS[0]
-    models_url = f"{DEEPSEEK_API_BASE}/models"
-    headers_primary = {"Authorization": f"Bearer {primary_acc['key']}"}
+    chat_url = f"{DEEPSEEK_API_BASE}/chat/completions"
+    
+    # 1. Auditar cada cuenta con una solicitud ligera de 1 token para verificar saldo real
+    account_statuses = {}
+    working_account = None
 
-    try:
-        t0 = time.perf_counter()
-        resp = requests.get(models_url, headers=headers_primary, timeout=8)
-        latency = round((time.perf_counter() - t0) * 1000, 1)
-        is_ok = (resp.status_code == 200)
-        status_msg = "🟢 Operativa (200 OK)" if is_ok else f"HTTP {resp.status_code}: {resp.text[:60]}"
-        if is_ok:
-            key_pool.record_latency(primary_acc["name"], latency)
-    except Exception as e:
-        is_ok = False
-        latency = 0.0
-        status_msg = f"Error de red: {e}"
+    for acc in DEEPSEEK_ACCOUNTS:
+        acc_name = acc["name"]
+        headers = {"Authorization": f"Bearer {acc['key']}", "Content-Type": "application/json"}
+        payload = {"model": "deepseek-chat", "messages": [{"role": "user", "content": "ping"}], "max_tokens": 1}
+        
+        try:
+            t0 = time.perf_counter()
+            resp = requests.post(chat_url, headers=headers, json=payload, timeout=6)
+            lat = round((time.perf_counter() - t0) * 1000, 1)
+            
+            if resp.status_code == 200:
+                is_ok = True
+                status_msg = "🟢 Operativa (200 OK)"
+                key_pool.record_latency(acc_name, lat)
+                if working_account is None:
+                    working_account = (acc, lat, status_msg)
+            elif resp.status_code == 402:
+                is_ok = False
+                status_msg = "⚠️ Sin Saldo (HTTP 402)"
+            elif resp.status_code in (401, 403):
+                is_ok = False
+                status_msg = f"❌ Error Autenticación ({resp.status_code})"
+                key_pool.mark_auth_failed(acc_name)
+            else:
+                is_ok = False
+                status_msg = f"HTTP {resp.status_code}: {resp.text[:50]}"
+        except Exception as e:
+            is_ok = False
+            lat = 0.0
+            status_msg = f"Error de red: {e}"
+
+        account_statuses[acc_name] = {
+            "is_functional": is_ok,
+            "latency_ms": lat,
+            "status_message": status_msg
+        }
+
+        # Registrar entrada para la cuenta específica
+        results.append({
+            "provider_name": f"DeepSeek [{acc_name}]",
+            "model_identifier": "deepseek-chat",
+            "canonical_id": "deepseek-chat",
+            "is_functional": is_ok,
+            "status_code": 200 if is_ok else (402 if "402" in status_msg else 500),
+            "status_message": status_msg,
+            "latency_ms": lat,
+            "detected_context_window": 131072,
+            "supports_tools": True,
+            "supports_vision": False,
+            "is_free_tier": False,
+            "cost_input_m": 0.14,
+            "cost_output_m": 0.28
+        })
+
+    # 2. Registrar los modelos del catálogo con la cuenta activa encontrada
+    if working_account is not None:
+        active_acc, active_lat, active_msg = working_account
+        cat_functional = True
+        cat_latency = active_lat
+        cat_msg = active_msg
+    else:
+        first_acc_name = DEEPSEEK_ACCOUNTS[0]["name"]
+        cat_functional = False
+        cat_latency = 0.0
+        cat_msg = account_statuses.get(first_acc_name, {}).get("status_message", "⚠️ Sin saldo en el pool")
 
     for item in models_to_test:
         raw_name = item["model"]
         can_id, _ = normalizer.resolve(raw_name, provider_hint="DeepSeek")
         results.append({
-            "provider_name": "DeepSeek",
+            "provider_name": "DeepSeek Direct",
             "model_identifier": raw_name,
             "canonical_id": can_id,
-            "is_functional": is_ok,
-            "status_code": 200 if is_ok else 500,
-            "status_message": status_msg,
-            "latency_ms": latency,
+            "is_functional": cat_functional,
+            "status_code": 200 if cat_functional else 402,
+            "status_message": cat_msg,
+            "latency_ms": cat_latency,
             "detected_context_window": item["context"],
             "supports_tools": not item["reasoning"],
             "supports_vision": False,
@@ -60,41 +114,5 @@ def probe_deepseek() -> List[Dict[str, Any]]:
             "cost_input_m": item["in_cost"],
             "cost_output_m": item["out_cost"]
         })
-
-    # 2. Sondear cuentas adicionales de DeepSeek para verificar disponibilidad
-    if len(DEEPSEEK_ACCOUNTS) > 1:
-        for acc in DEEPSEEK_ACCOUNTS[1:]:
-            acc_name = acc["name"]
-            headers_acc = {"Authorization": f"Bearer {acc['key']}"}
-            is_acc_ok = False
-            acc_latency = 0.0
-            acc_status = "No verificado"
-            
-            try:
-                t0 = time.perf_counter()
-                resp = requests.get(models_url, headers=headers_acc, timeout=6)
-                acc_latency = round((time.perf_counter() - t0) * 1000, 1)
-                is_acc_ok = (resp.status_code == 200)
-                acc_status = "🟢 Operativa (200 OK)" if is_acc_ok else f"HTTP {resp.status_code}"
-                if is_acc_ok:
-                    key_pool.record_latency(acc_name, acc_latency)
-            except Exception as e:
-                acc_status = f"Error: {e}"
-
-            results.append({
-                "provider_name": f"DeepSeek [{acc_name}]",
-                "model_identifier": "deepseek-chat",
-                "canonical_id": "deepseek-chat",
-                "is_functional": is_acc_ok,
-                "status_code": 200 if is_acc_ok else 500,
-                "status_message": acc_status,
-                "latency_ms": acc_latency,
-                "detected_context_window": 65536,
-                "supports_tools": True,
-                "supports_vision": False,
-                "is_free_tier": False,
-                "cost_input_m": 0.14,
-                "cost_output_m": 0.28
-            })
 
     return results

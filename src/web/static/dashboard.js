@@ -142,12 +142,26 @@ function applyPreset(preset) {
   }
 }
 
+function onAllCatalogToggle() {
+  const isAll = document.getElementById("filterAllCatalog").checked;
+  if (isAll) {
+    if (document.getElementById("filterFreeOnly")) document.getElementById("filterFreeOnly").checked = false;
+    if (document.getElementById("filterLocalOnly")) document.getElementById("filterLocalOnly").checked = false;
+    if (document.getElementById("filterExcludeLegacy")) document.getElementById("filterExcludeLegacy").checked = false;
+    if (document.getElementById("filterExcludeLowScore")) document.getElementById("filterExcludeLowScore").checked = false;
+  }
+  filterAndRender();
+}
+
 function filterAndRender() {
   const q = document.getElementById("searchInput").value.toLowerCase().trim();
   const selectedSource = document.getElementById("sourceSelect").value;
   const selectedContext = document.getElementById("contextSelect") ? document.getElementById("contextSelect").value : "all";
+  const showAll = document.getElementById("filterAllCatalog") ? document.getElementById("filterAllCatalog").checked : false;
   const onlyFree = document.getElementById("filterFreeOnly").checked;
   const onlyLocal = document.getElementById("filterLocalOnly").checked;
+  const excludeLegacy = document.getElementById("filterExcludeLegacy") ? document.getElementById("filterExcludeLegacy").checked : true;
+  const excludeLowScore = document.getElementById("filterExcludeLowScore") ? document.getElementById("filterExcludeLowScore").checked : false;
 
   const showFrontier = document.getElementById("filterFrontier").checked;
   const showAgentic = document.getElementById("filterAgentic").checked;
@@ -161,20 +175,24 @@ function filterAndRender() {
   const showEdge = document.getElementById("filterEdge") ? document.getElementById("filterEdge").checked : true;
 
   currentFiltered = allModels.filter(m => {
-    if (onlyFree && !Boolean(m.is_free_tier)) return false;
-    if (onlyLocal && !Boolean(m.is_local_active)) return false;
+    if (!showAll) {
+      if (onlyFree && !Boolean(m.is_free_tier)) return false;
+      if (onlyLocal && !Boolean(m.is_local_active)) return false;
+      if (excludeLegacy && Boolean(m.is_legacy)) return false;
+      if (excludeLowScore && (Number(m.intelligence_score) || 0) < 70) return false;
 
-    const t = m.tier;
-    if (t === "frontier" && !showFrontier) return false;
-    if (t === "agentic" && !showAgentic) return false;
-    if (t === "reasoning" && !showReasoning) return false;
-    if (t === "multimodal" && !showMultimodal) return false;
-    if (t === "long_context" && !showLongContext) return false;
-    if (t === "workhorse" && !showWorkhorse) return false;
-    if (t === "coding" && !showCoding) return false;
-    if (t === "uncensored" && !showUncensored) return false;
-    if (t === "realtime" && !showRealtime) return false;
-    if (t === "edge" && !showEdge) return false;
+      const t = m.tier;
+      if (t === "frontier" && !showFrontier) return false;
+      if (t === "agentic" && !showAgentic) return false;
+      if (t === "reasoning" && !showReasoning) return false;
+      if (t === "multimodal" && !showMultimodal) return false;
+      if (t === "long_context" && !showLongContext) return false;
+      if (t === "workhorse" && !showWorkhorse) return false;
+      if (t === "coding" && !showCoding) return false;
+      if (t === "uncensored" && !showUncensored) return false;
+      if (t === "realtime" && !showRealtime) return false;
+      if (t === "edge" && !showEdge) return false;
+    }
 
     if (selectedSource !== "all") {
       const sources = (m.sources || []).map(s => String(s).toLowerCase());
@@ -197,7 +215,8 @@ function filterAndRender() {
     }
 
     if (q) {
-      const matchName = (m.canonical_name || "").toLowerCase().includes(q);
+      const dispName = (m.display_name || m.canonical_name || "").toLowerCase();
+      const matchName = dispName.includes(q);
       const matchProv = (m.provider || "").toLowerCase().includes(q);
       const matchId = (m.id || "").toLowerCase().includes(q);
       if (!matchName && !matchProv && !matchId) return false;
@@ -232,9 +251,10 @@ function renderLocalTable() {
     const freeTxt = m.is_free_tier ? "<span class='free-badge'>🆓 GRATIS</span>" : ('$' + (Number(m.input_cost_per_m) || 0).toFixed(3) + ' / $' + (Number(m.output_cost_per_m) || 0).toFixed(3));
     const lat = m.local_latency_ms ? (m.local_latency_ms + " ms") : "-";
     const statusTxt = m.local_status_msg || '🟢 OK';
+    const dispTitle = m.display_name || (m.canonical_name + ' (' + m.provider + ')');
     return `
       <tr class="model-row">
-        <td onclick="openModal('${m.id}')"><strong>${m.canonical_name}</strong> <span style="font-size: 11px; color: var(--floydia-teal);">ℹ️</span></td>
+        <td onclick="openModal('${m.id}')"><strong>${dispTitle}</strong> <span style="font-size: 11px; color: var(--floydia-teal);">ℹ️</span></td>
         <td onclick="openModal('${m.id}')">${m.provider}</td>
         <td onclick="openModal('${m.id}')"><span class="tier-badge tier-${m.tier}">${m.tier}</span></td>
         <td onclick="openModal('${m.id}')" class="code-val">${(Number(m.context_window) || 0).toLocaleString()} tok</td>
@@ -266,11 +286,12 @@ function renderGlobalTable() {
     const costStr = m.is_free_tier ? "<span class='free-badge'>🆓 GRATIS</span>" : ('$' + (Number(m.input_cost_per_m) || 0).toFixed(3) + ' / $' + (Number(m.output_cost_per_m) || 0).toFixed(3));
     const eloVal = Math.round((Number(m.preference_score) || 0) * 4 + 1000);
     const sourcesHtml = (m.sources || []).map(s => '<span class="source-tag">' + s + '</span>').join("");
+    const dispTitle = m.display_name || (m.canonical_name + ' (' + m.provider + ')');
 
     return `
       <tr class="model-row">
         <td onclick="openModal('${m.id}')" class="code-val">#${m.global_rank}</td>
-        <td onclick="openModal('${m.id}')"><strong>${m.canonical_name}</strong> <span style="font-size: 11px; color: #64748B;">(${m.provider})</span> <span style="font-size: 11px; color: var(--floydia-teal);">ℹ️</span></td>
+        <td onclick="openModal('${m.id}')"><strong>${dispTitle}</strong> <span style="font-size: 11px; color: var(--floydia-teal);">ℹ️</span></td>
         <td onclick="openModal('${m.id}')">${badgeHtml}</td>
         <td onclick="openModal('${m.id}')"><span class="tier-badge tier-${m.tier}">${m.tier}</span></td>
         <td onclick="openModal('${m.id}')" class="score-val">${m.intelligence_score}</td>
@@ -285,6 +306,50 @@ function renderGlobalTable() {
       </tr>
     `;
   }).join("");
+}
+
+async function runTokenRouterWeb() {
+  const task = document.getElementById("routerTaskSelect").value;
+  const budget = document.getElementById("routerBudgetSelect").value;
+  const reqTools = document.getElementById("routerReqTools").checked;
+  const reqVision = document.getElementById("routerReqVision").checked;
+  const localOnly = document.getElementById("routerLocalOnly").checked;
+  const resBox = document.getElementById("routerResultBox");
+
+  resBox.style.display = "block";
+  document.getElementById("routerWinnerName").innerText = "⏳ Consultando TokenRouter...";
+  document.getElementById("routerWinnerReason").innerText = "Calculando ranking multicriterio y latencias en vivo...";
+  document.getElementById("routerFallbacksList").innerText = "";
+
+  try {
+    const resp = await fetch("/api/recommend_model", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        task: task,
+        budget: budget,
+        requires_tools: reqTools,
+        requires_vision: reqVision,
+        prefer_local_only: localOnly
+      })
+    });
+    const data = await resp.json();
+    const rec = data.recommended_model || {};
+    const dName = rec.display_name || rec.canonical_name || "Modelo";
+    document.getElementById("routerWinnerName").innerText = "🎯 " + dName;
+    document.getElementById("routerWinnerReason").innerText = rec.reason || "Recomendado por TokenRouter";
+
+    const fallbacks = data.cascading_fallbacks || [];
+    if (fallbacks.length > 0) {
+      const fbLines = fallbacks.map(fb => "• [" + (fb.reason || "Alt") + "] " + (fb.display_name || fb.canonical_name));
+      document.getElementById("routerFallbacksList").innerText = "Cascada de Fallbacks:\n" + fbLines.join("\n");
+    } else {
+      document.getElementById("routerFallbacksList").innerText = "";
+    }
+  } catch (err) {
+    document.getElementById("routerWinnerName").innerText = "❌ Error en TokenRouter";
+    document.getElementById("routerWinnerReason").innerText = String(err);
+  }
 }
 
 function applyTableSort(tableType, colIndex, isAsc) {

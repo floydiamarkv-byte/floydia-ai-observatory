@@ -51,4 +51,4 @@ Thumbs.db
 
 # Cachés y backups locales
 cache/
-*.bak
+*.bak*

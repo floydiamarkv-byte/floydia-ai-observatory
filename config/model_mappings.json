@@ -71,7 +71,8 @@
         "gemini-2.5-flash-001",
         "models/gemini-2.5-flash",
         "google/gemini-2.5-flash"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "gemini-2.0-flash",
@@ -92,7 +93,8 @@
         "gemini-2.0-flash-001",
         "models/gemini-2.0-flash",
         "google/gemini-2.0-flash-001"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "gemini-2.5-pro",
@@ -112,7 +114,8 @@
         "gemini-2.5-pro-preview-05-20",
         "models/gemini-2.5-pro",
         "google/gemini-2.5-pro"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "deepseek-chat",
@@ -132,7 +135,8 @@
         "deepseek-v3",
         "deepseek/deepseek-chat",
         "deepseek-ai/DeepSeek-V3"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "deepseek-reasoner",
@@ -153,7 +157,8 @@
         "deepseek/deepseek-r1",
         "deepseek-ai/DeepSeek-R1",
         "deepseek/deepseek-r1:free"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "claude-3-7-sonnet",
@@ -173,7 +178,8 @@
         "claude-3.7-sonnet",
         "anthropic/claude-3.7-sonnet",
         "claude-3-7-sonnet"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "claude-3-5-sonnet",
@@ -193,7 +199,8 @@
         "claude-3.5-sonnet",
         "anthropic/claude-3.5-sonnet",
         "claude-3-5-sonnet"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "claude-3-5-haiku",
@@ -212,7 +219,8 @@
         "claude-3-5-haiku-20241022",
         "claude-3.5-haiku",
         "anthropic/claude-3.5-haiku"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "gpt-4o",
@@ -232,7 +240,8 @@
         "gpt-4o-2024-08-06",
         "gpt-4o-2024-11-20",
         "openai/gpt-4o"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "gpt-4o-mini",
@@ -251,7 +260,8 @@
         "gpt-4o-mini",
         "gpt-4o-mini-2024-07-18",
         "openai/gpt-4o-mini"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "o3-mini",
@@ -270,7 +280,8 @@
         "o3-mini",
         "o3-mini-2025-01-31",
         "openai/o3-mini"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "qwen-2.5-coder-32b",
@@ -289,7 +300,8 @@
         "qwen/qwen-2.5-coder-32b-instruct",
         "qwen/qwen-2.5-coder-32b-instruct:free",
         "Qwen/Qwen2.5-Coder-32B-Instruct"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "qwen-2.5-max",
@@ -308,7 +320,8 @@
         "qwen/qwen-max",
         "qwen-2.5-max",
         "qwen/qwen-2.5-max"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "llama-3.3-70b",
@@ -327,7 +340,8 @@
         "meta-llama/llama-3.3-70b-instruct",
         "meta-llama/llama-3.3-70b-instruct:free",
         "meta-llama/Llama-3.3-70B-Instruct"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "nous-hermes-3-70b",
@@ -346,7 +360,8 @@
         "nousresearch/hermes-3-llama-3.1-70b",
         "Hermes-3-Llama-3.1-70B",
         "hermes-3-70b"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "gemini-3.7-flash",
@@ -365,7 +380,8 @@
         "gemini-3.7-flash",
         "models/gemini-3.7-flash",
         "google/gemini-3.7-flash"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "gemini-3.6-flash",
@@ -384,7 +400,8 @@
         "gemini-3.6-flash",
         "models/gemini-3.6-flash",
         "google/gemini-3.6-flash"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "gemini-3.5-flash",
@@ -403,7 +420,8 @@
         "gemini-3.5-flash",
         "models/gemini-3.5-flash",
         "google/gemini-3.5-flash"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "gemma-4-31b-it",
@@ -422,7 +440,8 @@
         "gemma-4-31b-it",
         "models/gemma-4-31b-it",
         "google/gemma-4-31b-it"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "nemotron-3-super",
@@ -441,7 +460,8 @@
         "nvidia/nemotron-3-super-120b-a12b:free",
         "nvidia/nemotron-3-super-120b-a12b",
         "nemotron-3-super"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "nemotron-3-nano",
@@ -460,7 +480,8 @@
         "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
         "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
         "nemotron-3-nano"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "glm-5.2",
@@ -479,7 +500,8 @@
         "z-ai/glm-5.2:free",
         "z-ai/glm-5.2",
         "glm-5.2"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "laguna-s-2.1",
@@ -498,7 +520,8 @@
         "poolside/laguna-s-2.1:free",
         "poolside/laguna-s-2.1",
         "laguna-s-2.1"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "deepseek-v4",
@@ -517,7 +540,8 @@
         "deepseek-ai/deepseek-v4-flash-0731",
         "deepseek-v4-flash",
         "deepseek-v4"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "codestral-latest",
@@ -536,7 +560,8 @@
         "codestral-latest",
         "mistral/codestral-latest",
         "codestral"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "llama-3.3-70b-groq",
@@ -554,7 +579,8 @@
       "aliases": [
         "llama-3.3-70b-versatile",
         "groq/llama-3.3-70b-versatile"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "deepseek-r1-distill-llama-70b",
@@ -572,7 +598,8 @@
       "aliases": [
         "deepseek-r1-distill-llama-70b",
         "groq/deepseek-r1-distill-llama-70b"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "phi-4",
@@ -591,7 +618,8 @@
         "Phi-4",
         "microsoft/Phi-4",
         "phi-4"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "gpt-4o-github",
@@ -611,7 +639,8 @@
         "github/gpt-4o",
         "openai/gpt-4o:free",
         "models/gpt-4o-github"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "claude-opus-5-high",
@@ -632,7 +661,8 @@
         "anthropic/claude-opus-5-high",
         "claude-opus-5",
         "Claude Opus 5"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "claude-opus-5-max",
@@ -651,7 +681,8 @@
         "claude-opus-5-max",
         "Claude Opus 5 (Max)",
         "anthropic/claude-opus-5-max"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "claude-fable-5",
@@ -673,7 +704,8 @@
         "anthropic/claude-fable-5",
         "~anthropic/claude-fable-latest",
         "claude-fable"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "gpt-5.6-sol-xhigh",
@@ -694,7 +726,8 @@
         "gpt-5.6-sol-xhigh (codex-harness)",
         "openai/gpt-5.6-sol-xhigh",
         "gpt-5.6-sol"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "gpt-5.5-high",
@@ -716,7 +749,8 @@
         "GPT 5.5",
         "gpt-5.5",
         "openai/gpt-5.5-high"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "claude-opus-4-8-high",
@@ -736,7 +770,8 @@
         "Claude Opus 4.8 (High)",
         "claude-opus-4-8",
         "anthropic/claude-opus-4-8-high"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "claude-opus-4-7-high",
@@ -757,7 +792,8 @@
         "claude-opus-4-7",
         "Claude Opus 4.7",
         "anthropic/claude-opus-4-7-high"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "claude-opus-4-6-high",
@@ -777,7 +813,8 @@
         "Claude Opus 4.6 (High)",
         "claude-opus-4-6",
         "anthropic/claude-opus-4-6-high"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "kimi-k3-max",
@@ -801,7 +838,8 @@
         "moonshot-ai/kimi-k3",
         "~moonshotai/kimi-latest",
         "moonshot/kimi-k3-max"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "qwen3.8-max",
@@ -823,7 +861,8 @@
         "qwen-3.8-max",
         "qwen/qwen3.8-max",
         "~qwen/qwen-latest"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "qwen3.8-flash",
@@ -844,7 +883,8 @@
         "qwen-3.8-flash",
         "alibaba/qwen3.8-flash",
         "Qwen 3.8 Flash"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "qwen3.8-27b",
@@ -864,7 +904,8 @@
         "Qwen 3.8 27B",
         "alibaba/qwen3.8-27b",
         "qwen/qwen3.8-27b"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "grok-4.6-high",
@@ -888,7 +929,8 @@
         "xai/grok-4.6",
         "~x-ai/grok-latest",
         "x-ai/grok-4.6-high"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "glm-5.3-max",
@@ -911,7 +953,8 @@
         "z-ai/glm-5.3",
         "zhipu/glm-5.3",
         "~z-ai/glm-latest"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "gemini-3.7-flash-high",
@@ -931,7 +974,8 @@
         "gemini-3.7-flash:high",
         "gemini-3.7-flash-thinking-high",
         "google/gemini-3.7-flash-high"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "gemini-3.1-pro-preview",
@@ -950,7 +994,8 @@
         "gemini-3.1-pro-preview",
         "gemini-3-pro",
         "google/gemini-3.1-pro-preview"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "claude-sonnet-5-high",
@@ -970,7 +1015,8 @@
         "Claude Sonnet 5 (High)",
         "claude-sonnet-5",
         "anthropic/claude-sonnet-5-high"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "muse-spark-1.2",
@@ -989,7 +1035,8 @@
         "muse-spark-1.2 (xHigh)",
         "muse-spark-1.2",
         "meta/muse-spark-1.2"
-      ]
+      ],
+      "is_legacy": false
     },
     {
       "id": "muse-spark-1.1",
@@ -1008,7 +1055,8 @@
         "muse-spark-1.1",
         "meta/muse-spark-1.1",
         "muse-spark"
-      ]
+      ],
+      "is_legacy": false
     }
   ]
 }

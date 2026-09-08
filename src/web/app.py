@@ -45,7 +45,13 @@ def cached_rankings():
     """Retorna rankings desde caché o los recalcula si expiró el TTL."""
     now = time.time()
     if _RANKINGS_CACHE["data"] is None or (now - _RANKINGS_CACHE["ts"]) > CACHE_TTL_SECONDS:
-        _RANKINGS_CACHE["data"] = calculate_multidimensional_rankings()
+        from src.core.normalizer import format_display_name
+        raw_rankings = calculate_multidimensional_rankings()
+        for m in raw_rankings:
+            m["display_name"] = format_display_name(m)
+            m_id = str(m.get("id", "")).lower()
+            m["is_legacy"] = bool(m.get("is_legacy")) or any(k in m_id for k in ["gpt-3.5", "claude-2", "gemini-1.0", "llama-2"])
+        _RANKINGS_CACHE["data"] = raw_rankings
         _RANKINGS_CACHE["ts"] = now
     return _RANKINGS_CACHE["data"]
 
@@ -1243,13 +1249,22 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
         </select>
       </div>
 
-      <!-- 10 CATEGORÍAS ESPECIALIZADAS -->
+      <!-- FILTROS Y CATEGORÍAS REACTIVAS -->
       <div class="checkbox-group">
+        <label class="check-label" style="border-color: #10D2AD; color: #10D2AD;">
+          <input type="checkbox" id="filterAllCatalog" onchange="onAllCatalogToggle()"> 🌐 Todos los Programados
+        </label>
         <label class="check-label check-label-free">
           <input type="checkbox" id="filterFreeOnly" onchange="filterAndRender()"> 🆓 Gratis
         </label>
         <label class="check-label">
-          <input type="checkbox" id="filterLocalOnly" onchange="filterAndRender()"> 🟢 En PC
+          <input type="checkbox" id="filterLocalOnly" onchange="filterAndRender()"> 🟢 En PC (Live OK)
+        </label>
+        <label class="check-label">
+          <input type="checkbox" id="filterExcludeLegacy" checked onchange="filterAndRender()"> 🚫 Excluir Legacy
+        </label>
+        <label class="check-label">
+          <input type="checkbox" id="filterExcludeLowScore" onchange="filterAndRender()"> 📉 Excluir Score < 70
         </label>
         <label class="check-label">
           <input type="checkbox" id="filterFrontier" checked onchange="filterAndRender()"> 👑 Frontier
@@ -1281,6 +1296,48 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
         <label class="check-label">
           <input type="checkbox" id="filterEdge" checked onchange="filterAndRender()"> 📱 Edge
         </label>
+      </div>
+    </div>
+
+    <!-- SECCIÓN TOKENROUTER DINÁMICO -->
+    <div class="card" style="border-left: 4px solid #38BDF8; background: linear-gradient(180deg, #111C2B 0%, #0D1622 100%);">
+      <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="color: #38BDF8;">⚡ TokenRouter — Enrutador Inteligente de Modelos en Tiempo Real</span>
+        <span class="ai-engine-tag" style="background: rgba(56, 189, 248, 0.15); color: #38BDF8; border-color: #38BDF8;">Cascading Router Active</span>
+      </div>
+      <div class="card-subtext">Selecciona la tarea y presupuesto para que el router calcule en milisegundos el modelo más eficiente y sus alternativas de respaldo.</div>
+      
+      <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; align-items: center;">
+        <div>
+          <span style="font-size: 12px; color: #94A3B8;">🎯 Tarea:</span>
+          <select id="routerTaskSelect" class="dropdown-select" style="border-color: #38BDF8;">
+            <option value="general">🌐 Propósito General</option>
+            <option value="coding">💻 Programación & Refactor</option>
+            <option value="reasoning">🧠 Razonamiento STEM</option>
+            <option value="fast">⚡ Inferencia Ultra-Rápida</option>
+          </select>
+        </div>
+        <div>
+          <span style="font-size: 12px; color: #94A3B8;">💰 Presupuesto:</span>
+          <select id="routerBudgetSelect" class="dropdown-select" style="border-color: #10D2AD;">
+            <option value="any">⚖️ Cualquier Presupuesto</option>
+            <option value="free">🆓 Solo Nivel Gratuito ($0)</option>
+            <option value="economy">💵 Modo Economía (< $1.5/M)</option>
+            <option value="frontier">👑 Frontier / Máxima Calidad</option>
+          </select>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; margin-top: 16px;">
+          <label class="check-label"><input type="checkbox" id="routerReqTools"> ⚙️ Tools</label>
+          <label class="check-label"><input type="checkbox" id="routerReqVision"> 👁️ Visión</label>
+          <label class="check-label"><input type="checkbox" id="routerLocalOnly" checked> 🟢 Solo Local</label>
+        </div>
+        <button class="btn btn-primary" style="margin-top: 16px; padding: 7px 18px;" onclick="runTokenRouterWeb()">🎯 Consultar TokenRouter</button>
+      </div>
+
+      <div id="routerResultBox" style="display: none; margin-top: 16px; padding: 14px; background: #070C14; border: 1px solid #1F3347; border-radius: 8px;">
+        <div style="font-family: 'Chakra Petch'; font-size: 16px; font-weight: 700; color: #10D2AD;" id="routerWinnerName">Modelo</div>
+        <div style="font-size: 13px; color: #CBD5E1; margin: 6px 0;" id="routerWinnerReason"></div>
+        <div style="font-family: 'JetBrains Mono'; font-size: 12px; color: #38BDF8;" id="routerFallbacksList"></div>
       </div>
     </div>
 

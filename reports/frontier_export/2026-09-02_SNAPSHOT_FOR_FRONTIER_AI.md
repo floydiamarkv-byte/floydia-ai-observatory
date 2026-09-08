@@ -1,5 +1,5 @@
 # 🌐 FLOYDIA AI BENCHMARKS & LOCAL APIS — SNAPSHOT DIARIO
-> **Fecha de Extracción**: 2026-08-28  
+> **Fecha de Extracción**: 2026-09-02  
 > **Sistema Emisor**: FloydIA AI Rankings & Local API Observatory v9.1  
 > **Firma**: FloydIA — *«Construimos la inteligencia. Desde la infraestructura.»*  
 > **Uso Previsto**: Pega este archivo completo en **Claude 3.7 Sonnet, GPT-4o o DeepSeek-R1** para análisis estratégicos avanzados.
@@ -25,7 +25,7 @@ Responde al usuario ofreciendo:
 
 ---
 
-## 🟢 1. ARSENAL LOCAL: MODELOS ACTIVOS EN MI COMPUTADORA (14 Modelos Verificados)
+## 🟢 1. ARSENAL LOCAL: MODELOS ACTIVOS EN MI COMPUTADORA (11 Modelos Verificados)
 *(Estos son los modelos que tengo configurados con API Keys funcionales y probadas hoy en mi equipo)*
 
 | Modelo | Proveedor | Tier | Ventana Contexto | Latencia (ms) | Modo Precio | Coste In/Out ($/1M) | Score Global |
@@ -34,16 +34,13 @@ Responde al usuario ofreciendo:
 | **Google Gemini 2.5 Flash** | Google | `long_context` | 1,048,576 tok | 474.1 ms | $0.150 / $1.250 | $0.15 / $1.25 | **68.92 / 100** |
 | **Google Gemini 2.0 Flash** | Google | `realtime` | 1,048,576 tok | 474.1 ms | 🆓 GRATIS | $0.1 / $0.4 | **51.68 / 100** |
 | **Meta Muse Spark 1.2 (xHigh)** | Meta | `multimodal` | 1,048,576 tok | 484.3 ms | $1.250 / $4.250 | $1.25 / $4.25 | **99.07 / 100** |
-| **Google Gemini 3.5 Flash (Multi)** | Google | `multimodal` | 1,048,576 tok | 911.2 ms | $0.750 / $4.500 | $0.75 / $4.5 | **98.82 / 100** |
-| **Mistral Codestral Latest** | Mistral | `coding` | 256,000 tok | 1012.8 ms | $0.300 / $0.900 | $0.3 / $0.9 | **44.54 / 100** |
+| **Gemma 4 31B IT (Agent)** | Google | `agentic` | 262,144 tok | 897.2 ms | 🆓 GRATIS | $0.0 / $0.0 | **None** |
 | **Google Gemini 3.6 Flash (Fast)** | Google | `workhorse` | 1,048,576 tok | 1143.9 ms | $0.375 / $1.875 | $0.375 / $1.875 | **95.78 / 100** |
-| **moonshotai/kimi-k3** | NVIDIA NIM [C2_NVIDIA] | `None` | 262,144 tok | 1184.0 ms | $0.150 / $0.300 | $0.15 / $0.3 | **Verificado** |
-| **DeepSeek R1 (Reasoner)** | DeepSeek | `reasoning` | 64,000 tok | 1345.5 ms | $0.700 / $2.500 | $0.7 / $2.5 | **81.16 / 100** |
-| **DeepSeek V4 Flash** | DeepSeek | `frontier` | 262,144 tok | 1345.5 ms | $0.100 / $0.200 | $0.1 / $0.2 | **72.78 / 100** |
-| **DeepSeek V3 (Chat)** | DeepSeek | `workhorse` | 163,840 tok | 1345.5 ms | $0.257 / $1.029 | $0.2574 / $1.0287 | **56.4 / 100** |
-| **NVIDIA Nemotron 3 Nano Omni 30B** | NVIDIA | `realtime` | 262,144 tok | 1886.7 ms | $0.050 / $0.200 | $0.05 / $0.2 | **None** |
-| **Gemma 4 31B IT (Agent)** | Google | `agentic` | 262,144 tok | 1955.0 ms | 🆓 GRATIS | $0.0 / $0.0 | **None** |
-| **Moonshot Kimi K3 (Max)** | Moonshot | `coding` | 1,048,576 tok | 2201.3 ms | $2.550 / $12.750 | $2.55 / $12.75 | **99.19 / 100** |
+| **Mistral Codestral Latest** | Mistral | `coding` | 256,000 tok | 1359.9 ms | $0.300 / $0.900 | $0.3 / $0.9 | **44.54 / 100** |
+| **Google Gemini 3.5 Flash (Multi)** | Google | `multimodal` | 1,048,576 tok | 1378.0 ms | $0.750 / $4.500 | $0.75 / $4.5 | **98.82 / 100** |
+| **DeepSeek R1 (Reasoner)** | DeepSeek | `reasoning` | 64,000 tok | 1452.3 ms | $0.700 / $2.500 | $0.7 / $2.5 | **81.16 / 100** |
+| **DeepSeek V4 Flash** | DeepSeek | `frontier` | 262,144 tok | 1452.3 ms | $0.100 / $0.200 | $0.1 / $0.2 | **72.78 / 100** |
+| **DeepSeek V3 (Chat)** | DeepSeek | `workhorse` | 163,840 tok | 1452.3 ms | $0.257 / $1.029 | $0.2574 / $1.0287 | **57.54 / 100** |
 
 ---
 
@@ -55,10 +52,11 @@ Responde al usuario ofreciendo:
 | #1 | **Anthropic Claude Opus 5 (High)** | Anthropic | `frontier` | 99.57 / 100 | 1399 | $2.5 / $12.5 |
 | #2 | **Anthropic Claude Opus 5 (Max)** | Anthropic | `frontier` | 99.57 / 100 | 1399 | $20.0 / $100.0 |
 | #3 | **Anthropic Claude Opus 4.7 (High)** | Anthropic | `frontier` | 99.5 / 100 | 1397 | $2.5 / $12.5 |
-| #4 | **OpenAI GPT 5.5 (High)** | OpenAI | `frontier` | 99.4 / 100 | 1396 | $5.0 / $30.0 |
+| #4 | **OpenAI GPT 5.5 (High)** | OpenAI | `frontier` | 99.4 / 100 | 1396 | $2.5 / $15.0 |
 | #5 | **Anthropic Claude Fable 5** | Anthropic | `frontier` | 99.28 / 100 | 1397 | $5.0 / $25.0 |
-| #6 | **OpenAI GPT 5.6 Sol (xHigh)** | OpenAI | `frontier` | 99.22 / 100 | 1397 | $2.0 / $10.0 |
+| #6 | **OpenAI GPT 5.6 Sol (xHigh)** | OpenAI | `frontier` | 99.22 / 100 | 1397 | $1.0 / $5.0 |
 | #7 | **Anthropic Claude Opus 4.8 (High)** | Anthropic | `frontier` | 99.21 / 100 | 1397 | $2.5 / $12.5 |
+| #8 | **Moonshot Kimi K3 (Max)** | Moonshot | `coding` | 99.19 / 100 | 1397 | $2.55 / $12.75 |
 | #9 | **Anthropic Claude Opus 4.6 (High)** | Anthropic | `frontier` | 99.07 / 100 | 1394 | $2.5 / $12.5 |
 | #11 | **Meta Muse Spark 1.1** | Meta | `multimodal` | 98.97 / 100 | 1394 | $1.25 / $4.25 |
 | #12 | **Alibaba Qwen 3.8 Max** | Alibaba | `coding` | 98.93 / 100 | 1393 | $2.0 / $6.0 |
@@ -71,7 +69,6 @@ Responde al usuario ofreciendo:
 | #20 | **Google Gemini 3.1 Pro Preview** | Google | `long_context` | 98.02 / 100 | 1393 | $2.0 / $12.0 |
 | #21 | **Grok-4-0709** | xAI | `workhorse` | 97.46 / 100 | 1386 | Gratis |
 | #22 | **ChatGPT-4o-latest (2025-03-26)** | OpenAI | `multimodal` | 96.26 / 100 | 1380 | Gratis |
-| #23 | **o3-2025-04-16** | OpenAI | `reasoning` | 95.96 / 100 | 1378 | Gratis |
 
 ---
 
@@ -92,7 +89,7 @@ Responde al usuario ofreciendo:
 - ⚪ [EXTERNO] **Aryanne/QwentileSwap** (Free Tier): Eficiencia **80.2/100** · Contexto: 128,000 tokens
 
 ### 💻 Top Especialistas en Programación y Agentes
-- 🟢 [EN MI PC] **Moonshot Kimi K3 (Max)**: Score Coding **98.3/100**
+- ⚪ [EXTERNO] **Moonshot Kimi K3 (Max)**: Score Coding **98.3/100**
 - ⚪ [EXTERNO] **Alibaba Qwen 3.8 Max**: Score Coding **98.1/100**
 - ⚪ [EXTERNO] **Z.ai GLM 5.3 Max**: Score Coding **97.2/100**
 - ⚪ [EXTERNO] **Anthropic Claude 3.5 Sonnet**: Score Coding **51.2/100**
@@ -106,5 +103,5 @@ Responde al usuario ofreciendo:
 3. *«Diseña un pipeline de cascada de modelos utilizando exclusivamente mis APIs gratuitas y de bajo costo listadas en la sección 1.»*
 
 ---
-*Generado automáticamente por FloydIA AI Rankings Observatory el 2026-08-28.*  
+*Generado automáticamente por FloydIA AI Rankings Observatory el 2026-09-02.*  
 *«Desde la infraestructura, todo.»*

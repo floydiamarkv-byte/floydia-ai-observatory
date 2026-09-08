@@ -18,10 +18,10 @@ def probe_google_ai_studio() -> List[Dict[str, Any]]:
         return results
 
     models_to_test = [
-        {"model": "gemini-3.6-flash", "context": 1048576, "is_free": True, "in_cost": 0.0, "out_cost": 0.0},
         {"model": "gemini-3.5-flash", "context": 1048576, "is_free": True, "in_cost": 0.0, "out_cost": 0.0},
         {"model": "gemini-3.7-flash", "context": 1048576, "is_free": False, "in_cost": 0.075, "out_cost": 0.30},
-        {"model": "gemma-4-31b-it", "context": 262144, "is_free": True, "in_cost": 0.0, "out_cost": 0.0}
+        {"model": "gemma-4-31b-it", "context": 262144, "is_free": True, "in_cost": 0.0, "out_cost": 0.0},
+        {"model": "gemma-4-26b-a4b-it", "context": 262144, "is_free": True, "in_cost": 0.0, "out_cost": 0.0}
     ]
 
     check_url = f"{GOOGLE_OPENAI_BASE}/chat/completions"
@@ -107,7 +107,7 @@ def probe_google_ai_studio() -> List[Dict[str, Any]]:
                     check_url,
                     headers=headers_acc,
                     json={
-                        "model": "gemini-3.6-flash",
+                        "model": "gemini-3.5-flash",
                         "messages": [{"role": "user", "content": "1"}],
                         "max_tokens": 2
                     },
@@ -133,8 +133,8 @@ def probe_google_ai_studio() -> List[Dict[str, Any]]:
 
             results.append({
                 "provider_name": f"Google AI Studio [{acc_name}]",
-                "model_identifier": "gemini-3.6-flash",
-                "canonical_id": "gemini-3.6-flash",
+                "model_identifier": "gemini-3.5-flash",
+                "canonical_id": "gemini-3.5-flash",
                 "is_functional": is_ok,
                 "status_code": status_code,
                 "status_message": status_msg,

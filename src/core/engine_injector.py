@@ -1,11 +1,11 @@
 """
-Módulo Unificado de Inyección y Saneamiento de Motores de FloydIA.
+src/core/engine_injector.py — Módulo Unificado de Inyección Dinámica y Saneamiento de Motores.
 Reescribe y sincroniza configuraciones con escrituras atómicas transaccionales,
 backups rotativos .bak y validación sintáctica (Fix V-05, V-18, V-19) para:
 - OpenCode Desktop & CLI (~/.config/opencode/opencode.jsonc)
 - Hermes Desktop & CLI (~/.hermes/config.yaml + purga de caché)
 - DeepSeek Harness DSH (~/.dsh/settings.yaml)
-- Sincronización multi-nodo hacia HP45 vía Rsync.
+- Sincronización multi-nodo hacia HP45 vía Rsync resiliente.
 """
 
 import os
@@ -16,7 +16,13 @@ import tempfile
 import subprocess
 from typing import Dict, Any, List, Tuple, Optional, Callable
 from pathlib import Path
-from config.settings import BASE_DIR
+from config.settings import (
+    BASE_DIR, GOOGLE_OPENAI_BASE, DEEPSEEK_API_BASE,
+    OPENROUTER_API_BASE, NVIDIA_API_BASE, DASHSCOPE_API_BASE,
+    MISTRAL_API_BASE, GROQ_API_BASE, Z_AI_API_BASE,
+    ZEN_API_BASE, GROKIFIED_API_BASE, GITHUB_MODELS_BASE,
+    FIREWORKS_API_BASE
+)
 
 WORKSPACE = Path("/home/tec/Dropbox/ANTIGRAVITY_PROJECTS")
 OPENCODE_CONFIG = Path(os.path.expanduser("~/.config/opencode/opencode.jsonc"))
@@ -43,7 +49,6 @@ def _validate_yaml(text: str) -> None:
         import yaml
         yaml.safe_load(text)
     except ImportError:
-        # Fallback si PyYAML no está instalado en el entorno mínimo
         pass
 
 
@@ -96,671 +101,338 @@ def atomic_write(
     return path
 
 
-def apply_engine_configurations() -> List[Tuple[str, str]]:
+# Mapeo de proveedores base con metadatos para OpenCode, Hermes y DSH
+PROVIDER_METADATA = {
+    "google": {
+        "npm": "@ai-sdk/google",
+        "name": "Google AI Studio Pro",
+        "env_key": "C1_GOOGLE_AISTUDIO",
+        "base_url": GOOGLE_OPENAI_BASE,
+        "dsh_api": "openai-completions"
+    },
+    "deepseek": {
+        "npm": "@ai-sdk/openai",
+        "name": "DeepSeek Direct",
+        "env_key": "C7_DEEPSEEK",
+        "base_url": f"{DEEPSEEK_API_BASE.rstrip('/')}/v1",
+        "dsh_api": "openai-completions"
+    },
+    "openrouter": {
+        "npm": "@ai-sdk/openai",
+        "name": "OpenRouter Fleet",
+        "env_key": "C7_OPENROUTER_OPENCODE_HP15",
+        "base_url": OPENROUTER_API_BASE,
+        "dsh_api": "openai-completions"
+    },
+    "nvidia": {
+        "npm": "@ai-sdk/openai",
+        "name": "NVIDIA NIM",
+        "env_key": "C1_NVIDIA",
+        "base_url": NVIDIA_API_BASE,
+        "dsh_api": "openai-completions"
+    },
+    "dashscope": {
+        "npm": "@ai-sdk/openai",
+        "name": "Alibaba DashScope (Qwen)",
+        "env_key": "C7_DASHSCOPE_API_KEY",
+        "base_url": DASHSCOPE_API_BASE,
+        "dsh_api": "openai-completions"
+    },
+    "mistral": {
+        "npm": "@ai-sdk/mistral",
+        "name": "Mistral AI Pro",
+        "env_key": "C1_MISTRAL",
+        "base_url": MISTRAL_API_BASE,
+        "dsh_api": "openai-completions"
+    },
+    "groq": {
+        "npm": "@ai-sdk/openai",
+        "name": "Groq LPU",
+        "env_key": "C1_GROQ",
+        "base_url": GROQ_API_BASE,
+        "dsh_api": "openai-completions"
+    },
+    "z_ai": {
+        "npm": "@ai-sdk/openai",
+        "name": "Z.AI (Zhipu GLM)",
+        "env_key": "C1_Z_AI",
+        "base_url": Z_AI_API_BASE,
+        "dsh_api": "openai-completions"
+    },
+    "zenmux": {
+        "npm": "@ai-sdk/openai",
+        "name": "ZenMux Gateway",
+        "env_key": "C1_ZEN_OPENCODE",
+        "base_url": ZEN_API_BASE,
+        "dsh_api": "openai-completions"
+    },
+    "grokified": {
+        "npm": "@ai-sdk/openai",
+        "name": "Grokified (xAI)",
+        "env_key": "GROKIFIED_API_KEY",
+        "base_url": GROKIFIED_API_BASE,
+        "dsh_api": "openai-completions"
+    },
+    "github": {
+        "npm": "@ai-sdk/openai",
+        "name": "GitHub Models",
+        "env_key": "S02_GITHUB_TOKEN_ANTIGRAVITY",
+        "base_url": GITHUB_MODELS_BASE,
+        "dsh_api": "openai-completions"
+    },
+    "fireworks": {
+        "npm": "@ai-sdk/openai",
+        "name": "Fireworks AI",
+        "env_key": "C7_FIREWORKS_API_KEY",
+        "base_url": FIREWORKS_API_BASE,
+        "dsh_api": "openai-completions"
+    }
+}
+
+
+def _resolve_default_model(models_by_provider: Dict[str, List[Dict[str, Any]]]) -> Tuple[str, str, str, str]:
     """
-    Reescribe las configuraciones de OpenCode, Hermes y DSH con los modelos más recientes
-    y comprobados de la flota de FloydIA de forma atómica. Retorna lista de mensajes (mensaje, nivel).
+    Selecciona el mejor modelo principal y modelo ligero (small) disponible en la flota activa.
+    Retorna: (primary_full, small_full, primary_provider, primary_model_id)
+    """
+    # Prioridad para modelo principal
+    primary_candidates = [
+        ("google", "gemini-2.5-flash"),
+        ("google", "gemini-2.0-flash"),
+        ("deepseek", "deepseek-chat"),
+        ("openrouter", "deepseek/deepseek-chat"),
+        ("openrouter", "google/gemini-2.5-flash"),
+        ("openrouter", "qwen/qwen-2.5-coder-32b-instruct:free"),
+        ("dashscope", "qwen3.8-max"),
+        ("mistral", "codestral-latest")
+    ]
+    
+    # Prioridad para modelo secundario (small / ultra-rápido)
+    small_candidates = [
+        ("groq", "llama-3.1-8b-instant"),
+        ("openrouter", "nvidia/nemotron-3.5-lightning:free"),
+        ("google", "gemini-2.0-flash"),
+        ("dashscope", "qwen3.8-flash"),
+        ("mistral", "ministral-8b-latest"),
+        ("z_ai", "glm-4-flash")
+    ]
+
+    selected_primary = None
+    selected_small = None
+
+    for prov, m_id in primary_candidates:
+        if prov in models_by_provider:
+            for item in models_by_provider[prov]:
+                if item["model_id"] == m_id:
+                    selected_primary = (prov, m_id)
+                    break
+        if selected_primary:
+            break
+
+    for prov, m_id in small_candidates:
+        if prov in models_by_provider:
+            for item in models_by_provider[prov]:
+                if item["model_id"] == m_id:
+                    selected_small = (prov, m_id)
+                    break
+        if selected_small:
+            break
+
+    # Fallback si ninguno de los candidatos prioritarios está activo
+    if not selected_primary and models_by_provider:
+        first_prov = next(iter(models_by_provider))
+        first_model = models_by_provider[first_prov][0]["model_id"]
+        selected_primary = (first_prov, first_model)
+
+    if not selected_small and models_by_provider:
+        selected_small = selected_primary
+
+    p_prov, p_mid = selected_primary if selected_primary else ("google", "gemini-2.5-flash")
+    s_prov, s_mid = selected_small if selected_small else ("openrouter", "nvidia/nemotron-3.5-lightning:free")
+
+    return f"{p_prov}/{p_mid}", f"{s_prov}/{s_mid}", p_prov, p_mid
+
+
+def apply_engine_configurations(
+    selected_models: Optional[List[Dict[str, Any]]] = None
+) -> List[Tuple[str, str]]:
+    """
+    Reescribe las configuraciones de OpenCode, Hermes y DSH con escrituras atómicas.
+    Si se suministra `selected_models`, inyecta ÚNICAMENTE dichos modelos/proveedores.
     """
     logs = []
 
+    # Si no se pasan modelos explícitos, recuperar del escaneo profundo o catálogo DB
+    if selected_models is None:
+        try:
+            from src.probers.deep_probe_scanner import get_latest_deep_scan_results
+            latest = get_latest_deep_scan_results()
+            selected_models = [m for m in latest if m.get("is_functional") or m.get("classification") == "RESPUESTA_OK"]
+        except Exception:
+            selected_models = []
+
+    # Si aún está vacío, usar un conjunto curado seguro de respaldo
+    if not selected_models:
+        selected_models = [
+            {"provider_id": "google", "model_id": "gemini-2.5-flash", "canonical_name": "[1M•Free] Gemini 2.5 Flash", "context_window": 1048576, "is_free_tier": True},
+            {"provider_id": "deepseek", "model_id": "deepseek-chat", "canonical_name": "[128k•Paid] DeepSeek Chat V3", "context_window": 131072, "is_free_tier": False},
+            {"provider_id": "openrouter", "model_id": "qwen/qwen-2.5-coder-32b-instruct:free", "canonical_name": "[128k•Free] Qwen 2.5 Coder 32B", "context_window": 131072, "is_free_tier": True},
+            {"provider_id": "openrouter", "model_id": "nvidia/nemotron-3.5-lightning:free", "canonical_name": "[262k•Free] Nemotron 3.5 Lightning", "context_window": 262144, "is_free_tier": True},
+            {"provider_id": "groq", "model_id": "llama-3.3-70b-versatile", "canonical_name": "[128k•Free] Llama 3.3 70B", "context_window": 131072, "is_free_tier": True},
+            {"provider_id": "groq", "model_id": "llama-3.1-8b-instant", "canonical_name": "[128k•Free] Llama 3.1 8B Instant", "context_window": 131072, "is_free_tier": True}
+        ]
+
+    # Agrupar modelos por provider_id
+    models_by_prov: Dict[str, List[Dict[str, Any]]] = {}
+    for m in selected_models:
+        p_id = m.get("provider_id") or "openrouter"
+        p_id = p_id.lower().replace("-", "_").split(" ")[0].split("[")[0]
+        if p_id not in models_by_prov:
+            models_by_prov[p_id] = []
+        
+        # Evitar duplicados por model_id dentro del mismo proveedor
+        if not any(x["model_id"] == m["model_id"] for x in models_by_prov[p_id]):
+            models_by_prov[p_id].append(m)
+
+    primary_full, small_full, prim_prov, prim_mid = _resolve_default_model(models_by_prov)
+
+    # ──────────────────────────────────────────────────────────────────────────
     # 1. OpenCode (~/.config/opencode/opencode.jsonc)
+    # ──────────────────────────────────────────────────────────────────────────
+    opencode_providers = {}
+    for p_id, m_list in models_by_prov.items():
+        meta = PROVIDER_METADATA.get(p_id)
+        if not meta:
+            continue
+
+        prov_models = {}
+        for m in m_list:
+            mid = m["model_id"]
+            cname = m.get("canonical_name") or mid
+            ctx = m.get("context_window", 128000)
+            ctx_str = f"{int(ctx/1000)}k" if ctx < 1000000 else "1M"
+            cost_tag = "Free" if m.get("is_free_tier") else "Paid"
+            disp_name = f"[{ctx_str}•{cost_tag}] {cname}" if "[" not in cname else cname
+            prov_models[mid] = {"name": disp_name}
+
+        if p_id == "google":
+            opencode_providers[p_id] = {
+                "npm": "@ai-sdk/google",
+                "name": meta["name"],
+                "options": {"apiKey": f"{{env:{meta['env_key']}}}"},
+                "models": prov_models
+            }
+        else:
+            opencode_providers[p_id] = {
+                "npm": "@ai-sdk/openai",
+                "name": meta["name"],
+                "options": {
+                    "baseURL": meta["base_url"],
+                    "apiKey": f"{{env:{meta['env_key']}}}"
+                },
+                "models": prov_models
+            }
+
     opencode_cfg = {
         "$schema": "https://opencode.ai/config.json",
-        "model": "google/gemini-3.6-flash",
-        "small_model": "opencode/nemotron-3.5-lightning-free",
-        "provider": {
-            "opencode": {
-                "npm": "@ai-sdk/openai",
-                "name": "OpenCode Zen",
-                "options": {
-                    "baseURL": "https://api.opencode.ai/zen/v1",
-                    "apiKey": "{env:C1_ZEN_OPENCODE}"
-                },
-                "models": {
-                    "opencode/nemotron-3-ultra-free": {"name": "[262k•Zen Free] Nemotron 3 Ultra 550B"},
-                    "opencode/nemotron-3.5-lightning-free": {"name": "[262k•Zen Free] Nemotron 3.5 Lightning"},
-                    "opencode/mimo-v2.5-free": {"name": "[262k•Zen Free] MiMo V2.5"},
-                    "opencode/hy3-free": {"name": "[262k•Zen Free] Hy3 Free"},
-                    "opencode/big-pickle": {"name": "[131k•Zen] Big Pickle"},
-                    "opencode/muse-spark-1.2-contributor-free": {"name": "[262k•Zen Free] Muse Spark 1.2"}
-                }
-            },
-            "google": {
-                "npm": "@ai-sdk/google",
-                "name": "Google AI Studio Pro",
-                "options": {"apiKey": "{env:C1_GOOGLE_AISTUDIO}"},
-                "models": {
-                    "gemini-3.7-flash": {"name": "[1M•Pro] Gemini 3.7 (Reasoning)"},
-                    "gemini-3.6-flash": {"name": "[1M•Pro] Gemini 3.6 (Fast)"},
-                    "gemini-3.5-flash": {"name": "[1M•Pro] Gemini 3.5 (Multi)"},
-                    "gemma-4-31b-it": {"name": "[262k•Pro] Gemma 4 31B (Agent)"},
-                    "gemma-4-26b-a4b-it": {"name": "[262k•Pro] Gemma 4 26B (Fast)"},
-                    "gemini-2.5-pro": {"name": "[1M•Pro] Gemini 2.5 Pro (Frontier)"},
-                    "gemini-2.5-flash": {"name": "[1M•Pro] Gemini 2.5 Flash (Workhorse)"}
-                }
-            },
-            "deepseek": {
-                "npm": "@ai-sdk/openai",
-                "name": "DeepSeek Direct",
-                "options": {
-                    "baseURL": "https://api.deepseek.com/v1",
-                    "apiKey": "{env:DEEPSEEK_API_KEY}"
-                },
-                "models": {
-                    "deepseek-v4-flash": {"name": "[262k•Paid] DeepSeek V4 Flash"},
-                    "deepseek-v4-pro": {"name": "[262k•Paid] DeepSeek V4 Pro"},
-                    "deepseek-chat": {"name": "[128k•Paid] DeepSeek Chat V3"},
-                    "deepseek-reasoner": {"name": "[64k•Paid] DeepSeek Reasoner R1"}
-                }
-            },
-            "mistral": {
-                "npm": "@ai-sdk/mistral",
-                "name": "Mistral AI Pro",
-                "options": {"apiKey": "{env:C1_MISTRAL}"},
-                "models": {
-                    "codestral-latest": {"name": "[256k•Trial] Codestral (Code)"},
-                    "devstral-latest": {"name": "[256k•Trial] Devstral (Agent)"},
-                    "mistral-large-latest": {"name": "[128k•Trial] Mistral Large"},
-                    "mistral-small-latest": {"name": "[128k•Trial] Mistral Small"},
-                    "ministral-8b-latest": {"name": "[128k•Trial] Ministral 8B"}
-                }
-            },
-            "nvidia": {
-                "npm": "@ai-sdk/openai",
-                "name": "NVIDIA NIM",
-                "options": {
-                    "baseURL": "https://integrate.api.nvidia.com/v1",
-                    "apiKey": "{env:C7_NVIDIA}"
-                },
-                "models": {
-                    "deepseek-ai/deepseek-v4-flash-0731": {"name": "[256k•Trial] DeepSeek V4 (NIM)"},
-                    "deepseek-ai/deepseek-v4-pro-0813": {"name": "[256k•Trial] DeepSeek V4 Pro (NIM)"},
-                    "moonshotai/kimi-k3": {"name": "[256k•Trial] Kimi K3 (NIM)"},
-                    "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning": {"name": "[256k•Trial] Nemotron 3 Nano (NIM)"},
-                    "nvidia/nemotron-3-super-120b-a12b": {"name": "[262k•Trial] Nemotron 3 Super (NIM)"},
-                    "nvidia/nemotron-3-ultra-550b-a55b": {"name": "[262k•Trial] Nemotron 3 Ultra (NIM)"}
-                }
-            },
-            "z_ai": {
-                "npm": "@ai-sdk/openai",
-                "name": "Z.AI (Zhipu GLM)",
-                "options": {
-                    "baseURL": "https://open.bigmodel.cn/api/paas/v4",
-                    "apiKey": "{env:C1_Z_AI}"
-                },
-                "models": {
-                    "glm-5.3": {"name": "[262k•Pro] GLM 5.3 (Frontier)"},
-                    "glm-5.2": {"name": "[262k•Pro] GLM 5.2 (Workhorse)"},
-                    "glm-5-turbo": {"name": "[131k•Pro] GLM 5 Turbo"},
-                    "glm-5.3-flash": {"name": "[131k•Free] GLM 5.3 Flash"}
-                }
-            },
-            "grokified": {
-                "npm": "@ai-sdk/openai",
-                "name": "Grokified (xAI)",
-                "options": {
-                    "baseURL": "https://api.grokified.com/v1",
-                    "apiKey": "{env:GROKIFIED_API_KEY}"
-                },
-                "models": {
-                    "grok-4.6": {"name": "[262k•Pro] Grok 4.6 (Frontier)"},
-                    "grok-4.5": {"name": "[131k•Pro] Grok 4.5"},
-                    "grok-4.20-multi-agent-0309": {"name": "[262k•Pro] Grok 4.20 Multi-Agent"},
-                    "grok-build-0.1": {"name": "[131k•Pro] Grok Build 0.1 (Code)"}
-                }
-            },
-            "dashscope": {
-                "npm": "@ai-sdk/openai",
-                "name": "Alibaba DashScope (Qwen)",
-                "options": {
-                    "baseURL": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
-                    "apiKey": "{env:C7_DASHSCOPE_API_KEY}"
-                },
-                "models": {
-                    "qwen3.8-max": {"name": "[262k•Pro] Qwen 3.8 Max (Frontier)"},
-                    "qwen3.8-flash": {"name": "[131k•Free] Qwen 3.8 Flash"},
-                    "qwen3.8-27b": {"name": "[131k•Pro] Qwen 3.8 27B"},
-                    "qwen3.7-flash": {"name": "[131k•Free] Qwen 3.7 Flash"}
-                }
-            },
-            "openrouter": {
-                "npm": "@ai-sdk/openai",
-                "name": "OpenRouter Free",
-                "options": {
-                    "baseURL": "https://openrouter.ai/api/v1",
-                    "apiKey": "{env:C7_OPENROUTER_OPENCODE_HP15}"
-                },
-                "models": {
-                    "openrouter/auto": {"name": "[Auto•Free] OpenRouter Auto"},
-                    "openrouter/free": {"name": "[Auto•Free] OpenRouter Free"},
-                    "minimax/minimax-m3:free": {"name": "[1M•Free] MiniMax M3 (Frontier)"},
-                    "nvidia/nemotron-3-super-120b-a12b:free": {"name": "[262k•Free] Nemotron 3 Super"},
-                    "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free": {"name": "[256k•Free] Nemotron 3 Nano"},
-                    "z-ai/glm-5.2:free": {"name": "[256k•Free] GLM 5.2 (Frontier)"},
-                    "poolside/laguna-s-2.1:free": {"name": "[262k•Free] Laguna S 2.1 (Code)"},
-                    "thinkingmachines/inkling:free": {"name": "[256k•Free] TM Inkling"}
-                }
-            }
-        }
+        "model": primary_full,
+        "small_model": small_full,
+        "provider": opencode_providers
     }
 
     try:
         content_json = json.dumps(opencode_cfg, indent=2, ensure_ascii=False)
         atomic_write(OPENCODE_CONFIG, content_json, validator=_validate_json)
-        logs.append((f"✅ OpenCode configurado (atómico): {OPENCODE_CONFIG}", "SUCCESS"))
+        total_oc_models = sum(len(p["models"]) for p in opencode_providers.values())
+        logs.append((f"✅ OpenCode configurado ({len(opencode_providers)} proveedores, {total_oc_models} modelos OK): {OPENCODE_CONFIG}", "SUCCESS"))
     except Exception as e:
         logs.append((f"❌ Error configurando OpenCode: {e}", "ERROR"))
 
-    # 2. Hermes (~/.hermes/config.yaml)
-    hermes_yaml = """model:
-  default: gemini-3.6-flash
-  provider: google
-  base_url: https://generativelanguage.googleapis.com/v1beta/openai
+    # ──────────────────────────────────────────────────────────────────────────
+    # 2. Hermes Agent CLI & Desktop (~/.hermes/config.yaml & cache)
+    # ──────────────────────────────────────────────────────────────────────────
+    hermes_providers_yaml = []
+    hermes_cache_providers = {}
+
+    for p_id, m_list in models_by_prov.items():
+        meta = PROVIDER_METADATA.get(p_id)
+        if not meta:
+            continue
+
+        model_ids = [m["model_id"] for m in m_list]
+        hermes_cache_providers[p_id] = {
+            "name": meta["name"],
+            "models": model_ids,
+            "base_url": meta["base_url"]
+        }
+
+        m_lines = "\n".join([f"      - {mid}" for mid in model_ids])
+        hermes_providers_yaml.append(f"""  {p_id}:
+    name: "{meta['name']}"
+    env_key: {meta['env_key']}
+    base_url: "{meta['base_url']}"
+    api: openai-completions
+    models:
+{m_lines}""")
+
+    prim_meta = PROVIDER_METADATA.get(prim_prov, PROVIDER_METADATA["google"])
+    hermes_yaml_content = f"""model:
+  default: "{prim_mid}"
+  provider: "{prim_prov}"
+  base_url: "{prim_meta['base_url']}"
 providers:
-  google:
-    name: Google AI Studio Pro
-    env_key: C1_GOOGLE_AISTUDIO
-    base_url: https://generativelanguage.googleapis.com/v1beta/openai
-    api: openai-completions
-    models:
-      - gemini-3.7-flash
-      - gemini-3.6-flash
-      - gemini-3.5-flash
-      - gemma-4-31b-it
-      - gemma-4-26b-a4b-it
-      - gemini-2.5-pro
-      - gemini-2.5-flash
-  opencode:
-    name: OpenCode Zen
-    env_key: C1_ZEN_OPENCODE
-    base_url: https://api.opencode.ai/zen/v1
-    api: openai-completions
-    models:
-      - opencode/nemotron-3-ultra-free
-      - opencode/nemotron-3.5-lightning-free
-      - opencode/mimo-v2.5-free
-      - opencode/hy3-free
-      - opencode/big-pickle
-      - opencode/muse-spark-1.2-contributor-free
-  deepseek:
-    name: DeepSeek Direct
-    env_key: DEEPSEEK_API_KEY
-    base_url: https://api.deepseek.com/v1
-    api: openai-completions
-    models:
-      - deepseek-v4-flash
-      - deepseek-v4-pro
-      - deepseek-chat
-      - deepseek-reasoner
-  openrouter:
-    name: OpenRouter Free
-    env_key: C7_OPENROUTER_OPENCODE_HP15
-    base_url: https://openrouter.ai/api/v1
-    api: openai-completions
-    models:
-      - openrouter/auto
-      - openrouter/free
-      - minimax/minimax-m3:free
-      - nvidia/nemotron-3-super-120b-a12b:free
-      - nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free
-      - z-ai/glm-5.2:free
-      - poolside/laguna-s-2.1:free
-      - thinkingmachines/inkling:free
-  nvidia:
-    name: NVIDIA NIM
-    env_key: C7_NVIDIA
-    base_url: https://integrate.api.nvidia.com/v1
-    api: openai-completions
-    models:
-      - deepseek-ai/deepseek-v4-flash-0731
-      - deepseek-ai/deepseek-v4-pro-0813
-      - moonshotai/kimi-k3
-      - nvidia/nemotron-3-nano-omni-30b-a3b-reasoning
-      - nvidia/nemotron-3-super-120b-a12b
-      - nvidia/nemotron-3-ultra-550b-a55b
-  mistral:
-    name: Mistral AI Pro
-    env_key: C1_MISTRAL
-    base_url: https://api.mistral.ai/v1
-    api: openai-completions
-    models:
-      - codestral-latest
-      - devstral-latest
-      - mistral-large-latest
-      - mistral-small-latest
-      - ministral-8b-latest
-  z_ai:
-    name: Z.AI (Zhipu GLM)
-    env_key: C1_Z_AI
-    base_url: https://open.bigmodel.cn/api/paas/v4
-    api: openai-completions
-    models:
-      - glm-5.3
-      - glm-5.2
-      - glm-5-turbo
-      - glm-5.3-flash
-  grokified:
-    name: Grokified (xAI)
-    env_key: GROKIFIED_API_KEY
-    base_url: https://api.grokified.com/v1
-    api: openai-completions
-    models:
-      - grok-4.6
-      - grok-4.5
-      - grok-4.20-multi-agent-0309
-      - grok-build-0.1
-  dashscope:
-    name: Alibaba DashScope (Qwen)
-    env_key: C7_DASHSCOPE_API_KEY
-    base_url: https://dashscope-intl.aliyuncs.com/compatible-mode/v1
-    api: openai-completions
-    models:
-      - qwen3.8-max
-      - qwen3.8-flash
-      - qwen3.8-27b
-      - qwen3.7-flash
-database:
-  journal_mode: wal
-runtime:
-  nofile_soft_limit: 4096
-_config_version: 42
-fallback_model:
-  provider: opencode
-  model: opencode/nemotron-3.5-lightning-free
-model_aliases:
-  gemini-37: gemini-3.7-flash
-  gemini-36: gemini-3.6-flash
-  zen-ultra: opencode/nemotron-3-ultra-free
-  zen-lightning: opencode/nemotron-3.5-lightning-free
-  zen-mimo: opencode/mimo-v2.5-free
-  zen-hy3: opencode/hy3-free
-  auto-free: openrouter/auto
-  minimax-free: minimax/minimax-m3:free
-  nemotron-super: nvidia/nemotron-3-super-120b-a12b:free
-  nemotron-nano: nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free
-  glm-free: z-ai/glm-5.2:free
-  glm-53: glm-5.3
-  glm-52: glm-5.2
-  grok-46: grok-4.6
-  grok-agent: grok-4.20-multi-agent-0309
-  qwen-max: qwen3.8-max
-  qwen-flash: qwen3.8-flash
-  deepseek-flash: deepseek-v4-flash
-  deepseek-pro: deepseek-v4-pro
-  deepseek-chat: deepseek-chat
-  deepseek-r1: deepseek-reasoner
-  kimi-k3-nim: moonshotai/kimi-k3
-  codestral: codestral-latest
-plugins:
-  enabled: []
-mcp_servers:
-  colab:
-    command: uvx
-    args:
-      - git+https://github.com/googlecolab/colab-mcp
-  inkscape:
-    command: python3
-    args:
-      - /home/tec/Dropbox/ANTIGRAVITY_PROJECTS/SCRIPTS/mcp_servers/inkscape_mcp.py
-  stitch:
-    command: /home/tec/.local/bin/stitch-mcp-wrapper.sh
-  obsidian:
-    command: /home/tec/.npm-global/bin/obsidian-mcp-rs
-    args:
-      - /home/tec/Dropbox/ANTIGRAVITY_PROJECTS/memory-bank
-  novamira_mcp:
-    command: /home/tec/Dropbox/ANTIGRAVITY_PROJECTS/SCRIPTS/launch-mcp-wordpress.sh
-  crawl4ai:
-    command: /home/tec/.local/bin/crawl4ai-mcp
-"""
+""" + "\n".join(hermes_providers_yaml) + "\n"
+
     try:
-        atomic_write(HERMES_CONFIG, hermes_yaml, validator=_validate_yaml)
-        logs.append((f"✅ Hermes config.yaml actualizado (atómico): {HERMES_CONFIG}", "SUCCESS"))
+        atomic_write(HERMES_CONFIG, hermes_yaml_content, validator=_validate_yaml)
+        # Escribir caché de modelos Hermes
+        cache_content = json.dumps({
+            "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "providers": hermes_cache_providers
+        }, indent=2)
+        atomic_write(HERMES_CACHE, cache_content, validator=_validate_json)
+        logs.append((f"✅ Hermes Agent configurado ({len(hermes_providers_yaml)} proveedores OK): {HERMES_CONFIG}", "SUCCESS"))
     except Exception as e:
         logs.append((f"❌ Error configurando Hermes: {e}", "ERROR"))
 
-    # 3. Purga de Caché de Hermes
-    hermes_clean_cache = {
-        "google": {"fp": "google-curated-v5", "at": time.time(), "models": ["gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemma-4-31b-it", "gemma-4-26b-a4b-it", "gemini-2.5-pro", "gemini-2.5-flash"]},
-        "opencode": {"fp": "opencode-curated-v5", "at": time.time(), "models": ["opencode/nemotron-3-ultra-free", "opencode/nemotron-3.5-lightning-free", "opencode/mimo-v2.5-free", "opencode/hy3-free", "opencode/big-pickle", "opencode/muse-spark-1.2-contributor-free"]},
-        "z_ai": {"fp": "zai-curated-v5", "at": time.time(), "models": ["glm-5.3", "glm-5.2", "glm-5-turbo", "glm-5.3-flash"]},
-        "grokified": {"fp": "grokified-curated-v5", "at": time.time(), "models": ["grok-4.6", "grok-4.5", "grok-4.20-multi-agent-0309", "grok-build-0.1"]},
-        "dashscope": {"fp": "dashscope-curated-v5", "at": time.time(), "models": ["qwen3.8-max", "qwen3.8-flash", "qwen3.8-27b", "qwen3.7-flash"]},
-        "deepseek": {"fp": "deepseek-curated-v5", "at": time.time(), "models": ["deepseek-v4-flash", "deepseek-v4-pro", "deepseek-chat", "deepseek-reasoner"]},
-        "openrouter": {"fp": "openrouter-curated-v5", "at": time.time(), "models": ["openrouter/auto", "openrouter/free", "minimax/minimax-m3:free", "nvidia/nemotron-3-super-120b-a12b:free", "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free", "z-ai/glm-5.2:free", "poolside/laguna-s-2.1:free", "thinkingmachines/inkling:free"]},
-        "nvidia": {"fp": "nvidia-curated-v5", "at": time.time(), "models": ["deepseek-ai/deepseek-v4-flash-0731", "deepseek-ai/deepseek-v4-pro-0813", "moonshotai/kimi-k3", "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning", "nvidia/nemotron-3-super-120b-a12b", "nvidia/nemotron-3-ultra-550b-a55b"]},
-        "mistral": {"fp": "mistral-curated-v5", "at": time.time(), "models": ["codestral-latest", "devstral-latest", "mistral-large-latest", "mistral-small-latest", "ministral-8b-latest"]}
-    }
+    # ──────────────────────────────────────────────────────────────────────────
+    # 3. DeepSeek Harness DSH (~/.dsh/settings.yaml)
+    # ──────────────────────────────────────────────────────────────────────────
+    dsh_providers_yaml = []
+    for p_id, m_list in models_by_prov.items():
+        meta = PROVIDER_METADATA.get(p_id)
+        if not meta:
+            continue
+
+        model_entries = []
+        for m in m_list:
+            mid = m["model_id"]
+            cname = m.get("canonical_name") or mid
+            ctx = m.get("context_window", 131072)
+            model_entries.append(f"""        - id: "{mid}"
+          name: "{cname}"
+          contextWindow: {ctx}""")
+
+        models_block = "\n".join(model_entries)
+        dsh_providers_yaml.append(f"""    {p_id}:
+      api: {meta['dsh_api']}
+      displayName: "{meta['name']}"
+      apiKeyEnv: {meta['env_key']}
+      baseURL: "{meta['base_url']}"
+      models:
+{models_block}""")
+
+    dsh_yaml_content = f"""version: 2
+default_provider: "{prim_prov}"
+default_model: "{prim_mid}"
+theme: dark
+providers:
+""" + "\n".join(dsh_providers_yaml) + "\n"
+
     try:
-        cache_json = json.dumps(hermes_clean_cache, indent=2)
-        atomic_write(HERMES_CACHE, cache_json, validator=_validate_json)
-        logs.append(("✅ Caché de Hermes saneada (atómico)", "SUCCESS"))
-    except Exception as e:
-        logs.append((f"⚠️ No se pudo purgar caché de Hermes: {e}", "WARN"))
-
-    # 4. DeepSeek Harness (~/.dsh/settings.yaml)
-    dsh_yaml = """ui-onboarding:
-  welcomeNoticeVersion: 2026-08-13.1
-
-agent-default-model:
-  provider: google
-  model: gemini-3.6-flash
-
-# ── Flota Completa Multi-Proveedor en llm-deepseek (Selector Nativo DSH) ──
-llm-deepseek:
-  models:
-    # Google AI Studio Pro
-    - id: "gemini-3.7-flash"
-      name: "[1M•Pro] Gemini 3.7 (Reasoning) · Google"
-      contextWindow: 1048576
-    - id: "gemini-3.6-flash"
-      name: "[1M•Pro] Gemini 3.6 (Fast) · Google"
-      contextWindow: 1048576
-    - id: "gemini-3.5-flash"
-      name: "[1M•Pro] Gemini 3.5 (Multi) · Google"
-      contextWindow: 1048576
-    - id: "gemma-4-31b-it"
-      name: "[262k•Pro] Gemma 4 31B (Agent) · Google"
-      contextWindow: 262144
-    - id: "gemini-2.5-pro"
-      name: "[1M•Pro] Gemini 2.5 Pro (Frontier) · Google"
-      contextWindow: 1048576
-    - id: "gemini-2.5-flash"
-      name: "[1M•Pro] Gemini 2.5 Flash (Workhorse) · Google"
-      contextWindow: 1048576
-
-    # OpenCode Zen Free Fleet
-    - id: "opencode/nemotron-3-ultra-free"
-      name: "[262k•Zen Free] Nemotron 3 Ultra 550B"
-      contextWindow: 262144
-    - id: "opencode/nemotron-3.5-lightning-free"
-      name: "[262k•Zen Free] Nemotron 3.5 Lightning"
-      contextWindow: 262144
-    - id: "opencode/mimo-v2.5-free"
-      name: "[262k•Zen Free] MiMo V2.5"
-      contextWindow: 262144
-    - id: "opencode/hy3-free"
-      name: "[262k•Zen Free] Hy3 Free"
-      contextWindow: 262144
-    - id: "opencode/muse-spark-1.2-contributor-free"
-      name: "[262k•Zen Free] Muse Spark 1.2"
-      contextWindow: 262144
-
-    # DeepSeek Direct
-    - id: deepseek-v4-flash
-      name: "[262k•Paid] DeepSeek V4 Flash"
-      contextWindow: 262144
-    - id: deepseek-v4-pro
-      name: "[262k•Paid] DeepSeek V4 Pro"
-      contextWindow: 262144
-    - id: deepseek-chat
-      name: "[128k•Paid] DeepSeek Chat V3"
-      contextWindow: 131072
-    - id: deepseek-reasoner
-      name: "[64k•Paid] DeepSeek Reasoner R1"
-      contextWindow: 65536
-
-    # Alibaba DashScope (Qwen)
-    - id: "qwen3.8-max"
-      name: "[262k•Pro] Qwen 3.8 Max (Frontier)"
-      contextWindow: 262144
-    - id: "qwen3.8-flash"
-      name: "[131k•Free] Qwen 3.8 Flash"
-      contextWindow: 131072
-    - id: "qwen3.8-27b"
-      name: "[131k•Pro] Qwen 3.8 27B"
-      contextWindow: 131072
-
-    # Mistral AI Pro
-    - id: "codestral-latest"
-      name: "[256k•Trial] Codestral (Code) · Mistral"
-      contextWindow: 262144
-    - id: "devstral-latest"
-      name: "[256k•Trial] Devstral (Agent) · Mistral"
-      contextWindow: 262144
-    - id: "mistral-large-latest"
-      name: "[128k•Trial] Mistral Large"
-      contextWindow: 131072
-
-    # NVIDIA NIM
-    - id: "deepseek-ai/deepseek-v4-flash-0731"
-      name: "[256k•Trial] DeepSeek V4 (NIM)"
-      contextWindow: 262144
-    - id: "moonshotai/kimi-k3"
-      name: "[256k•Trial] Kimi K3 (NIM)"
-      contextWindow: 262144
-    - id: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning"
-      name: "[256k•Trial] Nemotron 3 Nano (NIM)"
-      contextWindow: 256000
-    - id: "nvidia/nemotron-3-super-120b-a12b"
-      name: "[262k•Trial] Nemotron 3 Super (NIM)"
-      contextWindow: 262144
-
-    # Z.AI (GLM)
-    - id: "glm-5.3"
-      name: "[262k•Pro] GLM 5.3 (Frontier)"
-      contextWindow: 262144
-    - id: "glm-5.2"
-      name: "[262k•Pro] GLM 5.2 (Workhorse)"
-      contextWindow: 262144
-
-    # OpenRouter Free Fleet
-    - id: "openrouter/auto"
-      name: "[Auto•Free] OpenRouter Auto"
-      contextWindow: 262144
-    - id: "openrouter/free"
-      name: "[Auto•Free] OpenRouter Free"
-      contextWindow: 262144
-    - id: "minimax/minimax-m3:free"
-      name: "[1M•Free] MiniMax M3 (Frontier)"
-      contextWindow: 1048576
-    - id: "nvidia/nemotron-3-super-120b-a12b:free"
-      name: "[262k•Free] Nemotron 3 Super"
-      contextWindow: 262144
-    - id: "z-ai/glm-5.2:free"
-      name: "[256k•Free] GLM 5.2 (Frontier)"
-      contextWindow: 262144
-    - id: "poolside/laguna-s-2.1:free"
-      name: "[262k•Free] Laguna S 2.1 (Code)"
-      contextWindow: 262144
-
-llm-pi-ai:
-  providers:
-    google:
-      apiKeyEnv: C1_GOOGLE_AISTUDIO
-      baseURL: "https://generativelanguage.googleapis.com/v1beta/openai"
-      models:
-        - id: "gemini-3.7-flash"
-          name: "[1M•Pro] Gemini 3.7 (Reasoning)"
-          contextWindow: 1048576
-        - id: "gemini-3.6-flash"
-          name: "[1M•Pro] Gemini 3.6 (Fast)"
-          contextWindow: 1048576
-        - id: "gemini-3.5-flash"
-          name: "[1M•Pro] Gemini 3.5 (Multi)"
-          contextWindow: 1048576
-        - id: "gemma-4-31b-it"
-          name: "[262k•Pro] Gemma 4 31B (Agent)"
-          contextWindow: 262144
-        - id: "gemma-4-26b-a4b-it"
-          name: "[262k•Pro] Gemma 4 26B (Fast)"
-          contextWindow: 262144
-        - id: "gemini-2.5-pro"
-          name: "[1M•Pro] Gemini 2.5 Pro (Frontier)"
-          contextWindow: 1048576
-        - id: "gemini-2.5-flash"
-          name: "[1M•Pro] Gemini 2.5 Flash (Workhorse)"
-          contextWindow: 1048576
-
-    opencode:
-      apiKeyEnv: C1_ZEN_OPENCODE
-      baseURL: "https://api.opencode.ai/zen/v1"
-      models:
-        - id: "opencode/nemotron-3-ultra-free"
-          name: "[262k•Zen Free] Nemotron 3 Ultra 550B"
-          contextWindow: 262144
-        - id: "opencode/nemotron-3.5-lightning-free"
-          name: "[262k•Zen Free] Nemotron 3.5 Lightning"
-          contextWindow: 262144
-        - id: "opencode/mimo-v2.5-free"
-          name: "[262k•Zen Free] MiMo V2.5"
-          contextWindow: 262144
-        - id: "opencode/hy3-free"
-          name: "[262k•Zen Free] Hy3 Free"
-          contextWindow: 262144
-        - id: "opencode/big-pickle"
-          name: "[131k•Zen] Big Pickle"
-          contextWindow: 131072
-        - id: "opencode/muse-spark-1.2-contributor-free"
-          name: "[262k•Zen Free] Muse Spark 1.2"
-          contextWindow: 262144
-
-    z_ai:
-      apiKeyEnv: C1_Z_AI
-      baseURL: "https://open.bigmodel.cn/api/paas/v4"
-      models:
-        - id: "glm-5.3"
-          name: "[262k•Pro] GLM 5.3 (Frontier)"
-          contextWindow: 262144
-        - id: "glm-5.2"
-          name: "[262k•Pro] GLM 5.2 (Workhorse)"
-          contextWindow: 262144
-        - id: "glm-5-turbo"
-          name: "[131k•Pro] GLM 5 Turbo"
-          contextWindow: 131072
-        - id: "glm-5.3-flash"
-          name: "[131k•Free] GLM 5.3 Flash"
-          contextWindow: 131072
-
-    grokified:
-      apiKeyEnv: GROKIFIED_API_KEY
-      baseURL: "https://api.grokified.com/v1"
-      models:
-        - id: "grok-4.6"
-          name: "[262k•Pro] Grok 4.6 (Frontier)"
-          contextWindow: 262144
-        - id: "grok-4.5"
-          name: "[131k•Pro] Grok 4.5"
-          contextWindow: 131072
-        - id: "grok-4.20-multi-agent-0309"
-          name: "[262k•Pro] Grok 4.20 Multi-Agent"
-          contextWindow: 262144
-        - id: "grok-build-0.1"
-          name: "[131k•Pro] Grok Build 0.1 (Code)"
-          contextWindow: 131072
-
-    dashscope:
-      apiKeyEnv: C7_DASHSCOPE_API_KEY
-      baseURL: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
-      models:
-        - id: "qwen3.8-max"
-          name: "[262k•Pro] Qwen 3.8 Max (Frontier)"
-          contextWindow: 262144
-        - id: "qwen3.8-flash"
-          name: "[131k•Free] Qwen 3.8 Flash"
-          contextWindow: 131072
-        - id: "qwen3.8-27b"
-          name: "[131k•Pro] Qwen 3.8 27B"
-          contextWindow: 131072
-        - id: "qwen3.7-flash"
-          name: "[131k•Free] Qwen 3.7 Flash"
-          contextWindow: 131072
-
-    deepseek:
-      apiKeyEnv: DEEPSEEK_API_KEY
-      baseURL: "https://api.deepseek.com/v1"
-      models:
-        - id: "deepseek-v4-flash"
-          name: "[262k•Paid] DeepSeek V4 Flash"
-          contextWindow: 262144
-        - id: "deepseek-v4-pro"
-          name: "[262k•Paid] DeepSeek V4 Pro"
-          contextWindow: 262144
-        - id: "deepseek-chat"
-          name: "[128k•Paid] DeepSeek Chat V3"
-          contextWindow: 131072
-        - id: "deepseek-reasoner"
-          name: "[64k•Paid] DeepSeek Reasoner R1"
-          contextWindow: 65536
-
-    mistral:
-      apiKeyEnv: C1_MISTRAL
-      baseURL: "https://api.mistral.ai/v1"
-      models:
-        - id: "codestral-latest"
-          name: "[256k•Trial] Codestral (Code)"
-          contextWindow: 262144
-        - id: "devstral-latest"
-          name: "[256k•Trial] Devstral (Agent)"
-          contextWindow: 262144
-        - id: "mistral-large-latest"
-          name: "[128k•Trial] Mistral Large"
-          contextWindow: 131072
-        - id: "mistral-small-latest"
-          name: "[128k•Trial] Mistral Small"
-          contextWindow: 131072
-        - id: "ministral-8b-latest"
-          name: "[128k•Trial] Ministral 8B"
-          contextWindow: 131072
-
-    openrouter:
-      apiKeyEnv: C7_OPENROUTER_OPENCODE_HP15
-      baseURL: "https://openrouter.ai/api/v1"
-      models:
-        - id: "openrouter/auto"
-          name: "[Auto•Free] OpenRouter Auto"
-          contextWindow: 262144
-        - id: "openrouter/free"
-          name: "[Auto•Free] OpenRouter Free"
-          contextWindow: 262144
-        - id: "minimax/minimax-m3:free"
-          name: "[1M•Free] MiniMax M3 (Frontier)"
-          contextWindow: 1048576
-        - id: "nvidia/nemotron-3-super-120b-a12b:free"
-          name: "[262k•Free] Nemotron 3 Super"
-          contextWindow: 262144
-        - id: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free"
-          name: "[256k•Free] Nemotron 3 Nano"
-          contextWindow: 262144
-        - id: "z-ai/glm-5.2:free"
-          name: "[256k•Free] GLM 5.2 (Frontier)"
-          contextWindow: 262144
-        - id: "poolside/laguna-s-2.1:free"
-          name: "[262k•Free] Laguna S 2.1 (Code)"
-          contextWindow: 262144
-        - id: "thinkingmachines/inkling:free"
-          name: "[256k•Free] TM Inkling"
-          contextWindow: 262144
-
-    nvidia:
-      apiKeyEnv: C7_NVIDIA
-      baseURL: "https://integrate.api.nvidia.com/v1"
-      models:
-        - id: "deepseek-ai/deepseek-v4-flash-0731"
-          name: "[256k•Trial] DeepSeek V4 (NIM)"
-          contextWindow: 262144
-        - id: "deepseek-ai/deepseek-v4-pro-0813"
-          name: "[256k•Trial] DeepSeek V4 Pro (NIM)"
-          contextWindow: 262144
-        - id: "moonshotai/kimi-k3"
-          name: "[256k•Trial] Kimi K3 (NIM)"
-          contextWindow: 262144
-        - id: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning"
-          name: "[256k•Trial] Nemotron 3 Nano (NIM)"
-          contextWindow: 256000
-        - id: "nvidia/nemotron-3-super-120b-a12b"
-          name: "[262k•Trial] Nemotron 3 Super (NIM)"
-          contextWindow: 262144
-        - id: "nvidia/nemotron-3-ultra-550b-a55b"
-          name: "[262k•Trial] Nemotron 3 Ultra (NIM)"
-          contextWindow: 262144
-ui-theme:
-  preference: dark
-"""
-    try:
-        atomic_write(DSH_CONFIG_USER, dsh_yaml, validator=_validate_yaml)
-        atomic_write(DSH_CONFIG_WORKSPACE, dsh_yaml, validator=_validate_yaml)
-        logs.append((f"✅ DeepSeek Harness sincronizado (atómico): {DSH_CONFIG_USER}", "SUCCESS"))
+        atomic_write(DSH_CONFIG_USER, dsh_yaml_content, validator=_validate_yaml)
+        atomic_write(DSH_CONFIG_WORKSPACE, dsh_yaml_content, validator=_validate_yaml)
+        logs.append((f"✅ DeepSeek Harness sincronizado ({len(dsh_providers_yaml)} proveedores OK): {DSH_CONFIG_USER}", "SUCCESS"))
     except Exception as e:
         logs.append((f"❌ Error configurando DSH: {e}", "ERROR"))
 
@@ -768,9 +440,9 @@ ui-theme:
 
 
 def sync_to_hp45() -> Tuple[str, str]:
-    """Sincroniza las configuraciones saneadas hacia el nodo secundario HP45."""
+    """Sincroniza las configuraciones saneadas hacia el nodo secundario HP45 con tolerancia a fallos."""
     if not SYNC_HP45_SCRIPT.exists():
-        return ("⚠️ Script de sincronización no encontrado: " + str(SYNC_HP45_SCRIPT), "WARN")
+        return (f"⚠️ Script de sincronización no encontrado: {SYNC_HP45_SCRIPT}", "WARN")
 
     cmd = ["bash", str(SYNC_HP45_SCRIPT), "hp45", "tec"]
     try:
@@ -782,9 +454,9 @@ def sync_to_hp45() -> Tuple[str, str]:
             env={"PATH": os.environ.get("PATH", "/usr/bin:/bin"), "HOME": os.environ.get("HOME", "/home/tec")}
         )
         if res.returncode == 0:
-            return ("✅ Sincronización exitosa hacia HP45 (tec@192.168.1.200).", "SUCCESS")
-        return (f"⚠️ Rsync finalizado: {res.stdout.strip()[:100]}", "WARN")
+            return ("✅ Sincronización resiliente completada exitosamente hacia HP45 (192.168.1.200).", "SUCCESS")
+        return (f"⚠️ Rsync finalizado con advertencias: {res.stdout.strip()[:150]}", "WARN")
     except subprocess.TimeoutExpired:
-        return ("⚠️ Timeout conectando a HP45 (nodo portátil apagado o suspendido).", "WARN")
+        return ("⚠️ Timeout conectando a HP45 (nodo portátil apagado o fuera de red).", "WARN")
     except Exception as e:
         return (f"❌ Error en sincronización a HP45: {e}", "ERROR")
