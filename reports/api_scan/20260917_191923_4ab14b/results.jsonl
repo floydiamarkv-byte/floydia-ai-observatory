@@ -1,0 +1,45 @@
+{"provider": "openrouter", "account": "C1_OPENROUTER", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 718.93, "ttft_ms": null, "balance": 0.1959, "error": null}
+{"provider": "openrouter", "account": "C2_OPENROUTER", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 564.93, "ttft_ms": null, "balance": 0.0011, "error": null}
+{"provider": "openrouter", "account": "C3_OPENROUTER", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 501.98, "ttft_ms": null, "balance": 0.0011, "error": null}
+{"provider": "openrouter", "account": "C4_OPENROUTER", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 639.56, "ttft_ms": null, "balance": 0, "error": null}
+{"provider": "openrouter", "account": "C5_OPENROUTER", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 417.26, "ttft_ms": null, "balance": 0, "error": null}
+{"provider": "openrouter", "account": "C6_OPENROUTER", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 421.43, "ttft_ms": null, "balance": 0, "error": null}
+{"provider": "openrouter", "account": "C7_OPENROUTER", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 435.56, "ttft_ms": null, "balance": 3.2042, "error": null}
+{"provider": "openrouter", "account": "OPENROUTER_API_KEY", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 408.69, "ttft_ms": null, "balance": 3.2042, "error": null}
+{"provider": "nvidia", "account": "C1_NVIDIA", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 294.59, "ttft_ms": null, "balance": null, "error": null}
+{"provider": "nvidia", "account": "C2_NVIDIA", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 201.9, "ttft_ms": null, "balance": null, "error": null}
+{"provider": "nvidia", "account": "C7_NVIDIA", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 74.87, "ttft_ms": null, "balance": null, "error": null}
+{"provider": "nvidia", "account": "C9_NVIDIA", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 245.33, "ttft_ms": null, "balance": null, "error": null}
+{"provider": "google", "account": "C1_GOOGLE_AISTUDIO", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 299.23, "ttft_ms": null, "balance": null, "error": null}
+{"provider": "google", "account": "C2_GOOGLE_AISTUDIO", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 423.13, "ttft_ms": null, "balance": null, "error": null}
+{"provider": "google", "account": "C3_GOOGLE_AISTUDIO", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 232.03, "ttft_ms": null, "balance": null, "error": null}
+{"provider": "google", "account": "C4_GOOGLE_AISTUDIO", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 121.88, "ttft_ms": null, "balance": null, "error": null}
+{"provider": "google", "account": "C5_GOOGLE_AISTUDIO", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 153.41, "ttft_ms": null, "balance": null, "error": null}
+{"provider": "google", "account": "C6_GOOGLE_AISTUDIO", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 241.73, "ttft_ms": null, "balance": null, "error": null}
+{"provider": "groq", "account": "C1_GROQ", "tier": "T0", "status": "HTTP_403", "http_status": 403, "total_ms": 242.9, "ttft_ms": null, "balance": null, "error": "HTTP 403"}
+{"provider": "groq", "account": "C2_GROQ", "tier": "T0", "status": "HTTP_403", "http_status": 403, "total_ms": 236.94, "ttft_ms": null, "balance": null, "error": "HTTP 403"}
+{"provider": "groq", "account": "C3_GROQ", "tier": "T0", "status": "HTTP_403", "http_status": 403, "total_ms": 65.1, "ttft_ms": null, "balance": null, "error": "HTTP 403"}
+{"provider": "groq", "account": "C4_GROQ", "tier": "T0", "status": "HTTP_403", "http_status": 403, "total_ms": 61.96, "ttft_ms": null, "balance": null, "error": "HTTP 403"}
+{"provider": "groq", "account": "C5_GROQ", "tier": "T0", "status": "HTTP_403", "http_status": 403, "total_ms": 65.89, "ttft_ms": null, "balance": null, "error": "HTTP 403"}
+{"provider": "groq", "account": "C6_GROQ", "tier": "T0", "status": "HTTP_403", "http_status": 403, "total_ms": 62.06, "ttft_ms": null, "balance": null, "error": "HTTP 403"}
+{"provider": "mistral", "account": "C1_MISTRAL", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 423.36, "ttft_ms": null, "balance": null, "error": null}
+{"provider": "mistral", "account": "C2_MISTRAL", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 380.34, "ttft_ms": null, "balance": null, "error": null}
+{"provider": "mistral", "account": "C3_MISTRAL", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 395.13, "ttft_ms": null, "balance": null, "error": null}
+{"provider": "mistral", "account": "C4_MISTRAL", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 413.92, "ttft_ms": null, "balance": null, "error": null}
+{"provider": "mistral", "account": "C5_MISTRAL", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 378.76, "ttft_ms": null, "balance": null, "error": null}
+{"provider": "mistral", "account": "C6_MISTRAL", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 376.24, "ttft_ms": null, "balance": null, "error": null}
+{"provider": "deepseek", "account": "DEEPSEEK_API_KEY", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 553.78, "ttft_ms": null, "balance": null, "error": null}
+{"provider": "deepseek", "account": "C1_DEEPSEEK", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 544.99, "ttft_ms": null, "balance": null, "error": null}
+{"provider": "deepseek", "account": "C2_DEEPSEEK", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 369.7, "ttft_ms": null, "balance": null, "error": null}
+{"provider": "zen", "account": "C1_ZEN_OPENCODE", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 1284.76, "ttft_ms": null, "balance": null, "error": null}
+{"provider": "zen", "account": "C2_ZEN_OPENCODE", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 503.16, "ttft_ms": null, "balance": null, "error": null}
+{"provider": "zen", "account": "C7_ZEN_OPENCODE", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 481.74, "ttft_ms": null, "balance": null, "error": null}
+{"provider": "zai", "account": "C1_Z_AI", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 661.01, "ttft_ms": null, "balance": null, "error": null}
+{"provider": "zai", "account": "C2_Z_AI", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 617.02, "ttft_ms": null, "balance": null, "error": null}
+{"provider": "zai", "account": "C3_Z_AI", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 503.46, "ttft_ms": null, "balance": null, "error": null}
+{"provider": "dashscope", "account": "C7_DASHSCOPE_API_KEY", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 986.97, "ttft_ms": null, "balance": null, "error": null}
+{"provider": "dashscope", "account": "C7_QWEN_API_KEY", "tier": "T0", "status": "OK", "http_status": 200, "total_ms": 914.84, "ttft_ms": null, "balance": null, "error": null}
+{"provider": "fireworks", "account": "C7_FIREWORKS_API_KEY", "tier": "T0", "status": "HTTP_412", "http_status": 412, "total_ms": 486.55, "ttft_ms": null, "balance": null, "error": "HTTP 412"}
+{"provider": "fireworks", "account": "C8_FIREWORKS_API", "tier": "T0", "status": "HTTP_412", "http_status": 412, "total_ms": 405.46, "ttft_ms": null, "balance": null, "error": "HTTP 412"}
+{"provider": "github", "account": "S02_GITHUB_TOKEN_ANTIGRAVITY", "tier": "T0", "status": "ERROR", "http_status": 500, "total_ms": 127.82, "ttft_ms": null, "balance": null, "error": "Cannot connect to host models.inference.ai.azure.com:443 ssl:default [Name or service not known]"}
+{"provider": "github", "account": "S02_GITHUB_PAT", "tier": "T0", "status": "ERROR", "http_status": 500, "total_ms": 3.15, "ttft_ms": null, "balance": null, "error": "Cannot connect to host models.inference.ai.azure.com:443 ssl:default [Name or service not known]"}

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Floydia API Scanner — SRE Dashboard 20260918_000104_26767d</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: rgba(22, 27, 34, 0.85);
+            --border: rgba(48, 54, 61, 0.8);
+            --accent: #58a6ff;
+            --text: #c9d1d9;
+            --green: #2ea043;
+            --yellow: #d29922;
+            --red: #f85149;
+        }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 0;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2.5rem;
+            box-shadow: 0 16px 32px rgba(0,0,0,0.5);
+        }
+        h1, h2, h3 { color: #ffffff; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+        }
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+        th { background: rgba(33, 38, 45, 0.9); color: #fff; }
+        code { background: rgba(110, 118, 129, 0.2); padding: 0.2rem 0.4rem; border-radius: 4px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📡 FloydIA API Scanner v2.0 (SRE Dashboard)</h1>
+        <p><strong>Scan ID:</strong> <code>20260918_000104_26767d</code> | <strong>Coste:</strong> $0.00 USD</p>
+        <pre style="white-space: pre-wrap; font-family: inherit;"># Informe de Escaneo SRE — FloydIA API Scanner v2.0
+- **Scan ID:** `20260918_000104_26767d`
+- **Fecha (UTC):** 2026-09-18 00:01:10 UTC
+- **Modo:** PRODUCCIÓN (En Vivo)
+- **Coste Total:** $0.00 USD
+- **Cuentas Auditadas:** 39 (✅ 29 Operativas | ⚠️ 10 Errores)
+- **Saldo Detectado:** $6.61 USD
+- **Latencia Media:** 565.4 ms
+
+## 1. Tabla de Cuentas y Modelos
+
+| Proveedor | Cuenta / Modelo | Tier | Estado | HTTP | Total (ms) | TTFT (ms) | Saldo ($) |
+|:---|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| openrouter | `C1_OPENROUTER` | T0 | ✅ OK | 200 | 708.0 | — | $0.20 |
+| openrouter | `C2_OPENROUTER` | T0 | ✅ OK | 200 | 618.8 | — | $0.00 |
+| openrouter | `C3_OPENROUTER` | T0 | ✅ OK | 200 | 786.24 | — | $0.00 |
+| openrouter | `C4_OPENROUTER` | T0 | ✅ OK | 200 | 549.78 | — | $0.00 |
+| openrouter | `C5_OPENROUTER` | T0 | ✅ OK | 200 | 583.27 | — | $0.00 |
+| openrouter | `C6_OPENROUTER` | T0 | ✅ OK | 200 | 601.88 | — | $0.00 |
+| openrouter | `C7_OPENROUTER` | T0 | ✅ OK | 200 | 648.87 | — | $3.20 |
+| openrouter | `OPENROUTER_API_KEY` | T0 | ✅ OK | 200 | 397.68 | — | $3.20 |
+| nvidia | `C1_NVIDIA` | T0 | ✅ OK | 200 | 261.33 | — | — |
+| nvidia | `C2_NVIDIA` | T0 | ✅ OK | 200 | 239.98 | — | — |
+| nvidia | `C7_NVIDIA` | T0 | ✅ OK | 200 | 77.88 | — | — |
+| nvidia | `C9_NVIDIA` | T0 | ✅ OK | 200 | 200.4 | — | — |
+| google | `C1_GOOGLE_AISTUDIO` | T0 | ❌ HTTP_404 | 404 | 295.07 | — | — |
+| google | `C2_GOOGLE_AISTUDIO` | T0 | ❌ HTTP_404 | 404 | 262.47 | — | — |
+| google | `C3_GOOGLE_AISTUDIO` | T0 | ❌ HTTP_404 | 404 | 172.48 | — | — |
+| google | `C4_GOOGLE_AISTUDIO` | T0 | ❌ HTTP_404 | 404 | 349.98 | — | — |
+| google | `C5_GOOGLE_AISTUDIO` | T0 | ❌ HTTP_404 | 404 | 219.3 | — | — |
+| google | `C6_GOOGLE_AISTUDIO` | T0 | ❌ HTTP_404 | 404 | 98.92 | — | — |
+| mistral | `C1_MISTRAL` | T0 | ✅ OK | 200 | 629.91 | — | — |
+| mistral | `C2_MISTRAL` | T0 | ✅ OK | 200 | 627.08 | — | — |
+| mistral | `C3_MISTRAL` | T0 | ✅ OK | 200 | 313.96 | — | — |
+| mistral | `C4_MISTRAL` | T0 | ✅ OK | 200 | 311.94 | — | — |
+| mistral | `C5_MISTRAL` | T0 | ✅ OK | 200 | 403.27 | — | — |
+| mistral | `C6_MISTRAL` | T0 | ✅ OK | 200 | 406.79 | — | — |
+| deepseek | `DEEPSEEK_API_KEY` | T0 | ✅ OK | 200 | 855.53 | — | — |
+| deepseek | `C1_DEEPSEEK` | T0 | ✅ OK | 200 | 491.02 | — | — |
+| deepseek | `C2_DEEPSEEK` | T0 | ✅ OK | 200 | 381.8 | — | — |
+| zen | `C1_ZEN_OPENCODE` | T0 | ✅ OK | 200 | 552.82 | — | — |
+| zen | `C2_ZEN_OPENCODE` | T0 | ✅ OK | 200 | 1206.11 | — | — |
+| zen | `C7_ZEN_OPENCODE` | T0 | ✅ OK | 200 | 1255.66 | — | — |
+| zai | `C1_Z_AI` | T0 | ✅ OK | 200 | 690.94 | — | — |
+| zai | `C2_Z_AI` | T0 | ✅ OK | 200 | 619.43 | — | — |
+| zai | `C3_Z_AI` | T0 | ✅ OK | 200 | 487.69 | — | — |
+| dashscope | `C7_DASHSCOPE_API_KEY` | T0 | ✅ OK | 200 | 2618.62 | — | — |
+| dashscope | `C7_QWEN_API_KEY` | T0 | ✅ OK | 200 | 1644.03 | — | — |
+| fireworks | `C7_FIREWORKS_API_KEY` | T0 | ❌ HTTP_412 | 412 | 489.19 | — | — |
+| fireworks | `C8_FIREWORKS_API` | T0 | ❌ HTTP_412 | 412 | 457.75 | — | — |
+| github | `S02_GITHUB_TOKEN_ANTIGRAVITY` | T0 | ❌ HTTP_410 | 410 | 293.92 | — | — |
+| github | `S02_GITHUB_PAT` | T0 | ❌ HTTP_410 | 410 | 241.84 | — | — |</pre>
+    </div>
+</body>
+</html>

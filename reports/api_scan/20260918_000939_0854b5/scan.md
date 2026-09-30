@@ -1,0 +1,74 @@
+# Informe de Escaneo SRE — FloydIA API Scanner v2.0
+- **Scan ID:** `20260918_000939_0854b5`
+- **Fecha (UTC):** 2026-09-18 00:10:02 UTC
+- **Modo:** PRODUCCIÓN (En Vivo)
+- **Coste Total:** $0.00 USD
+- **Cuentas Auditadas:** 39 (✅ 35 Operativas | ⚠️ 4 Errores)
+- **Saldo Detectado:** $6.61 USD
+- **Latencia Media:** 521.2 ms
+
+## 1. Tabla de Cuentas y Modelos
+
+| Proveedor | Cuenta / Modelo | Tier | Estado | HTTP | Total (ms) | TTFT (ms) | Saldo ($) |
+|:---|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| openrouter | `C1_OPENROUTER` | T0 | ✅ OK | 200 | 630.2 | — | $0.20 |
+| openrouter | `C2_OPENROUTER` | T0 | ✅ OK | 200 | 542.12 | — | $0.00 |
+| openrouter | `C3_OPENROUTER` | T0 | ✅ OK | 200 | 724.89 | — | $0.00 |
+| openrouter | `C4_OPENROUTER` | T0 | ✅ OK | 200 | 539.1 | — | $0.00 |
+| openrouter | `C5_OPENROUTER` | T0 | ✅ OK | 200 | 427.62 | — | $0.00 |
+| openrouter | `C6_OPENROUTER` | T0 | ✅ OK | 200 | 394.52 | — | $0.00 |
+| openrouter | `C7_OPENROUTER` | T0 | ✅ OK | 200 | 415.43 | — | $3.20 |
+| openrouter | `OPENROUTER_API_KEY` | T0 | ✅ OK | 200 | 382.29 | — | $3.20 |
+| nvidia | `C1_NVIDIA` | T0 | ✅ OK | 200 | 285.61 | — | — |
+| nvidia | `C2_NVIDIA` | T0 | ✅ OK | 200 | 260.77 | — | — |
+| nvidia | `C7_NVIDIA` | T0 | ✅ OK | 200 | 240.98 | — | — |
+| nvidia | `C9_NVIDIA` | T0 | ✅ OK | 200 | 222.83 | — | — |
+| google | `C1_GOOGLE_AISTUDIO` | T0 | ✅ OK | 200 | 270.25 | — | — |
+| google | `C2_GOOGLE_AISTUDIO` | T0 | ✅ OK | 200 | 561.61 | — | — |
+| google | `C3_GOOGLE_AISTUDIO` | T0 | ✅ OK | 200 | 231.14 | — | — |
+| google | `C4_GOOGLE_AISTUDIO` | T0 | ✅ OK | 200 | 383.42 | — | — |
+| google | `C5_GOOGLE_AISTUDIO` | T0 | ✅ OK | 200 | 223.43 | — | — |
+| google | `C6_GOOGLE_AISTUDIO` | T0 | ✅ OK | 200 | 384.46 | — | — |
+| mistral | `C1_MISTRAL` | T0 | ✅ OK | 200 | 494.85 | — | — |
+| mistral | `C2_MISTRAL` | T0 | ✅ OK | 200 | 423.16 | — | — |
+| mistral | `C3_MISTRAL` | T0 | ✅ OK | 200 | 363.92 | — | — |
+| mistral | `C4_MISTRAL` | T0 | ✅ OK | 200 | 386.79 | — | — |
+| mistral | `C5_MISTRAL` | T0 | ✅ OK | 200 | 371.91 | — | — |
+| mistral | `C6_MISTRAL` | T0 | ✅ OK | 200 | 380.56 | — | — |
+| deepseek | `DEEPSEEK_API_KEY` | T0 | ✅ OK | 200 | 609.21 | — | — |
+| deepseek | `C1_DEEPSEEK` | T0 | ✅ OK | 200 | 573.36 | — | — |
+| deepseek | `C2_DEEPSEEK` | T0 | ✅ OK | 200 | 372.68 | — | — |
+| zen | `C1_ZEN_OPENCODE` | T0 | ✅ OK | 200 | 589.88 | — | — |
+| zen | `C2_ZEN_OPENCODE` | T0 | ✅ OK | 200 | 1257.31 | — | — |
+| zen | `C7_ZEN_OPENCODE` | T0 | ✅ OK | 200 | 491.6 | — | — |
+| zai | `C1_Z_AI` | T0 | ✅ OK | 200 | 747.51 | — | — |
+| zai | `C2_Z_AI` | T0 | ✅ OK | 200 | 722.84 | — | — |
+| zai | `C3_Z_AI` | T0 | ✅ OK | 200 | 625.25 | — | — |
+| dashscope | `C7_DASHSCOPE_API_KEY` | T0 | ✅ OK | 200 | 1311.03 | — | — |
+| dashscope | `C7_QWEN_API_KEY` | T0 | ✅ OK | 200 | 1399.63 | — | — |
+| fireworks | `C7_FIREWORKS_API_KEY` | T0 | ⚠️ CACHED_NEGATIVE | 400 | 0.0 | — | — |
+| fireworks | `C8_FIREWORKS_API` | T0 | ⚠️ CACHED_NEGATIVE | 400 | 0.0 | — | — |
+| github | `S02_GITHUB_TOKEN_ANTIGRAVITY` | T0 | ⚠️ CACHED_NEGATIVE | 400 | 0.0 | — | — |
+| github | `S02_GITHUB_PAT` | T0 | ⚠️ CACHED_NEGATIVE | 400 | 0.0 | — | — |
+
+## 2. Dictamen Ejecutivo SRE con IA
+
+### 🧠 Dictamen Ejecutivo SRE (AI Radar — Modo Heurístico Local)
+
+1. **Estado de Salud de la Flota**: 35 de 39 cuentas operativas. Latencia media P50: 521.2ms, P95: 1311.0ms.
+
+2. **Análisis de Anomalías**:
+   • `fireworks` (C7_FIREWORKS_API_KEY): HTTP 400 — ACCOUNT_SETUP: HTTP 412
+   • `fireworks` (C8_FIREWORKS_API): HTTP 400 — ACCOUNT_SETUP: HTTP 412
+   • `github` (S02_GITHUB_TOKEN_ANTIGRAVITY): HTTP 400 — MODEL_UNAVAILABLE: HTTP 410
+   • `github` (S02_GITHUB_PAT): HTTP 400 — MODEL_UNAVAILABLE: HTTP 410
+
+3. **Recomendación de Presets y Ruteo**:
+   • **Preset A (Resiliencia $0.00)**: Recomendado activo debido a latencias pasivas estables.
+   • **OpenRouter C7**: Saldo detectado y disponible para ruteo de emergencia.
+
+4. **Acciones SRE Prioritarias**:
+   • Purgar claves con HTTP 403 de la negative cache tras rotación de credenciales.
+   • Inferencia remota en NVIDIA NIM temporalmente saturada (The read operation timed out). Diagnóstico SRE generado por fallback local.
+
+*(Generado por el motor SRE determinista local de FloydIA)*
