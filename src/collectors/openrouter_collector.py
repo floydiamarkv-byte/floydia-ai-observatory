@@ -4,8 +4,10 @@ Extrae precios por token, longitud de contexto y metadatos de modelos.
 """
 
 import json
-import time
-import jsonschema
+try:
+    import jsonschema
+except ImportError:
+    jsonschema = None
 import requests
 from typing import Dict, Any, Optional
 from pathlib import Path
@@ -40,7 +42,7 @@ class OpenRouterCollector(BaseCollector):
 
     def _validate_payload(self, payload: Any) -> bool:
         schema = self._load_schema()
-        if not schema:
+        if not schema or not jsonschema:
             return isinstance(payload, dict) and "data" in payload
         try:
             jsonschema.validate(instance=payload, schema=schema)

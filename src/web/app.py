@@ -21,7 +21,7 @@ from typing import Dict, Any, List
 import os
 import secrets
 import time
-from config.settings import BASE_DIR, DAILY_REPORTS_DIR, FRONTIER_EXPORT_DIR
+from config.settings import BASE_DIR, DAILY_REPORTS_DIR, FRONTIER_EXPORT_DIR, REPORTS_DIR
 from src.core.scoring import calculate_multidimensional_rankings
 from src.core.db import get_latest_local_verified_models
 from src.probers.local_verifier import run_local_api_probes
@@ -135,6 +135,31 @@ class FloydIAWebServer(http.server.SimpleHTTPRequestHandler):
                     local_apis = get_latest_local_verified_models()
                     frontier_file = export_daily_snapshot_for_frontier_ai(rankings, local_apis)
                 self._send_file_download(frontier_file, f"{today_str}_SNAPSHOT_FOR_FRONTIER_AI.md")
+                return
+
+            elif path in ("/api-scan", "/api-scan/"):
+                latest_scan_html = REPORTS_DIR / "api_scan" / "latest" / "scan.html"
+                if latest_scan_html.exists():
+                    with open(latest_scan_html, "rb") as f:
+                        data = f.read()
+                    self.send_response(200)
+                    self.send_header("Content-Type", "text/html; charset=utf-8")
+                    self.send_header("Content-Length", str(len(data)))
+                    self.end_headers()
+                    self.wfile.write(data)
+                else:
+                    self.send_response(200)
+                    self.send_header("Content-Type", "text/html; charset=utf-8")
+                    msg = (
+                        "<html><body style='background:#0d1117;color:#c9d1d9;font-family:sans-serif;padding:2rem;'>"
+                        "<h2>📡 FloydIA API Scanner</h2>"
+                        "<p>No hay escaneos recientes disponibles.</p>"
+                        "<p>Ejecuta: <code>python3 .agents/skills/f-api-scanner/scripts/scanner_cli.py --quick --summary</code></p>"
+                        "</body></html>"
+                    ).encode("utf-8")
+                    self.send_header("Content-Length", str(len(msg)))
+                    self.end_headers()
+                    self.wfile.write(msg)
                 return
 
             elif path == "/" or path == "/index.html":
